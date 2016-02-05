@@ -1,0 +1,22 @@
+{
+    "version": "1.0.0-*",
+    "description": "UnitTests Class Library",
+    "authors": [ "lruckman" ],
+    "tags": [ "" ],
+    "projectUrl": "",
+    "licenseUrl": "",
+    "dependencies": {
+
+        "xunit.runner.dnx": "2.1.0-rc1-build204",
+        "xunit": "2.1.0"
+
+    },
+    "commands": {"test": "xunit.runner.dnx"},
+    "frameworks": {
+        "dnx451": {
+            "dependencies": {
+                "Web": "1.0.0-*"
+            }
+        }
+    }
+}

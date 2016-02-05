@@ -1,0 +1,8 @@
+﻿@model Web.ViewModels.Documents.Create.Command
+@inject Web.Engine.ISelectListProvider SelectListProvider
+
+<form method="POST" asp-action="create" asp-controller="documents" enctype="multipart/form-data">
+    <select asp-for="LibraryId" asp-items="await SelectListProvider.GetLibraries(0)"></select>
+    <input type="file" asp-for="File" multiple class="form-control"/>
+    <input type="submit" class="btn btn-primary"/>
+</form>

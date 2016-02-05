@@ -1,0 +1,19 @@
+﻿@model IEnumerable<Web.ViewModels.Documents.Index.Result>
+@AppDomain.CurrentDomain.GetData("DataDirectory")
+@foreach (var result in Model)
+{
+    <div class="media">
+        <div class="media-left">
+            <a asp-controller="Documents" asp-action="View" asp-route-documentid="@result.DocumentId">
+                <img src="@Url.Action("thumbnail", new {DocumentId = result.DocumentId})" alt="@result.DocumentId" style="width: 100px;" class="thumbnail"/>
+            </a>
+        </div>
+        <div class="media-body">
+            <h4 class="media-heading">@result.DocumentId</h4>
+            <br/>
+            @result.PageCount
+            <br/>
+            @result.FileSize
+        </div>
+    </div>
+}

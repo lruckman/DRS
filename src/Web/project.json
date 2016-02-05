@@ -1,0 +1,67 @@
+{
+  "userSecretsId": "aspnet5-Web-3cb81bad-0fe6-41e9-a4f0-ff92a2b8f64c",
+  "version": "1.0.0-*",
+  "compilationOptions": {
+    "emitEntryPoint": true
+  },
+
+    "dependencies": {
+        "EntityFramework.Commands": "7.0.0-rc1-final",
+        "EntityFramework.MicrosoftSqlServer": "7.0.0-rc1-final",
+        "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
+        "Microsoft.AspNet.Diagnostics.Entity": "7.0.0-rc1-final",
+        "Microsoft.AspNet.Identity.EntityFramework": "3.0.0-rc1-final",
+        "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
+        "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
+        "Microsoft.AspNet.Mvc.TagHelpers": "6.0.0-rc1-final",
+        "Microsoft.AspNet.Server.Kestrel": "1.0.0-rc1-final",
+        "Microsoft.AspNet.StaticFiles": "1.0.0-rc1-final",
+        "Microsoft.AspNet.Tooling.Razor": "1.0.0-rc1-final",
+        "Microsoft.Extensions.CodeGenerators.Mvc": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Configuration.FileProviderExtensions": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
+        "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
+        "StructureMap.Dnx": "0.4.0-alpha4",
+        "AutoMapper": "4.0.4",
+        "MediatR": "2.0.2",
+        "Ghostscript.NET": "1.2.0",
+        "FluentValidation": "5.6.2",
+        "iTextSharp": "5.5.7",
+        "itextsharp.pdfa": "5.5.7",
+        "itextsharp.xtra": "5.5.7",
+        "React.AspNet": "2.1.2",
+        "Lucene.Net": "3.0.3",
+        "SimpleLuceneFix": "1.1.0"
+    },
+
+  "commands": {
+    "web": "Microsoft.AspNet.Server.Kestrel",
+    "ef": "EntityFramework.Commands"
+  },
+
+    "frameworks": {
+        "dnx451": {
+            "dependencies": { },
+            "frameworkAssemblies": {
+                "System.Web": "4.0.0.0",
+                "System.Drawing":"4.0.0.0" 
+            }
+        }
+    },
+
+  "exclude": [
+    "wwwroot",
+    "node_modules"
+  ],
+  "publishExclude": [
+    "**.user",
+    "**.vspscc"
+  ],
+  "scripts": {
+    "prepublish": [ "npm install", "bower install", "gulp clean", "gulp min" ]
+  }
+}
