@@ -43,7 +43,7 @@ namespace Web.Engine
             // Lucene
 
             For<IIndexer>()
-                .Use(() => new Indexer(Startup.Configuration["DRS.IndexDirectory"]));
+                .Use(() => new Indexer(Startup.Configuration["DRS:IndexDirectory"]));
 
             // AutoMapper
 

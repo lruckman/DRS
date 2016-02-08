@@ -104,7 +104,7 @@ namespace Web.ViewModels.Documents
 
                     // generate the document paths
 
-                    var destPath = GetNewFileName(Startup.Configuration["DRS.DocumentDirectory"],
+                    var destPath = GetNewFileName(Startup.Configuration["DRS:DocumentDirectory"],
                         document.Id);
 
                     Debug.Assert(destPath != null);
