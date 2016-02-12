@@ -43,8 +43,8 @@ namespace Web.Engine.Services.Lucene
                 var result = indexService.IndexEntities(command, c =>
                 {
                     var doc = new Document();
-                    doc.Add(new Field("id", c.Id.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-                    doc.Add(new Field("_contents_", c.Contents, Field.Store.NO, Field.Index.ANALYZED));
+                    doc.Add(new Field(Constants.LuceneFieldId, c.Id.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+                    doc.Add(new Field(Constants.LuceneFieldOCR, c.Contents, Field.Store.NO, Field.Index.ANALYZED));
 
                     return doc;
                 });

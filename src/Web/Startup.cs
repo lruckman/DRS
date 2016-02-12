@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using AutoMapper;
-using FluentValidation;
-using MediatR;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.AspNet.Mvc.ModelBinding.Validation;
 using Microsoft.Data.Entity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using React.AspNet;
 using StructureMap;
-using StructureMap.Graph;
 using Web.Engine;
 using Web.Models;
 
@@ -54,12 +49,11 @@ namespace Web
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddReact();
+
             services.AddMvc();
 
-            var container = new Container(cfg =>
-            {
-                cfg.AddRegistry<WebRegistry>();
-            });
+            var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });
 
             // populates structuremap with .NET services
 
@@ -120,6 +114,26 @@ namespace Web
             }
 
             app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
+
+            // Cannot add an entity with a key that is already in use.
+            app.UseReact(config =>
+            {
+                // If you want to use server-side rendering of React components,
+                // add all the necessary JavaScript files here. This includes
+                // your components as well as all of their dependencies.
+                // See http://reactjs.net/ for more information. Example:
+                //config
+                //    .AddScript("~/Scripts/First.jsx")
+                //    .AddScript("~/Scripts/Second.jsx");
+
+                // If you use an external build too (for example, Babel, Webpack,
+                // Browserify or Gulp), you can improve performance by disabling
+                // ReactJS.NET's version of Babel and loading the pre-transpiled
+                // scripts. Example:
+                //config
+                //    .SetLoadBabel(false)
+                //
+            });
 
             app.UseStaticFiles();
 

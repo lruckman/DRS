@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using System.Reflection;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -44,6 +43,9 @@ namespace Web.Engine
 
             For<IIndexer>()
                 .Use(() => new Indexer(Startup.Configuration["DRS:IndexDirectory"]));
+
+            For<ISearcher>()
+                .Use(() => new Searcher(Startup.Configuration["DRS:IndexDirectory"]));
 
             // AutoMapper
 
