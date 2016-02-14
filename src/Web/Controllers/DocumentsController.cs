@@ -15,12 +15,9 @@ namespace Web.Controllers
             _mediator = mediator;
         }
 
-        public async Task<IActionResult> Index(Index.Query query)
+        public IActionResult Index()
         {
-            query.LibraryId = 2; //todo: remove hardcode
-            var model = await _mediator.SendAsync(query);
-
-            return View(model);
+            return View();
         }
 
         [Route("{documentId:int?}/[action]")]

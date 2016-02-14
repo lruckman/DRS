@@ -1,27 +1,18 @@
-﻿@model IEnumerable<Web.ViewModels.Documents.Index.Result>
-
+﻿@using System.Threading.Tasks
+@using Web.Engine
+@inject ISelectListProvider SelectListProvider
 
 <div id="content"></div>
 
-@foreach (var result in Model)
+@Html.React("SearchBox", new
 {
-    <div class="media">
-        <div class="media-left">
-            <a asp-controller="Documents" asp-action="View" asp-route-documentid="@result.DocumentId">
-                <img src="@Url.Action("thumbnail", new {DocumentId = result.DocumentId})" alt="@result.DocumentId" style="width: 100px;" class="thumbnail"/>
-            </a>
-        </div>
-        <div class="media-body">
-            <h4 class="media-heading">@result.DocumentId</h4>
-            <br/>
-            @result.PageCount
-            <br/>
-            @result.FileSize
-        </div>
-    </div>
-}
+    url = "/api/v1/search",
+    libraries = await SelectListProvider.GetLibraries()
+})
+
 @section scripts {
     <script src="https://fb.me/react-0.14.7.js"></script>
     <script src="https://fb.me/react-dom-0.14.7.js"></script>
     <script src="@Url.Content("~/js/document-index.jsx")"></script>
+    @Html.ReactInitJavaScript()
 }

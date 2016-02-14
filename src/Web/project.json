@@ -29,13 +29,13 @@
         "AutoMapper": "4.0.4",
         "MediatR": "2.0.2",
         "Ghostscript.NET": "1.2.0",
-        "FluentValidation": "5.6.2",
-        "iTextSharp": "5.5.7",
-        "itextsharp.pdfa": "5.5.7",
-        "itextsharp.xtra": "5.5.7",
-        "React.AspNet": "2.1.2",
         "Lucene.Net": "3.0.3",
-        "SimpleLuceneFix": "1.1.0"
+        "SimpleLuceneFix": "1.1.0",
+        "FluentValidation": "6.2.0-beta1",
+        "iTextSharp": "5.5.8",
+        "itextsharp.pdfa": "5.5.8",
+        "itextsharp.xtra": "5.5.8",
+        "React.AspNet": "2.2.0"
     },
 
   "commands": {

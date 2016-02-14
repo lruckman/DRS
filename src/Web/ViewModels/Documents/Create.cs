@@ -11,6 +11,7 @@ using Microsoft.Data.Entity;
 using Web.Engine;
 using Web.Engine.Extensions;
 using Web.Engine.Services.Lucene;
+using Web.Engine.Services.Lucene.Models;
 using Web.Models;
 
 namespace Web.ViewModels.Documents
@@ -55,7 +56,7 @@ namespace Web.ViewModels.Documents
                     .NotNull();
                 RuleFor(m => m.LibraryId)
                     .NotNull()
-                    .MustAsync(async libraryId => await db.Libraries.AnyAsync(l => l.Id == libraryId.Value));
+                    .MustAsync((libraryId, cancellationToken) => db.Libraries.AnyAsync(l => l.Id == libraryId.Value));
             }
         }
 
@@ -125,7 +126,7 @@ namespace Web.ViewModels.Documents
 
                     // index in lucene
 
-                    var indexSuccessful = _indexer.Index(new Engine.Services.Lucene.Models.Index.Command
+                    var indexSuccessful = _indexer.Index(new Index.Command
                     {
                         Id = document.Id,
                         Contents = await parser.GetContentAsync()
@@ -205,8 +206,8 @@ namespace Web.ViewModels.Documents
 
             private static string GetNewFileName(string rootPath, int seed)
             {
-                var subFolder1 = ((seed/1024)/1024);
-                var subFolder2 = ((seed/1024) - (((seed/1024)/1024)*1024));
+                var subFolder1 = ((seed / 1024) / 1024);
+                var subFolder2 = ((seed / 1024) - (((seed / 1024) / 1024) * 1024));
 
                 return Path.Combine(rootPath,
                     $@"{subFolder1}\{subFolder2}\{Guid.NewGuid():N}.bin");

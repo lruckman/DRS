@@ -17,6 +17,8 @@ namespace Web.ViewModels.Search
     {
         public class Query : IAsyncRequest<IEnumerable<Result>>
         {
+            public int? LibraryId { get; set; }
+
             public string Q { get; set; }
 
             public int Page { get; set; }
@@ -28,6 +30,7 @@ namespace Web.ViewModels.Search
         {
             public QueryValidator()
             {
+                RuleFor(m => m.LibraryId).NotNull();
             }
         }
 
@@ -52,8 +55,15 @@ namespace Web.ViewModels.Search
                 var documentIds = _searcher
                     .Search(message.Q);
 
+                //todo: work around for bug, use Count()>0 rather then Any
+                // https://github.com/aspnet/EntityFramework/issues/3317
+
+                //todo: re-add library filter once EF fixes
+
                 return await _db.Documents
-                    .Where(d => documentIds.Contains(d.Id))
+                    .Where(d => documentIds.Contains(d.Id) /*&&
+                                d.Libraries.Count(l => l.LibraryId == message.LibraryId.Value) > 0*/)
+                    .OrderBy(d => d.Id)
                     .Skip(Constants.SearchResultsPageSize * message.Page)
                     .Take(Constants.SearchResultsPageSize)
                     .ProjectTo<Result>()
@@ -64,7 +74,8 @@ namespace Web.ViewModels.Search
             {
                 protected override void Configure()
                 {
-                    Mapper.CreateMap<Document, Result>();
+                    Mapper.CreateMap<Document, Result>()
+                        .ForMember(d => d.ThumbnailUrl, o => o.MapFrom(s => $"/documents/{s.Id}/thumbnail"));
                 }
             }
         }
@@ -72,6 +83,7 @@ namespace Web.ViewModels.Search
         public class Result
         {
             public int Id { get; set; }
+            public string ThumbnailUrl { get; set; }
             public DateTimeOffset CreatedOn { get; set; }
             public DateTimeOffset ModifiedOn { get; set; }
             public long FileSize { get; set; }
