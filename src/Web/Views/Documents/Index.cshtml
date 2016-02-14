@@ -1,5 +1,8 @@
 ﻿@model IEnumerable<Web.ViewModels.Documents.Index.Result>
-@AppDomain.CurrentDomain.GetData("DataDirectory")
+
+
+<div id="content"></div>
+
 @foreach (var result in Model)
 {
     <div class="media">
@@ -16,4 +19,9 @@
             @result.FileSize
         </div>
     </div>
+}
+@section scripts {
+    <script src="https://fb.me/react-0.14.7.js"></script>
+    <script src="https://fb.me/react-dom-0.14.7.js"></script>
+    <script src="@Url.Content("~/js/document-index.jsx")"></script>
 }

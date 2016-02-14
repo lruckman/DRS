@@ -3,9 +3,9 @@ using MediatR;
 using Microsoft.AspNet.Mvc;
 using Web.ViewModels.Search;
 
-namespace Web.Controllers
+namespace Web.Controllers.Api.v1
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class SearchController : BaseController
     {
         private readonly IMediator _mediator;
@@ -14,9 +14,7 @@ namespace Web.Controllers
         {
             _mediator = mediator;
         }
-
-        // GET: api/values
-        [HttpGet]
+        
         public async Task<IActionResult> Get(Get.Query query)
         {
             if (!ModelState.IsValid)

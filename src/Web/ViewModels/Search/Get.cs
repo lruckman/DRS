@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
@@ -43,6 +44,11 @@ namespace Web.ViewModels.Search
 
             public async Task<IEnumerable<Result>> Handle(Query message)
             {
+                if (string.IsNullOrWhiteSpace(message.Q))
+                {
+                    return new Result[] {};
+                }
+
                 var documentIds = _searcher
                     .Search(message.Q);
 
@@ -53,11 +59,19 @@ namespace Web.ViewModels.Search
                     .ProjectTo<Result>()
                     .ToArrayAsync();
             }
+
+            public class MappingProfile : Profile
+            {
+                protected override void Configure()
+                {
+                    Mapper.CreateMap<Document, Result>();
+                }
+            }
         }
 
         public class Result
         {
-            public int DocumentId { get; set; }
+            public int Id { get; set; }
             public DateTimeOffset CreatedOn { get; set; }
             public DateTimeOffset ModifiedOn { get; set; }
             public long FileSize { get; set; }
