@@ -19,7 +19,7 @@ namespace Web.ViewModels.Search
         {
             public int? LibraryId { get; set; }
 
-            public string Q { get; set; }
+            public string Search { get; set; }
 
             public int Page { get; set; }
 
@@ -47,13 +47,13 @@ namespace Web.ViewModels.Search
 
             public async Task<IEnumerable<Result>> Handle(Query message)
             {
-                if (string.IsNullOrWhiteSpace(message.Q))
+                if (string.IsNullOrWhiteSpace(message.Search))
                 {
                     return new Result[] {};
                 }
 
                 var documentIds = _searcher
-                    .Search(message.Q);
+                    .Search(message.Search);
 
                 //todo: work around for bug, use Count()>0 rather then Any
                 // https://github.com/aspnet/EntityFramework/issues/3317

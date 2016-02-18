@@ -2,25 +2,52 @@
 var SearchForm = React.createClass({
     handleSubmit: function(e) {
         e.preventDefault();
-        var query = ReactDOM.findDOMNode(this.refs.query).value.trim();
+        var search = ReactDOM.findDOMNode(this.refs.search).value.trim();
         var libraryId = ReactDOM.findDOMNode(this.refs.library).value.trim();
-        this.props.onSearchSubmit(query, libraryId);
-        ReactDOM.findDOMNode(this.refs.query).value = '';
+        this.props.onSearchSubmit(search, libraryId);
+        ReactDOM.findDOMNode(this.refs.search).value = '';
         return;
+    },
+    handleClick: function (e) {
+        e.preventDefault();
+        var libId = e.currentTarget.getAttribute('href').replace('#','').trim();
+        var libName = e.currentTarget.innerHTML.trim();
+        ReactDOM.findDOMNode(this.refs.filter).innerHTML = libName;
+        ReactDOM.findDOMNode(this.refs.library).value = libId;
     },
     render: function () {
         var libraryNodes = this.props.libraries.map(function(library) {
             return (
-                <option key={library.Value} value={library.Value}>{library.Text}</option>
+                <li key={library.Value}>
+                    <a href={"#" + library.Value} onClick={this.handleClick}>{library.Text}</a>
+                </li>
             );
-        });
+        }.bind(this));
         return (
             <form className="search-form" onSubmit={this.handleSubmit}>
-                <select ref="library">
-                    {libraryNodes}
-                </select>
-                <input type="text" placeholder="Search" ref="query" />
-                <input type="submit" value="search" />
+                <div className="container">
+                    <div className="row">    
+                        <div className="col-xs-8 col-xs-offset-2">
+		                    <div className="input-group">
+                                <div className="input-group-btn">
+                                    <button type="button" className="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    	                <span ref="filter">Filter by</span> <span className="caret"></span>
+                                    </button>
+                                    <ul className="dropdown-menu" role="menu">
+                                      {libraryNodes}
+                                    </ul>
+                                </div>
+                                <input type="hidden" ref="library" />         
+                                <input type="text" className="form-control" placeholder="Search" ref="search" />
+                                <span className="input-group-btn">
+                                    <button className="btn btn-default" type="button">
+                                        <span className="glyphicon glyphicon-search"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+	                </div>
+                </div>
             </form>
         );
     }
@@ -58,17 +85,17 @@ var ResultList = React.createClass({
 });
 
 var SearchBox = React.createClass({
-    loadResultsFromServer: function (query, libraryId) {
+    loadResultsFromServer: function (search, libraryId) {
         var xhr = new XMLHttpRequest();
-        xhr.open('get', this.props.url + "?q=" + query + "&libraryid=" + libraryId, true);
+        xhr.open('get', this.props.url + "?search=" + search + "&libraryid=" + libraryId, true);
         xhr.onload = function () {
             var data = JSON.parse(xhr.responseText);
             this.setState({ data: data });
         }.bind(this);
         xhr.send();
     },
-    handleSearchSubmit: function (query, libraryId) {
-        this.loadResultsFromServer(query, libraryId);
+    handleSearchSubmit: function (search, libraryId) {
+        this.loadResultsFromServer(search, libraryId);
     },
     getInitialState: function() {
         return { data: [] };
