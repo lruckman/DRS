@@ -1,18 +1,29 @@
 ﻿@using System.Threading.Tasks
 @using Web.Engine
 @inject ISelectListProvider SelectListProvider
+<link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
+<link href="~/lib/font-awesome/css/font-awesome.css" rel="stylesheet"/>
 
 <div id="content"></div>
-
 @Html.React("SearchBox", new
 {
-    url = "/api/v1/search",
+    searchUrl = "/api/search",
+    addDocumentUrl = "/api/documents",
     libraries = await SelectListProvider.GetLibraries()
 })
 
 @section scripts {
-    <script src="https://fb.me/react-0.14.7.js"></script>
-    <script src="https://fb.me/react-dom-0.14.7.js"></script>
+    <environment names="Development">
+        <script src="~/lib/react/react.js"></script>
+        <script src="~/lib/react/react-dom.js"></script>
+        <script src="~/lib/react-bootstrap/react-bootstrap.js"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="https://fb.me/react-0.14.7.js"></script>
+        <script src="https://fb.me/react-dom-0.14.7.js"></script>
+        <script src="~/lib/react-bootstrap/react-bootstrap.min.js"></script>
+    </environment>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
     <script src="@Url.Content("~/js/document-index.jsx")"></script>
     @Html.ReactInitJavaScript()
 }

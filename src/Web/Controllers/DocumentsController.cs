@@ -20,38 +20,13 @@ namespace Web.Controllers
             return View();
         }
 
-        [Route("{documentId:int?}/[action]")]
-        [ResponseCache(Duration = 3600)]
-        public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
+        [HttpGet("[action]")]
+        public IActionResult Create()
         {
-            var model = await _mediator.SendAsync(query);
-
-            return File(model.Thumbnail, model.ContentType);
+            return View();
         }
-
-        [HttpGet]
-        [Route("[action]")]
-        public async Task<IActionResult> Create(Create.Query query)
-        {
-            var model = await _mediator.SendAsync(query);
-            return View(model);
-        }
-
-        [HttpPost]
-        [Route("[action]")]
-        public async Task<IActionResult> Create(Create.Command command)
-        {
-            if (!ModelState.IsValid)
-            {
-                return RedirectToAction(nameof(Create));
-            }
-
-            var model = await _mediator.SendAsync(command);
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        [Route("{documentId:int?}/[action]")]
+        
+        [HttpGet("{documentId:int?}/[action]")]
         public async Task<IActionResult> View(View.Query query)
         {
             var model = await _mediator.SendAsync(query);

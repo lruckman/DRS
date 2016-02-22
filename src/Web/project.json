@@ -35,7 +35,8 @@
         "iTextSharp": "5.5.8",
         "itextsharp.pdfa": "5.5.8",
         "itextsharp.xtra": "5.5.8",
-        "React.AspNet": "2.2.0"
+        "React.AspNet": "2.2.0",
+        "Tesseract": "3.0.2"
     },
 
   "commands": {

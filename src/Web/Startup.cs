@@ -7,6 +7,7 @@ using Microsoft.Data.Entity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 using React.AspNet;
 using StructureMap;
 using Web.Engine;
@@ -51,7 +52,17 @@ namespace Web
 
             services.AddReact();
 
-            services.AddMvc();
+            services
+                .AddMvc(options => { options.Filters.Add(new ValidateModelStateActionFilter()); })
+                .AddJsonOptions(options =>
+                    {
+                        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    });
+            
+            //services.AddMvcCore()
+            //    .AddJsonFormatters(a => a.ContractResolver = new CamelCasePropertyNamesContractResolver());
+
+
 
             var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });
 
@@ -114,10 +125,11 @@ namespace Web
             }
 
             app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
-            
+
             app.UseReact(config =>
             {
                 config
+                    .AddScriptWithoutTransform("~/lib/react-bootstrap/react-bootstrap.js")
                     .AddScript("~/js/document-index.jsx");
             });
 
