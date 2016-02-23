@@ -19,12 +19,6 @@ namespace Web.Controllers
         {
             return View();
         }
-
-        [HttpGet("[action]")]
-        public IActionResult Create()
-        {
-            return View();
-        }
         
         [HttpGet("{documentId:int?}/[action]")]
         public async Task<IActionResult> View(View.Query query)
