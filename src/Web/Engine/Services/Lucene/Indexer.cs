@@ -27,7 +27,7 @@ namespace Web.Engine.Services.Lucene
 
         private IndexService GetIndexService()
         {
-            var indexWriter = new DirectoryIndexWriter(new DirectoryInfo(_indexPath), true);
+            var indexWriter = new DirectoryIndexWriter(new DirectoryInfo(_indexPath));
             return new IndexService(indexWriter);
         }
 

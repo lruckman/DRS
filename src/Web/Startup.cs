@@ -58,11 +58,6 @@ namespace Web
                     {
                         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     });
-            
-            //services.AddMvcCore()
-            //    .AddJsonFormatters(a => a.ContractResolver = new CamelCasePropertyNamesContractResolver());
-
-
 
             var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });
 

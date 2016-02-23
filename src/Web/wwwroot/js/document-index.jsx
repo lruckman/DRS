@@ -114,8 +114,8 @@ var SearchForm = React.createClass({
 var Result = React.createClass({
     render: function() {
         return (
-            <div className="result">
-                <img src={this.props.thumbnailUrl} className="thumbnail" />
+            <div className="result" style={{ width: 100 + 'px'}}>
+                <img src={this.props.thumbnailUrl} className="thumbnail img-responsive" />
                 <h1 className="title">
                     {this.props.title}
                 </h1>
