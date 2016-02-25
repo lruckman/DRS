@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.AspNet.Mvc;
 using Web.Controllers;
-using Web.ViewModels.Documents;
 using Xunit;
 
 namespace UnitTests

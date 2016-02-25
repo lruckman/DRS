@@ -9,6 +9,12 @@ namespace Web.Models
         [Key]
         public int Id { get; set; }
 
+        [Required, MaxLength(60)]
+        public string Title { get; set; }
+
+        [MaxLength(512)]
+        public string Abstract { get; set; }
+
         [Required, MaxLength(256)]
         public string Path { get; set; }
 

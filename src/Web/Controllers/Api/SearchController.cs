@@ -24,7 +24,7 @@ namespace Web.Controllers.Api
 
             var results = await _mediator.SendAsync(query);
 
-            return new ObjectResult(results);
+            return Ok(results);
         }
     }
 }

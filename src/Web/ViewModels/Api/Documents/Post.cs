@@ -21,18 +21,28 @@ namespace Web.ViewModels.Api.Documents
         public class Command : IAsyncRequest<int?>
         {
             public IFormFile File { get; set; }
+            public string Title { get; set; }
+            [AllowHtml]
+            public string Abstract { get; set; }
             public int? LibraryId { get; set; }
+            public bool GenerateAbstract { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator(ApplicationDbContext db)
             {
+                RuleFor(m => m.Abstract)
+                    .Length(0, 512);
                 RuleFor(m => m.File)
                     .NotNull();
                 RuleFor(m => m.LibraryId)
                     .NotNull()
-                    .MustAsync((libraryId, cancellationToken) => db.Libraries.AnyAsync(l => l.Id == libraryId.Value));
+                    .MustAsync((libraryId, cancellationToken) =>
+                        db.Libraries.AnyAsync(l => l.Id == libraryId.Value));
+                RuleFor(m => m.Title)
+                    .NotNull()
+                    .Length(1, 60);
             }
         }
 
@@ -68,6 +78,7 @@ namespace Web.ViewModels.Api.Documents
                         FileSize = message.File.Length,
                         ModifiedOn = DateTimeOffset.Now,
                         ThumbnailPath = "",
+                        Title = message.Title,
                         PageCount = 0,
                         Path = "",
                         Key = Convert.ToBase64String(documentKey.Protect(null, dataProtectionScope))
@@ -102,10 +113,17 @@ namespace Web.ViewModels.Api.Documents
 
                     // index in lucene
 
+                    var fileContents = await parser.GetContentAsync();
+
+                    if (message.GenerateAbstract)
+                    {
+                        document.Abstract = fileContents?.Truncate(512);
+                    }
+
                     var indexSuccessful = _indexer.Index(new Index.Command
                     {
                         Id = document.Id,
-                        Contents = await parser.GetContentAsync()
+                        Contents = fileContents
                     });
 
                     if (!indexSuccessful)

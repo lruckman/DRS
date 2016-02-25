@@ -42,6 +42,9 @@
                         {libraryNodes}
                     </select>
                     <input type="file" ref="file" className="form-control" />
+                    <input type="title" ref="title" className="form-control" />
+                    <textarea type="abstract" ref="abstract" className="form-control"></textarea>
+                    <input type="checkbox" ref="generateAbstract" className=""/>
                 </ReactBootstrap.Modal.Body>
                 <ReactBootstrap.Modal.Footer>
                   <ReactBootstrap.Button onClick={this.close}>Close</ReactBootstrap.Button>
@@ -114,12 +117,14 @@ var SearchForm = React.createClass({
 var Result = React.createClass({
     render: function() {
         return (
-            <div className="result" style={{ width: 100 + 'px'}}>
-                <img src={this.props.thumbnailUrl} className="thumbnail img-responsive" />
-                <h1 className="title">
-                    {this.props.title}
-                </h1>
-                {this.props.children}
+            <div className="result pull-left" style={{ padding: 15 + 'px', width: 100 + 'px'}}>
+                <a href={this.props.viewLink} target="_blank">
+                    <img src={this.props.thumbnailLink} className="thumbnail img-responsive" />
+                    <h1 className="title">
+                        {this.props.title}
+                    </h1>
+                    {this.props.children}
+                </a>
             </div>
         );
     }
@@ -127,15 +132,18 @@ var Result = React.createClass({
 
 var ResultList = React.createClass({
     render: function () {
-        var resultNodes = this.props.data.map(function (result) {
+        var documents = this.props.data.documents
+            ? this.props.data.documents
+            : [];
+        var resultNodes = documents.map(function (result) {
             return (
-                <Result key={result.id} title={result.id} thumbnailUrl={result.thumbnailUrl}>
+                <Result key={result.id} title={result.id} thumbnailLink={result.thumbnailLink} viewLink={result.viewLink}>
                     {result.id}
                 </Result>
             );
         });
         return (
-            <div className="result-list">
+            <div className="result-list clearfix" data-next-link={this.props.data.nextLink}>
                 {resultNodes}
             </div>
         );
@@ -145,7 +153,7 @@ var ResultList = React.createClass({
 var SearchBox = React.createClass({
     loadResultsFromServer: function (search, libraryId) {
         var xhr = new XMLHttpRequest();
-        xhr.open('get', this.props.searchUrl + "?search=" + search + "&libraryid=" + libraryId, true);
+        xhr.open('get', this.props.searchUrl + "?q=" + search + "&libraryid=" + libraryId, true);
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var data = JSON.parse(xhr.responseText);

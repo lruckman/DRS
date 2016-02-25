@@ -10,18 +10,18 @@ using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
 {
-    public class GetThumbnail
+    public class Thumbnail
     {
         public class Query : IAsyncRequest<Result>
         {
-            public int? DocumentId { get; set; }
+            public int? Id { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
         {
             public QueryValidator()
             {
-                RuleFor(m => m.DocumentId).NotNull();
+                RuleFor(m => m.Id).NotNull();
             }
         }
 
@@ -39,14 +39,14 @@ namespace Web.ViewModels.Api.Documents
                 const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
 
                 var document = await _db.Documents
-                    .SingleAsync(d => d.Id == message.DocumentId.Value);
+                    .SingleAsync(d => d.Id == message.Id.Value);
 
                 var documentKey = Convert.FromBase64String(document.Key)
                     .Unprotect(null, dataProtectionScope);
 
                 var model = new Result
                 {
-                    Thumbnail = File.ReadAllBytes(document.ThumbnailPath)
+                    FileContents = File.ReadAllBytes(document.ThumbnailPath)
                         .Unprotect(documentKey, dataProtectionScope)
                 };
 
@@ -56,7 +56,7 @@ namespace Web.ViewModels.Api.Documents
 
         public class Result
         {
-            public byte[] Thumbnail { get; set; }
+            public byte[] FileContents { get; set; }
             public string ContentType => "image/png";
         }
     }

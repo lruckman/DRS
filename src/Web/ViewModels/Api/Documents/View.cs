@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using FluentValidation;
@@ -10,20 +8,20 @@ using Microsoft.Data.Entity;
 using Web.Engine.Extensions;
 using Web.Models;
 
-namespace Web.ViewModels.Documents
+namespace Web.ViewModels.Api.Documents
 {
     public class View
     {
         public class Query : IAsyncRequest<Result>
         {
-                public int? DocumentId { get; set; }
+            public int? Id { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
         {
             public QueryValidator()
             {
-                RuleFor(m => m.DocumentId).NotNull();
+                RuleFor(m => m.Id).NotNull();
             }
         }
 
@@ -41,14 +39,14 @@ namespace Web.ViewModels.Documents
                 const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
 
                 var document = await _db.Documents
-                    .SingleAsync(d => d.Id == message.DocumentId.Value);
+                    .SingleAsync(d => d.Id == message.Id.Value);
 
                 var documentKey = Convert.FromBase64String(document.Key)
                     .Unprotect(null, dataProtectionScope);
 
                 var model = new Result
                 {
-                    Document = File.ReadAllBytes(document.Path)
+                    FileContents = File.ReadAllBytes(document.Path)
                         .Unprotect(documentKey, dataProtectionScope)
                 };
 
@@ -58,7 +56,7 @@ namespace Web.ViewModels.Documents
 
         public class Result
         {
-            public byte[] Document { get; set; }
+            public byte[] FileContents { get; set; }
             public string ContentType => "application/pdf";
         }
     }

@@ -17,7 +17,14 @@ namespace Web.Controllers.Api
             _mediator = mediator;
         }
 
-        [Route("{id:int?}")]
+        [HttpGet("{id:int}/view")]
+        public async Task<IActionResult> View(View.Query query)
+        {
+            var model = await _mediator.SendAsync(query);
+            return File(model.FileContents, model.ContentType);
+        }
+
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(Get.Query query)
         {
             var model = await _mediator.SendAsync(query);
@@ -25,12 +32,12 @@ namespace Web.Controllers.Api
             return Ok(model);
         }
 
-        [Route("{documentId:int?}/thumbnail")]
-        public async Task<IActionResult> GetThumbnail(GetThumbnail.Query query)
+        [HttpGet("{id:int}/thumbnail")]
+        public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
         {
             var model = await _mediator.SendAsync(query);
 
-            return File(model.Thumbnail, model.ContentType);
+            return File(model.FileContents, model.ContentType);
         }
 
         public async Task<IActionResult> Post(Post.Command command)
@@ -42,7 +49,8 @@ namespace Web.Controllers.Api
                 return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
             }
 
-            return CreatedAtAction(nameof(Get), new RouteValueDictionary(new Get.Query {Id = documentId}), null);
+            return CreatedAtAction(nameof(ViewModels.Api.Documents.Get)
+                , new RouteValueDictionary(new Get.Query {Id = documentId}), null);
         }
     }
 }
