@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -52,22 +51,23 @@ namespace Web.ViewModels.Api.Search
 
             public async Task<Result> Handle(Query message)
             {
-                if (string.IsNullOrWhiteSpace(message.Q))
+                //todo: limit by active
+                IQueryable<Document> query = _db.Documents;
+
+                if (!string.IsNullOrWhiteSpace(message.Q))
                 {
-                    return new Result();
-                }
+                    var documentIds = _searcher
+                        .Search(message.Q);
 
-                var documentIds = _searcher
-                    .Search(message.Q);
+                    //todo: work around for bug, use Count()>0 rather then Any
+                    // https://github.com/aspnet/EntityFramework/issues/3317
 
-                //todo: work around for bug, use Count()>0 rather then Any
-                // https://github.com/aspnet/EntityFramework/issues/3317
+                    //todo: re-add library filter once EF fixes
 
-                //todo: re-add library filter once EF fixes
-
-                var query = _db.Documents
-                    .Where(d => documentIds.Contains(d.Id) /*&&
+                    query = query
+                        .Where(d => documentIds.Contains(d.Id) /*&&
                                 d.Libraries.Count(l => l.LibraryId == message.LibraryId.Value) > 0*/);
+                }
 
                 var result = new Result
                 {
@@ -95,6 +95,7 @@ namespace Web.ViewModels.Api.Search
                 protected override void Configure()
                 {
                     Mapper.CreateMap<Document, Result.Document>()
+                        .ForMember(d => d.SelfLink, o => o.MapFrom(s => $"/api/documents/{s.Id}"))
                         .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"))
                         .ForMember(d => d.ViewLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/view"));
                 }
@@ -111,10 +112,13 @@ namespace Web.ViewModels.Api.Search
             public class Document
             {
                 public int Id { get; set; }
+                public string Title { get; set; }
+                public string Abstract { get; set; }
+                public string SelfLink { get; set; }
                 public string ViewLink { get; set; }
                 public string ThumbnailLink { get; set; }
-                public DateTimeOffset CreatedOn { get; set; }
-                public DateTimeOffset ModifiedOn { get; set; }
+                public string CreatedOn { get; set; }
+                public string ModifiedOn { get; set; }
                 public long FileSize { get; set; }
                 public int PageCount { get; set; }
             }

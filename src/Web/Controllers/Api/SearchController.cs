@@ -17,11 +17,6 @@ namespace Web.Controllers.Api
         
         public async Task<IActionResult> Get(Get.Query query)
         {
-            if (!ModelState.IsValid)
-            {
-                return HttpBadRequest(ModelState);
-            }
-
             var results = await _mediator.SendAsync(query);
 
             return Ok(results);

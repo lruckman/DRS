@@ -22,7 +22,9 @@ namespace Web.ViewModels.Api.Documents
         {
             public IFormFile File { get; set; }
             public string Title { get; set; }
-            [AllowHtml]
+            /// <summary>
+            /// TODO: AllowHtml equivalent?
+            /// </summary>
             public string Abstract { get; set; }
             public int? LibraryId { get; set; }
             public bool GenerateAbstract { get; set; }
@@ -73,6 +75,7 @@ namespace Web.ViewModels.Api.Documents
 
                     var document = new Document
                     {
+                        Abstract = message.Abstract,
                         CreatedOn = DateTimeOffset.Now,
                         Extension = extension,
                         FileSize = message.File.Length,
