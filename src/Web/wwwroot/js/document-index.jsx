@@ -112,30 +112,14 @@ var SearchForm = React.createClass({
         }.bind(this));
         return (
             <form className="search-form" onSubmit={this.handleSubmit}>
-                <AddDocument libraries={this.props.libraries} onSubmit={this.props.onAddSubmit} />
-                <div className="container">
-                    <div className="row">    
-                        <div className="col-xs-8 col-xs-offset-2">
-		                    <div className="input-group">
-                                <div className="input-group-btn">
-                                    <button type="button" className="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    	                <span ref="filter">Filter by</span> <span className="caret"></span>
-                                    </button>
-                                    <ul className="dropdown-menu" role="menu">
-                                      {libraryNodes}
-                                    </ul>
-                                </div>
-                                <input type="hidden" ref="library" />         
-                                <input type="text" className="form-control" placeholder="Search" ref="search" />
-                                <span className="input-group-btn">
-                                    <button className="btn btn-default" type="button">
-                                        <span className="glyphicon glyphicon-search"></span>
-                                    </button>
-                                </span>
-                            </div>
-                        </div>
-	                </div>
-                </div>
+                <AddDocument libraries={this.props.libraries} onSubmit={this.props.onAddSubmit} />    
+                <input type="text" className="form-control" placeholder="Search" ref="search" />
+
+                <button type="button" className="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    <span ref="filter">Filter by</span> <span className="caret"></span>
+                </button>
+                <ul className="dropdown-menu" role="menu">{libraryNodes}</ul>
+                <input type="hidden" ref="library" />   
             </form>
         );
     }
@@ -144,14 +128,18 @@ var SearchForm = React.createClass({
 var Result = React.createClass({
     render: function() {
         return (
-            <div className="result pull-left" style={{ padding: 15 + 'px', width: 200 + 'px'}}>
-                <a href={this.props.viewLink} target="_blank">
-                    <img src={this.props.thumbnailLink} className="thumbnail img-responsive" />
-                    <h1 className="title">
+            <div className="result media">
+                <div className="media-left">
+                    <a href={this.props.viewLink} target="_blank">
+                        <img src={this.props.thumbnailLink} className="media-object thumbnail" alt={this.props.title} style={{width: 150 + 'px'}} />
+                    </a>
+                </div>
+                <div className="media-body">
+                    <h4 className="media-heading">
                         {this.props.title}
-                    </h1>
+                    </h4>
                     {this.props.children}
-                </a>
+                </div>
             </div>
         );
     }
@@ -227,11 +215,15 @@ var SearchBox = React.createClass({
     },
     render: function() {
         return (
-            <div className="search-box">
-                <SearchForm onSearchSubmit={this.handleSearchSubmit} 
-                            onAddSubmit={this.handleAddSubmit} 
-                            libraries={this.props.libraries} />
-                <ResultList data={this.state.data} />
+            <div className="search-box row">
+                <div className="col-sm-2">
+                    <SearchForm onSearchSubmit={this.handleSearchSubmit} 
+                                onAddSubmit={this.handleAddSubmit} 
+                                libraries={this.props.libraries} />
+                </div>
+                <div className="col-sm-10">
+                    <ResultList data={this.state.data} />
+                </div>
             </div>
         );
     }

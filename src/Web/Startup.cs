@@ -124,8 +124,13 @@ namespace Web
             app.UseReact(config =>
             {
                 config
+                    //.AddScriptWithoutTransform("~/lib/react/react.js")
                     .AddScriptWithoutTransform("~/lib/react-bootstrap/react-bootstrap.js")
+                    //.AddScriptWithoutTransform("~/lib/requirejs/require.js")
+                    //.AddScript("~/lib/react-select/examples/dist/bundle.js")
                     .AddScript("~/js/document-index.jsx");
+
+                //config.LoadReact = false;
             });
 
             app.UseStaticFiles();

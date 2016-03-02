@@ -1,0 +1,40 @@
+{
+  "name": "react-input-autosize",
+  "main": "dist/react-input-autosize.min.js",
+  "version": "0.6.8",
+  "homepage": "https://github.com/JedWatson/react-input-autosize",
+  "authors": [
+    "Jed Watson"
+  ],
+  "description": "Auto-resizing Input Form Component for React",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "react",
+    "react-component",
+    "input",
+    "form"
+  ],
+  "license": "MIT",
+  "ignore": [
+    ".editorconfig",
+    ".gitignore",
+    "package.json",
+    "src",
+    "node_modules",
+    "example",
+    "test"
+  ],
+  "_release": "0.6.8",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.6.8",
+    "commit": "a6f500ed975d1ad7178b5196c06295a7b00288ce"
+  },
+  "_source": "git://github.com/JedWatson/react-input-autosize.git",
+  "_target": "^0.6.5",
+  "_originalSource": "react-input-autosize"
+}

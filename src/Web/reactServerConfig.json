@@ -1,0 +1,12 @@
+﻿{
+    "expose": [
+        {
+            "path": "./wwwroot/lib/react-bootstrap/react-bootstrap",
+            "name": "react-bootstrap"
+        },
+        {
+            "path": "./wwwroot/js/document-index",
+            "name": "document-index"
+        }
+    ]
+}

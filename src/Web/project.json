@@ -31,12 +31,12 @@
         "Ghostscript.NET": "1.2.0",
         "Lucene.Net": "3.0.3",
         "SimpleLuceneFix": "1.1.0",
-        "FluentValidation": "6.2.0-beta1",
         "iTextSharp": "5.5.8",
         "itextsharp.pdfa": "5.5.8",
         "itextsharp.xtra": "5.5.8",
-        "React.AspNet": "2.2.0",
-        "Tesseract": "3.0.2"
+        "Tesseract": "3.0.2",
+        "FluentValidation": "6.2.1",
+        "React.AspNet": "2.2.1"
     },
 
   "commands": {

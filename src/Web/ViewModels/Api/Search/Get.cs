@@ -79,7 +79,7 @@ namespace Web.ViewModels.Api.Search
                     result.NextLink =
                         $"/api/search/?q={message.Q}&libraryid={message.LibraryId}&orderby={message.OrderBy}&pageindex={message.PageIndex + 1}";
                 }
-
+                
                 result.Documents = await query
                     .OrderBy(d => d.Id)
                     .Skip(message.MaxResults * message.PageIndex)
