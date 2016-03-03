@@ -1,3 +1,9 @@
+var React = require('react');
+var ReactDOM = require('react-dom');
+var Select = require('react-select');
+var Button = require('react-bootstrap').Button;
+var Modal = require('react-bootstrap').Modal;
+
 var AddDocument = React.createClass({displayName: "AddDocument",
     getInitialState: function() {
         return { showModel: false };
@@ -27,15 +33,15 @@ var AddDocument = React.createClass({displayName: "AddDocument",
         }.bind(this));
         return (
               React.createElement("div", null, 
-                React.createElement(ReactBootstrap.Button, {bsStyle: "default", bsSize: "large", onClick: this.open}, 
+                React.createElement(Button, {bsStyle: "default", bsSize: "large", onClick: this.open}, 
                 React.createElement("i", {className: "fa fa-plus"})
                 ), 
 
-              React.createElement(ReactBootstrap.Modal, {show: this.state.showModal, onHide: this.close}, 
-                React.createElement(ReactBootstrap.Modal.Header, {closeButton: true}, 
-                  React.createElement(ReactBootstrap.Modal.Title, null, "Add Document")
+              React.createElement(Modal, {show: this.state.showModal, onHide: this.close}, 
+                React.createElement(Modal.Header, {closeButton: true}, 
+                  React.createElement(Modal.Title, null, "Add Document")
                 ), 
-                React.createElement(ReactBootstrap.Modal.Body, null, 
+                React.createElement(Modal.Body, null, 
                     React.createElement("form", {className: "form-horizontal"}, 
                         React.createElement("div", {className: "form-group"}, 
                             React.createElement("label", {htmlFor: "library", className: "col-sm-2 control-label"}, "Library"), 
@@ -73,9 +79,9 @@ var AddDocument = React.createClass({displayName: "AddDocument",
                         )
                     )
                 ), 
-                React.createElement(ReactBootstrap.Modal.Footer, null, 
-                  React.createElement(ReactBootstrap.Button, {onClick: this.close}, "Close"), 
-                    React.createElement(ReactBootstrap.Button, {onClick: this.save}, "Save")
+                React.createElement(Modal.Footer, null, 
+                  React.createElement(Button, {onClick: this.close}, "Close"), 
+                    React.createElement(Button, {onClick: this.save}, "Save")
                 )
               )
             )
@@ -228,3 +234,5 @@ var SearchBox = React.createClass({displayName: "SearchBox",
         );
     }
 });
+
+module.exports = SearchBox;

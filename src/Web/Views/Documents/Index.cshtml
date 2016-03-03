@@ -15,18 +15,12 @@
 
 @section scripts {
     <environment names="Development">
-        <script src="~/lib/react/react.js"></script>
-        <script src="~/lib/react/react-dom.js"></script>
-        <script src="~/lib/react-bootstrap/react-bootstrap.js"></script>
-        @*<script src="~/lib/react-select/examples/dist/bundle.js"></script>*@
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="@Url.Content("~/js/dist/clientBundle.js")"></script>
     </environment>
     <environment names="Staging,Production">
-        <script src="https://fb.me/react-0.14.7.min.js"></script>
-        <script src="https://fb.me/react-dom-0.14.7.min.js"></script>
-        <script src="~/lib/react-bootstrap/react-bootstrap.min.js"></script>
-        @*<script src="~/lib/react-select/examples/dist/bundle.js"></script>*@
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="@Url.Content("~/js/dist/clientBundle.js")"></script>
     </environment>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="@Url.Content("~/js/document-index.jsx")"></script>
     @Html.ReactInitJavaScript()
 }

@@ -17,7 +17,8 @@ var gulp = require("gulp"),
 var paths = {
     webroot: "./wwwroot/",
     src: {
-        jsx: "./wwwroot/js/*.jsx"
+        jsx: "./wwwroot/js/*.jsx",
+        scripts: "./wwwroot/js/*.js"
     },
     dest: {
         bundles: "./wwwroot/js/dist",
@@ -160,12 +161,13 @@ gulp.task('client-build', function () {
 });
 
 gulp.task('watch', function () {
-    watch({ glob: paths.src.jsx }, function (files) {
+    /// watch *.jsx files for changes and compile to *.js
+    watch(paths.src.jsx, function (files) {
         return files.pipe(react())
           .pipe(gulp.dest(paths.dest.jsx));
     });
-
-    watch({ glob: [paths.src.scripts, paths.dest.bundlesFilter] }, function () {
+    /// watch for *.js file changes and bundle
+    watch([paths.src.scripts, paths.dest.bundlesFilter], function () {
         return gulpClientBundle();
     });
 });

@@ -1,4 +1,10 @@
-﻿var AddDocument = React.createClass({
+﻿var React = require('react');
+var ReactDOM = require('react-dom');
+var Select = require('react-select');
+var Button = require('react-bootstrap').Button;
+var Modal = require('react-bootstrap').Modal;
+
+var AddDocument = React.createClass({
     getInitialState: function() {
         return { showModel: false };
     },
@@ -27,15 +33,15 @@
         }.bind(this));
         return (
               <div>
-                <ReactBootstrap.Button bsStyle="default" bsSize="large" onClick={this.open}>
+                <Button bsStyle="default" bsSize="large" onClick={this.open}>
                 <i className="fa fa-plus"></i>
-                </ReactBootstrap.Button>
+                </Button>
 
-              <ReactBootstrap.Modal show={this.state.showModal} onHide={this.close}>
-                <ReactBootstrap.Modal.Header closeButton>
-                  <ReactBootstrap.Modal.Title>Add Document</ReactBootstrap.Modal.Title>
-                </ReactBootstrap.Modal.Header>
-                <ReactBootstrap.Modal.Body>
+              <Modal show={this.state.showModal} onHide={this.close}>
+                <Modal.Header closeButton>
+                  <Modal.Title>Add Document</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
                     <form className="form-horizontal">
                         <div className="form-group">
                             <label htmlFor="library" className="col-sm-2 control-label">Library</label>
@@ -72,12 +78,12 @@
                             </div>
                         </div>
                     </form>
-                </ReactBootstrap.Modal.Body>
-                <ReactBootstrap.Modal.Footer>
-                  <ReactBootstrap.Button onClick={this.close}>Close</ReactBootstrap.Button>
-                    <ReactBootstrap.Button onClick={this.save}>Save</ReactBootstrap.Button>
-                </ReactBootstrap.Modal.Footer>
-              </ReactBootstrap.Modal>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button onClick={this.close}>Close</Button>
+                    <Button onClick={this.save}>Save</Button>
+                </Modal.Footer>
+              </Modal>
             </div>
         );
     }
@@ -228,3 +234,5 @@ var SearchBox = React.createClass({
         );
     }
 });
+
+module.exports = SearchBox;
