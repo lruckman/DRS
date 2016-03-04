@@ -90,42 +90,48 @@ var AddDocument = React.createClass({
 });
 
 var SearchForm = React.createClass({
+    getInitialState () {
+        return {
+            libraries: []
+        };
+    },
+    search: function() {
+        var q = this.refs.search.value.trim();
+        var libraries = [];
+        if (this.state.libraries !== null) {
+            this.state.libraries.forEach(function(lib) {
+                libraries.push(lib.Value);
+            });
+        }
+        this.props.onSearchSubmit(q, libraries);
+    },
     handleSubmit: function(e) {
         e.preventDefault();
-        var search = this.refs.search.value.trim();
-        var libraryId = this.refs.library.value.trim();
-
-        this.props.onSearchSubmit(search, libraryId);
-        this.refs.search.value = '';
-
-        return;
+        this.search();
     },
-    handleClick: function (e) {
-        e.preventDefault();
-        var libId = e.currentTarget.getAttribute('href').replace('#','').trim();
-        var libName = e.currentTarget.innerHTML.trim();
-
-        this.refs.filter.innerHTML = libName;
-        this.refs.library.value = libId;
+    handleSelectChange (value) {
+        this.setState({ libraries: value });
+        this.search();
     },
     render: function () {
-        var libraryNodes = this.props.libraries.map(function(library) {
-            return (
-                <li key={library.Value}>
-                    <a href={"#" + library.Value} onClick={this.handleClick}>{library.Text}</a>
-                </li>
-            );
-        }.bind(this));
         return (
             <form className="search-form" onSubmit={this.handleSubmit}>
-                <AddDocument libraries={this.props.libraries} onSubmit={this.props.onAddSubmit} />    
-                <input type="text" className="form-control" placeholder="Search" ref="search" />
-
-                <button type="button" className="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span ref="filter">Filter by</span> <span className="caret"></span>
-                </button>
-                <ul className="dropdown-menu" role="menu">{libraryNodes}</ul>
-                <input type="hidden" ref="library" />   
+                <AddDocument libraries={this.props.libraries} onSubmit={this.props.onAddSubmit} />  
+                <div className="input-group">
+                  <input type="text" className="form-control" placeholder="Search for documents" ref="search" />
+                  <span className="input-group-btn">
+                    <button className="btn btn-default" type="submit">Go!</button>
+                  </span>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="">Filter by libraries</label>
+                    <Select multi value={this.state.libraries}
+                            valueKey="Value"
+                            labelKey="Text"
+                            options={this.props.libraries}
+                            placeholder="All libraries"
+                            onChange={this.handleSelectChange} />
+                </div>  
             </form>
         );
     }
@@ -172,9 +178,10 @@ var ResultList = React.createClass({
 });
 
 var SearchBox = React.createClass({
-    loadResultsFromServer: function (search, libraryId) {
+    loadResultsFromServer: function (search, libraries) {
         var xhr = new XMLHttpRequest();
-        xhr.open('get', this.props.searchUrl + "?q=" + search + "&libraryid=" + libraryId, true);
+
+        xhr.open('get', this.props.searchUrl + "?q=" + search + "&libraries=" + libraries.join("&libraries="), true);
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var data = JSON.parse(xhr.responseText);
@@ -194,7 +201,6 @@ var SearchBox = React.createClass({
         xhr.onload = function () {
             if (xhr.status === 201) {
                 alert('document created.');
-                //this.setState({ data: data });
             } else {
                 alert(xhr.status + 'An error occurred!');
             }
@@ -222,12 +228,12 @@ var SearchBox = React.createClass({
     render: function() {
         return (
             <div className="search-box row">
-                <div className="col-sm-2">
+                <div className="col-sm-3">
                     <SearchForm onSearchSubmit={this.handleSearchSubmit} 
                                 onAddSubmit={this.handleAddSubmit} 
                                 libraries={this.props.libraries} />
                 </div>
-                <div className="col-sm-10">
+                <div className="col-sm-9">
                     <ResultList data={this.state.data} />
                 </div>
             </div>

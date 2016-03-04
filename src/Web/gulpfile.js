@@ -11,8 +11,7 @@ var gulp = require("gulp"),
     streams = require("memory-streams"),
     combinedStream = require("combined-stream"),
     os = require("os"),
-    browserify = require('browserify'),
-    watch = require('gulp-watch');
+    browserify = require('browserify');
 
 var paths = {
     webroot: "./wwwroot/",
@@ -63,7 +62,7 @@ gulp.task("min:css", function () {
 
 gulp.task("min", ["min:js", "min:css"]);
 
-gulp.task('react', function () {
+gulp.task("react", function () {
     return gulp.src(paths.src.jsx)
       .pipe(react())
       .pipe(gulp.dest(paths.dest.jsx));
@@ -141,7 +140,7 @@ var gulpServerBundle = function () {
       .pipe(gulp.dest(paths.dest.bundles));
 };
 
-gulp.task('server-build', function () {
+gulp.task("server-build", function () {
     return gulpServerBundle();
 });
 
@@ -156,20 +155,15 @@ var gulpClientBundle = function () {
       .pipe(gulp.dest(paths.dest.bundles));
 };
 
-gulp.task('client-build', function () {
+gulp.task("client-build", function () {
     return gulpClientBundle();
 });
 
 gulp.task('watch', function () {
     /// watch *.jsx files for changes and compile to *.js
-    watch(paths.src.jsx, function (files) {
-        return files.pipe(react())
-          .pipe(gulp.dest(paths.dest.jsx));
-    });
+    gulp.watch("./wwwroot/js/*.jsx", [ "react" ]);
     /// watch for *.js file changes and bundle
-    watch([paths.src.scripts, paths.dest.bundlesFilter], function () {
-        return gulpClientBundle();
-    });
+    gulp.watch([ paths.src.scripts, paths.dest.bundlesFilter ], [ "client-build", "server-build" ]);
 });
 
-gulp.task('default', ['watch']);
+gulp.task("default", [ "watch" ]);

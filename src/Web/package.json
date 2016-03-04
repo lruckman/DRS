@@ -12,7 +12,6 @@
     "vinyl-source-stream": "^1.1.0",
     "memory-streams": "^0.1.0",
     "combined-stream": "^1.0.5",
-    "gulp-watch": "^4.3.5",
     "async-each": "^1.0.0",
     "glob-parent": "^2.0.0",
     "is-glob": "^2.0.1",

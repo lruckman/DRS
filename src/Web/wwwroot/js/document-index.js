@@ -90,42 +90,48 @@ var AddDocument = React.createClass({displayName: "AddDocument",
 });
 
 var SearchForm = React.createClass({displayName: "SearchForm",
+    getInitialState () {
+        return {
+            libraries: []
+        };
+    },
+    search: function() {
+        var q = this.refs.search.value.trim();
+        var libraries = [];
+        if (this.state.libraries !== null) {
+            this.state.libraries.forEach(function(lib) {
+                libraries.push(lib.Value);
+            });
+        }
+        this.props.onSearchSubmit(q, libraries);
+    },
     handleSubmit: function(e) {
         e.preventDefault();
-        var search = this.refs.search.value.trim();
-        var libraryId = this.refs.library.value.trim();
-
-        this.props.onSearchSubmit(search, libraryId);
-        this.refs.search.value = '';
-
-        return;
+        this.search();
     },
-    handleClick: function (e) {
-        e.preventDefault();
-        var libId = e.currentTarget.getAttribute('href').replace('#','').trim();
-        var libName = e.currentTarget.innerHTML.trim();
-
-        this.refs.filter.innerHTML = libName;
-        this.refs.library.value = libId;
+    handleSelectChange (value) {
+        this.setState({ libraries: value });
+        this.search();
     },
     render: function () {
-        var libraryNodes = this.props.libraries.map(function(library) {
-            return (
-                React.createElement("li", {key: library.Value}, 
-                    React.createElement("a", {href: "#" + library.Value, onClick: this.handleClick}, library.Text)
-                )
-            );
-        }.bind(this));
         return (
             React.createElement("form", {className: "search-form", onSubmit: this.handleSubmit}, 
                 React.createElement(AddDocument, {libraries: this.props.libraries, onSubmit: this.props.onAddSubmit}), 
-                React.createElement("input", {type: "text", className: "form-control", placeholder: "Search", ref: "search"}), 
-
-                React.createElement("button", {type: "button", className: "btn btn-default dropdown-toggle", "data-toggle": "dropdown"}, 
-                    React.createElement("span", {ref: "filter"}, "Filter by"), " ", React.createElement("span", {className: "caret"})
+                React.createElement("div", {className: "input-group"}, 
+                  React.createElement("input", {type: "text", className: "form-control", placeholder: "Search for documents", ref: "search"}), 
+                  React.createElement("span", {className: "input-group-btn"}, 
+                    React.createElement("button", {className: "btn btn-default", type: "submit"}, "Go!")
+                  )
                 ), 
-                React.createElement("ul", {className: "dropdown-menu", role: "menu"}, libraryNodes), 
-                React.createElement("input", {type: "hidden", ref: "library"})
+                React.createElement("div", {className: "form-group"}, 
+                    React.createElement("label", {htmlFor: ""}, "Filter by libraries"), 
+                    React.createElement(Select, {multi: true, value: this.state.libraries, 
+                            valueKey: "Value", 
+                            labelKey: "Text", 
+                            options: this.props.libraries, 
+                            placeholder: "All libraries", 
+                            onChange: this.handleSelectChange})
+                )
             )
         );
     }
@@ -172,9 +178,10 @@ var ResultList = React.createClass({displayName: "ResultList",
 });
 
 var SearchBox = React.createClass({displayName: "SearchBox",
-    loadResultsFromServer: function (search, libraryId) {
+    loadResultsFromServer: function (search, libraries) {
         var xhr = new XMLHttpRequest();
-        xhr.open('get', this.props.searchUrl + "?q=" + search + "&libraryid=" + libraryId, true);
+
+        xhr.open('get', this.props.searchUrl + "?q=" + search + "&libraries=" + libraries.join("&libraries="), true);
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var data = JSON.parse(xhr.responseText);
@@ -194,7 +201,6 @@ var SearchBox = React.createClass({displayName: "SearchBox",
         xhr.onload = function () {
             if (xhr.status === 201) {
                 alert('document created.');
-                //this.setState({ data: data });
             } else {
                 alert(xhr.status + 'An error occurred!');
             }
@@ -222,12 +228,12 @@ var SearchBox = React.createClass({displayName: "SearchBox",
     render: function() {
         return (
             React.createElement("div", {className: "search-box row"}, 
-                React.createElement("div", {className: "col-sm-2"}, 
+                React.createElement("div", {className: "col-sm-3"}, 
                     React.createElement(SearchForm, {onSearchSubmit: this.handleSearchSubmit, 
                                 onAddSubmit: this.handleAddSubmit, 
                                 libraries: this.props.libraries})
                 ), 
-                React.createElement("div", {className: "col-sm-10"}, 
+                React.createElement("div", {className: "col-sm-9"}, 
                     React.createElement(ResultList, {data: this.state.data})
                 )
             )

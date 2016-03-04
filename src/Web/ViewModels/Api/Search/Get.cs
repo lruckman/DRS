@@ -16,7 +16,7 @@ namespace Web.ViewModels.Api.Search
     {
         public class Query : IAsyncRequest<Result>
         {
-            public int? LibraryId { get; set; }
+            public int?[] Libraries { get; set; }
 
             public string Q { get; set; }
 
@@ -31,8 +31,6 @@ namespace Web.ViewModels.Api.Search
         {
             public QueryValidator()
             {
-                RuleFor(m => m.LibraryId)
-                    .NotNull();
                 RuleFor(m => m.MaxResults)
                     .InclusiveBetween(0, 100);
             }
@@ -77,7 +75,7 @@ namespace Web.ViewModels.Api.Search
                 if (result.TotalCount > message.MaxResults * (message.PageIndex + 1))
                 {
                     result.NextLink =
-                        $"/api/search/?q={message.Q}&libraryid={message.LibraryId}&orderby={message.OrderBy}&pageindex={message.PageIndex + 1}";
+                        $"/api/search/?q={message.Q}{string.Join("&libraries=",message.Libraries)}&orderby={message.OrderBy}&pageindex={message.PageIndex + 1}";
                 }
                 
                 result.Documents = await query
