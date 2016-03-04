@@ -161,7 +161,7 @@ gulp.task("client-build", function () {
 
 gulp.task('watch', function () {
     /// watch *.jsx files for changes and compile to *.js
-    gulp.watch("./wwwroot/js/*.jsx", [ "react" ]);
+    gulp.watch(paths.src.jsx, [ "react" ]);
     /// watch for *.js file changes and bundle
     gulp.watch([ paths.src.scripts, paths.dest.bundlesFilter ], [ "client-build", "server-build" ]);
 });
