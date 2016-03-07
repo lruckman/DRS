@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Linq;
+using System.Reflection;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -49,7 +51,33 @@ namespace Web.Engine
 
             // AutoMapper
 
-            For<IMappingEngine>().Use(() => Mapper.Engine);
+            var profiles =
+                typeof (WebRegistry).Assembly.GetTypes()
+                    .Where(t => typeof (Profile).IsAssignableFrom(t))
+                    .Select(t => (Profile) Activator.CreateInstance(t));
+
+            var config = new MapperConfiguration(cfg =>
+            {
+                foreach (var profile in profiles)
+                {
+                    cfg.AddProfile(profile);
+                }
+            });
+
+            config.AssertConfigurationIsValid(); // ¯\_(ツ)_/¯
+
+            For<MapperConfiguration>()
+                .Singleton()
+                .Use(config);
+
+            For<IConfigurationProvider>()
+                .Singleton()
+                .Use(config);
+
+            For<IMapper>()
+                .Singleton()
+                .Use(ctx => ctx.GetInstance<MapperConfiguration>()
+                    .CreateMapper(ctx.GetInstance));
 
             // Fluent Validation
 

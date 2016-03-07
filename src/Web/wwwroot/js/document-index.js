@@ -1,19 +1,10 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
 var Select = require('react-select');
 var Button = require('react-bootstrap').Button;
 var Modal = require('react-bootstrap').Modal;
+var FileDrop = require('react-file-drop');
 
 var AddDocument = React.createClass({displayName: "AddDocument",
-    getInitialState: function() {
-        return { showModel: false };
-    },
-    close: function() {
-        this.setState({ showModal: false });
-    },
-    open: function() {
-        this.setState({ showModal: true });
-    },
     save: function () {
         var files = this.refs.file.files;
         var libraryId = this.refs.library.value.trim();
@@ -32,12 +23,7 @@ var AddDocument = React.createClass({displayName: "AddDocument",
             );
         }.bind(this));
         return (
-              React.createElement("div", null, 
-                React.createElement(Button, {bsStyle: "default", bsSize: "large", onClick: this.open}, 
-                React.createElement("i", {className: "fa fa-plus"})
-                ), 
-
-              React.createElement(Modal, {show: this.state.showModal, onHide: this.close}, 
+              React.createElement(Modal, {show: this.props.showModal, onHide: this.props.onClose}, 
                 React.createElement(Modal.Header, {closeButton: true}, 
                   React.createElement(Modal.Title, null, "Add Document")
                 ), 
@@ -46,10 +32,13 @@ var AddDocument = React.createClass({displayName: "AddDocument",
                         React.createElement("div", {className: "form-group"}, 
                             React.createElement("label", {htmlFor: "library", className: "col-sm-2 control-label"}, "Library"), 
                             React.createElement("div", {className: "col-sm-10"}, 
-                                React.createElement("select", {ref: "library", id: "library", className: "form-control"}, libraryNodes
+                                React.createElement("select", {ref: "library", id: "library", className: "form-control"}, 
+                                    libraryNodes
                                 )
                             )
                         ), 
+                        this.props.file ? this.props.file.name : "", 
+                        this.props.file ? this.props.file.size : "", 
                         React.createElement("div", {className: "form-group"}, 
                             React.createElement("label", {htmlFor: "file", className: "col-sm-2 control-label"}, "Document"), 
                             React.createElement("div", {className: "col-sm-10"}, 
@@ -80,11 +69,10 @@ var AddDocument = React.createClass({displayName: "AddDocument",
                     )
                 ), 
                 React.createElement(Modal.Footer, null, 
-                  React.createElement(Button, {onClick: this.close}, "Close"), 
+                  React.createElement(Button, {onClick: this.props.onClose}, "Close"), 
                     React.createElement(Button, {onClick: this.save}, "Save")
                 )
               )
-            )
         );
     }
 });
@@ -116,12 +104,15 @@ var SearchForm = React.createClass({displayName: "SearchForm",
     render: function () {
         return (
             React.createElement("form", {className: "search-form", onSubmit: this.handleSubmit}, 
-                React.createElement(AddDocument, {libraries: this.props.libraries, onSubmit: this.props.onAddSubmit}), 
-                React.createElement("div", {className: "input-group"}, 
-                  React.createElement("input", {type: "text", className: "form-control", placeholder: "Search for documents", ref: "search"}), 
-                  React.createElement("span", {className: "input-group-btn"}, 
-                    React.createElement("button", {className: "btn btn-default", type: "submit"}, "Go!")
-                  )
+                React.createElement("div", {className: "form-group"}, 
+                    React.createElement("div", {className: "input-group integrated"}, 
+                      React.createElement("input", {type: "text", className: "form-control", placeholder: "Search for documents", ref: "search"}), 
+                      React.createElement("span", {className: "input-group-addon"}, 
+                        React.createElement("button", {type: "submit"}, 
+                          React.createElement("i", {className: "fa fa-search"})
+                        )
+                      )
+                    )
                 ), 
                 React.createElement("div", {className: "form-group"}, 
                     React.createElement("label", {htmlFor: ""}, "Filter by libraries"), 
@@ -220,18 +211,47 @@ var SearchBox = React.createClass({displayName: "SearchBox",
 
         xhr.send(formData);
     },
+    handleAddClose: function() {
+        this.setState({ add: { show: false, files: [], file: null } });
+    },
+    handleFileDrop: function (files, event) {
+        console.log(files, event);
+
+        var add = this.state.add;
+        add.file = files[0]; // files is read-only // todo: correctly track the file we are indexing
+        add.files = files;
+        add.show = true;
+
+        this.setState({ add: add });
+    },
     getInitialState: function() {
-        return { data: [] };
+        return {
+            data: [],
+            add: {
+                show: false,
+                files: [],
+                file: null
+            }
+        };
     },
     componentWillMount: function() {
     },
     render: function() {
         return (
             React.createElement("div", {className: "search-box row"}, 
+                React.createElement(FileDrop, {frame: window, 
+                          onDrop: this.handleFileDrop}, 
+                    React.createElement("i", {className: "fa fa-cloud-upload fa-5x"}), 
+                    React.createElement("h4", null, "Drag & Drop files here to index")
+                ), 
+                React.createElement(AddDocument, {libraries: this.props.libraries, 
+                             file: this.state.add.file, 
+                             onSubmit: this.props.onAddSubmit, 
+                             onClose: this.handleAddClose, 
+                             showModal: this.state.add.show}), 
                 React.createElement("div", {className: "col-sm-3"}, 
                     React.createElement(SearchForm, {onSearchSubmit: this.handleSearchSubmit, 
-                                onAddSubmit: this.handleAddSubmit, 
-                                libraries: this.props.libraries})
+                                onAddSubmit: this.handleAddSubmit})
                 ), 
                 React.createElement("div", {className: "col-sm-9"}, 
                     React.createElement(ResultList, {data: this.state.data})

@@ -1,19 +1,10 @@
 ﻿var React = require('react');
-var ReactDOM = require('react-dom');
 var Select = require('react-select');
 var Button = require('react-bootstrap').Button;
 var Modal = require('react-bootstrap').Modal;
+var FileDrop = require('react-file-drop');
 
 var AddDocument = React.createClass({
-    getInitialState: function() {
-        return { showModel: false };
-    },
-    close: function() {
-        this.setState({ showModal: false });
-    },
-    open: function() {
-        this.setState({ showModal: true });
-    },
     save: function () {
         var files = this.refs.file.files;
         var libraryId = this.refs.library.value.trim();
@@ -32,12 +23,7 @@ var AddDocument = React.createClass({
             );
         }.bind(this));
         return (
-              <div>
-                <Button bsStyle="default" bsSize="large" onClick={this.open}>
-                <i className="fa fa-plus"></i>
-                </Button>
-
-              <Modal show={this.state.showModal} onHide={this.close}>
+              <Modal show={this.props.showModal} onHide={this.props.onClose}>
                 <Modal.Header closeButton>
                   <Modal.Title>Add Document</Modal.Title>
                 </Modal.Header>
@@ -46,10 +32,13 @@ var AddDocument = React.createClass({
                         <div className="form-group">
                             <label htmlFor="library" className="col-sm-2 control-label">Library</label>
                             <div className="col-sm-10">
-                                <select ref="library" id="library" className="form-control">{libraryNodes}
+                                <select ref="library" id="library" className="form-control">
+                                    {libraryNodes}
                                 </select>
                             </div>
                         </div>
+                        {this.props.file ? this.props.file.name : ""}
+                        {this.props.file ? this.props.file.size : ""}
                         <div className="form-group">
                             <label htmlFor="file" className="col-sm-2 control-label">Document</label>
                             <div className="col-sm-10">
@@ -80,11 +69,10 @@ var AddDocument = React.createClass({
                     </form>
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button onClick={this.close}>Close</Button>
+                  <Button onClick={this.props.onClose}>Close</Button>
                     <Button onClick={this.save}>Save</Button>
                 </Modal.Footer>
               </Modal>
-            </div>
         );
     }
 });
@@ -116,13 +104,16 @@ var SearchForm = React.createClass({
     render: function () {
         return (
             <form className="search-form" onSubmit={this.handleSubmit}>
-                <AddDocument libraries={this.props.libraries} onSubmit={this.props.onAddSubmit} />  
-                <div className="input-group">
-                  <input type="text" className="form-control" placeholder="Search for documents" ref="search" />
-                  <span className="input-group-btn">
-                    <button className="btn btn-default" type="submit">Go!</button>
-                  </span>
-                </div>
+                <div className="form-group">
+                    <div className="input-group integrated">
+                      <input type="text" className="form-control" placeholder="Search for documents" ref="search" />
+                      <span className="input-group-addon">
+                        <button type="submit">
+                          <i className="fa fa-search"></i>
+                        </button>
+                      </span>
+                    </div>
+                </div> 
                 <div className="form-group">
                     <label htmlFor="">Filter by libraries</label>
                     <Select multi value={this.state.libraries}
@@ -220,18 +211,47 @@ var SearchBox = React.createClass({
 
         xhr.send(formData);
     },
+    handleAddClose: function() {
+        this.setState({ add: { show: false, files: [], file: null } });
+    },
+    handleFileDrop: function (files, event) {
+        console.log(files, event);
+
+        var add = this.state.add;
+        add.file = files[0]; // files is read-only // todo: correctly track the file we are indexing
+        add.files = files;
+        add.show = true;
+
+        this.setState({ add: add });
+    },
     getInitialState: function() {
-        return { data: [] };
+        return {
+            data: [],
+            add: {
+                show: false,
+                files: [],
+                file: null
+            }
+        };
     },
     componentWillMount: function() {
     },
     render: function() {
         return (
             <div className="search-box row">
+                <FileDrop frame={window}
+                          onDrop={this.handleFileDrop}>
+                    <i className="fa fa-cloud-upload fa-5x"></i>
+                    <h4>Drag & Drop files here to index</h4>
+                </FileDrop>
+                <AddDocument libraries={this.props.libraries}
+                             file={this.state.add.file}
+                             onSubmit={this.props.onAddSubmit}
+                             onClose={this.handleAddClose}
+                             showModal={this.state.add.show} />
                 <div className="col-sm-3">
                     <SearchForm onSearchSubmit={this.handleSearchSubmit} 
-                                onAddSubmit={this.handleAddSubmit} 
-                                libraries={this.props.libraries} />
+                                onAddSubmit={this.handleAddSubmit} />
                 </div>
                 <div className="col-sm-9">
                     <ResultList data={this.state.data} />

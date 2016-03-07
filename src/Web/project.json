@@ -25,8 +25,6 @@
         "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
         "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
-        "StructureMap.Dnx": "0.4.0-alpha4",
-        "AutoMapper": "4.0.4",
         "MediatR": "2.0.2",
         "Ghostscript.NET": "1.2.0",
         "Lucene.Net": "3.0.3",
@@ -36,7 +34,9 @@
         "itextsharp.xtra": "5.5.8",
         "Tesseract": "3.0.2",
         "FluentValidation": "6.2.1",
-        "React.AspNet": "2.2.1"
+        "React.AspNet": "2.2.1",
+        "AutoMapper": "4.2.1",
+        "StructureMap.Dnx": "0.4.0-rc1-final"
     },
 
   "commands": {

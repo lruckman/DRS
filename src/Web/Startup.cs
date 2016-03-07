@@ -69,18 +69,6 @@ namespace Web
 
             IoContainer = container;
 
-            // Automapper
-
-            Mapper.Initialize(cfg =>
-            {
-                foreach (var profile in container.GetAllInstances<Profile>())
-                {
-                    cfg.AddProfile(profile);
-                }
-            });
-
-            Mapper.AssertConfigurationIsValid(); // ¯\_(ツ)_/¯
-
             return container.GetInstance<IServiceProvider>();
         }
 
@@ -125,9 +113,8 @@ namespace Web
             {
                 config
                     .SetReuseJavaScriptEngines(true)
+                    .SetLoadBabel(false)
                     .AddScriptWithoutTransform("~/js/dist/serverBundle.js");
-
-                //config.LoadReact = false;
             });
 
             app.UseStaticFiles();

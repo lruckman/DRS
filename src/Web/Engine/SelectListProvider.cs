@@ -17,17 +17,19 @@ namespace Web.Engine
     public class SelectListProvider : ISelectListProvider
     {
         private readonly ApplicationDbContext _db;
+        private readonly IConfigurationProvider _configurationProvider;
 
-        public SelectListProvider(ApplicationDbContext db)
+        public SelectListProvider(ApplicationDbContext db, IConfigurationProvider configurationProvider)
         {
             _db = db;
+            _configurationProvider = configurationProvider;
         }
 
         public async Task<IEnumerable<SelectListItem>> GetLibraries(int userId = 0)
         {
             return await _db.Libraries
                 .OrderBy(l => l.Name)
-                .ProjectTo<SelectListItem>()
+                .ProjectTo<SelectListItem>(_configurationProvider)
                 .ToArrayAsync();
         }
 
@@ -35,7 +37,7 @@ namespace Web.Engine
         {
             protected override void Configure()
             {
-                Mapper.CreateMap<Library, SelectListItem>()
+                CreateMap<Library, SelectListItem>()
                     .ForMember(d => d.Text, o => o.MapFrom(s => s.Name))
                     .ForMember(d => d.Value, o => o.MapFrom(s => s.Id))
                     .ForMember(d => d.Disabled, o => o.Ignore())

@@ -40,11 +40,13 @@ namespace Web.ViewModels.Api.Search
         {
             private readonly ApplicationDbContext _db;
             private readonly ISearcher _searcher;
+            private readonly IConfigurationProvider _configurationProvider;
 
-            public QueryHandler(ApplicationDbContext db, ISearcher searcher)
+            public QueryHandler(ApplicationDbContext db, ISearcher searcher, IConfigurationProvider configurationProvider)
             {
                 _db = db;
                 _searcher = searcher;
+                _configurationProvider = configurationProvider;
             }
 
             public async Task<Result> Handle(Query message)
@@ -82,7 +84,7 @@ namespace Web.ViewModels.Api.Search
                     .OrderBy(d => d.Id)
                     .Skip(message.MaxResults * message.PageIndex)
                     .Take(message.MaxResults)
-                    .ProjectTo<Result.Document>()
+                    .ProjectTo<Result.Document>(_configurationProvider)
                     .ToArrayAsync();
 
                 return result;
@@ -92,7 +94,7 @@ namespace Web.ViewModels.Api.Search
             {
                 protected override void Configure()
                 {
-                    Mapper.CreateMap<Document, Result.Document>()
+                    CreateMap<Document, Result.Document>()
                         .ForMember(d => d.SelfLink, o => o.MapFrom(s => $"/api/documents/{s.Id}"))
                         .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"))
                         .ForMember(d => d.ViewLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/view"));

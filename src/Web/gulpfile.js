@@ -140,22 +140,22 @@ var gulpServerBundle = function () {
       .pipe(gulp.dest(paths.dest.bundles));
 };
 
-gulp.task("server-build", function () {
+gulp.task("server-build", [ "react" ], function () {
     return gulpServerBundle();
 });
 
 var gulpClientBundle = function () {
-    var b = browserify(paths.src.app,
-      {
-          extensions: ['.jsx', '.js']
-      });
-    var bundle = createServerBundle(b);
+    var bundle = createServerBundle(browserify(
+        {
+            extensions: ['.jsx', '.js']
+        }
+    ));
     return bundle
       .pipe(source(paths.dest.clientBundle))
       .pipe(gulp.dest(paths.dest.bundles));
 };
 
-gulp.task("client-build", function () {
+gulp.task("client-build", [ "react" ], function () {
     return gulpClientBundle();
 });
 
@@ -163,7 +163,7 @@ gulp.task('watch', function () {
     /// watch *.jsx files for changes and compile to *.js
     gulp.watch(paths.src.jsx, [ "react" ]);
     /// watch for *.js file changes and bundle
-    gulp.watch([ paths.src.scripts, paths.dest.bundlesFilter ], [ "client-build", "server-build" ]);
+    gulp.watch([paths.src.scripts, paths.dest.bundlesFilter], [ "client-build" ]);
 });
 
 gulp.task("default", [ "watch" ]);

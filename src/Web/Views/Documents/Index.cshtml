@@ -1,23 +1,20 @@
 ﻿@using System.Threading.Tasks
+@using Newtonsoft.Json
 @using Web.Engine
 @inject ISelectListProvider SelectListProvider
 
 <div id="content"></div>
-@Html.React("SearchBox", new
-{
-    searchUrl = "/api/search",
-    addDocumentUrl = "/api/documents",
-    libraries = await SelectListProvider.GetLibraries()
-})
 
 @section scripts {
-    <environment names="Development">
-        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-        <script src="@Url.Content("~/js/dist/clientBundle.js")"></script>
-    </environment>
-    <environment names="Staging,Production">
-        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-        <script src="@Url.Content("~/js/dist/clientBundle.js")"></script>
-    </environment>
-    @Html.ReactInitJavaScript()
+    <script>
+        var SearchBox = React.createFactory(require('SearchBox'));
+        ReactDOM.render(
+            SearchBox({
+                searchUrl: "/api/search",
+                addDocumentUrl: "/api/documents",
+                libraries: @Html.Raw(JsonConvert.SerializeObject(await SelectListProvider.GetLibraries()))
+            }),
+            document.getElementById('content')
+        );
+    </script>
 }

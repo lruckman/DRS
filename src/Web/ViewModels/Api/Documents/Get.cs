@@ -28,17 +28,19 @@ namespace Web.ViewModels.Api.Documents
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
+            private readonly IConfigurationProvider _configurationProvider;
 
-            public QueryHandler(ApplicationDbContext db)
+            public QueryHandler(ApplicationDbContext db, IConfigurationProvider configurationProvider)
             {
                 _db = db;
+                _configurationProvider = configurationProvider;
             }
 
             public async Task<Result> Handle(Query message)
             {
                 return await _db.Documents
                     .Where(d => d.Id == message.Id)
-                    .ProjectTo<Result>()
+                    .ProjectTo<Result>(_configurationProvider)
                     .SingleOrDefaultAsync();
             }
 
@@ -46,7 +48,7 @@ namespace Web.ViewModels.Api.Documents
             {
                 protected override void Configure()
                 {
-                    Mapper.CreateMap<Document, Result>()
+                    CreateMap<Document, Result>()
                         .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"));
                 }
             }

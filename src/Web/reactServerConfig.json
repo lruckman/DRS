@@ -1,24 +1,12 @@
 ﻿{
     "expose": [
         {
-            "path": "./node_modules/react/dist/react",
-            "name": "React"
+            "name": "ReactDOM",
+            "path": "./node_modules/react-dom/dist/react-dom"
         },
         {
-            "path": "./node_modules/react-dom/dist/react-dom",
-            "name": "ReactDOM"
-        },
-        {
-            "path": "./node_modules/react-select/lib/Select",
-            "name": "ReactSelect"
-        },
-        {
-            "path": "./node_modules/react-bootstrap/dist/react-bootstrap",
-            "name": "ReactBootstrap"
-        },
-        {
-            "path": "./wwwroot/js/document-index",
-            "name": "SearchBox"
+            "name": "SearchBox",
+            "path": "./wwwroot/js/document-index.js"
         }
     ]
 }
