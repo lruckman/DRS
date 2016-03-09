@@ -17,9 +17,9 @@ namespace Web.Engine.Services.Lucene
     {
         private readonly string _indexPath;
 
-        public Searcher(string indexPath)
+        public Searcher(DRSSettings settings)
         {
-            _indexPath = indexPath;
+            _indexPath = settings.IndexDirectory;
         }
 
         public IEnumerable<int> Search(string query)

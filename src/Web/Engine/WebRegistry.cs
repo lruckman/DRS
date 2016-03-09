@@ -44,10 +44,10 @@ namespace Web.Engine
             // Lucene
 
             For<IIndexer>()
-                .Use(() => new Indexer(Startup.Configuration["DRS:IndexDirectory"]));
+                .Use<Indexer>();
 
             For<ISearcher>()
-                .Use(() => new Searcher(Startup.Configuration["DRS:IndexDirectory"]));
+                .Use<Searcher>();
 
             // AutoMapper
 

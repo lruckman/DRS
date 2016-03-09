@@ -52,11 +52,13 @@ namespace Web.ViewModels.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IIndexer _indexer;
+            private readonly DRSSettings _settings;
 
-            public CommandHandler(ApplicationDbContext db, IIndexer indexer)
+            public CommandHandler(ApplicationDbContext db, IIndexer indexer, DRSSettings settings)
             {
                 _db = db;
                 _indexer = indexer;
+                _settings = settings;
             }
 
             public async Task<int?> Handle(Command message)
@@ -95,8 +97,7 @@ namespace Web.ViewModels.Api.Documents
 
                     // generate the document paths
 
-                    var destPath = GetNewFileName(Startup.Configuration["DRS:DocumentDirectory"],
-                        document.Id);
+                    var destPath = GetNewFileName(_settings.DocumentDirectory, document.Id);
 
                     Debug.Assert(destPath != null);
 

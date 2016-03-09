@@ -20,9 +20,9 @@ namespace Web.Engine.Services.Lucene
     {
         private readonly string _indexPath;
 
-        public Indexer(string indexPath)
+        public Indexer(DRSSettings settings)
         {
-            _indexPath = indexPath;
+            _indexPath = settings.IndexDirectory;
         }
 
         private IndexService GetIndexService()

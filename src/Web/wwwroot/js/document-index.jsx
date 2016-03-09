@@ -250,7 +250,8 @@ var SearchBox = React.createClass({
                              onClose={this.handleAddClose}
                              showModal={this.state.add.show} />
                 <div className="col-sm-3">
-                    <SearchForm onSearchSubmit={this.handleSearchSubmit} 
+                    <SearchForm libraries={this.props.libraries}
+                                onSearchSubmit={this.handleSearchSubmit} 
                                 onAddSubmit={this.handleAddSubmit} />
                 </div>
                 <div className="col-sm-9">
