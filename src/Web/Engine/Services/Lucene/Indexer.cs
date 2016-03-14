@@ -2,6 +2,7 @@
 using System.IO;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Microsoft.Extensions.OptionsModel;
 using SimpleLucene.Impl;
 using Web.Engine.Services.Lucene.Models;
 
@@ -20,9 +21,9 @@ namespace Web.Engine.Services.Lucene
     {
         private readonly string _indexPath;
 
-        public Indexer(DRSSettings settings)
+        public Indexer(IOptions<DRSSettings> settings)
         {
-            _indexPath = settings.IndexDirectory;
+            _indexPath = settings.Value.IndexDirectory;
         }
 
         private IndexService GetIndexService()

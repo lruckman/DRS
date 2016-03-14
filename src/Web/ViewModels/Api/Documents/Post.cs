@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNet.Http;
 using Microsoft.Data.Entity;
+using Microsoft.Extensions.OptionsModel;
 using Web.Engine;
 using Web.Engine.Extensions;
 using Web.Engine.Services.Lucene;
@@ -22,11 +24,8 @@ namespace Web.ViewModels.Api.Documents
         {
             public IFormFile File { get; set; }
             public string Title { get; set; }
-            /// <summary>
-            /// TODO: AllowHtml equivalent?
-            /// </summary>
             public string Abstract { get; set; }
-            public int? LibraryId { get; set; }
+            public int? LibraryIds { get; set; }
             public bool GenerateAbstract { get; set; }
         }
 
@@ -38,7 +37,7 @@ namespace Web.ViewModels.Api.Documents
                     .Length(0, 512);
                 RuleFor(m => m.File)
                     .NotNull();
-                RuleFor(m => m.LibraryId)
+                RuleFor(m => m.LibraryIds)
                     .NotNull()
                     .MustAsync((libraryId, cancellationToken) =>
                         db.Libraries.AnyAsync(l => l.Id == libraryId.Value));
@@ -52,9 +51,9 @@ namespace Web.ViewModels.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IIndexer _indexer;
-            private readonly DRSSettings _settings;
+            private readonly IOptions<DRSSettings> _settings;
 
-            public CommandHandler(ApplicationDbContext db, IIndexer indexer, DRSSettings settings)
+            public CommandHandler(ApplicationDbContext db, IIndexer indexer, IOptions<DRSSettings> settings)
             {
                 _db = db;
                 _indexer = indexer;
@@ -65,39 +64,45 @@ namespace Web.ViewModels.Api.Documents
             {
                 const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
 
-                var library = await _db.Libraries
-                    .SingleAsync(l => l.Id == message.LibraryId.Value);
+                var libraries = await _db.Libraries
+                    .Where(l => l.Id == message.LibraryIds.Value)
+                    .ToArrayAsync();
 
                 var extension = Path.GetExtension(message.File.FileName() ?? "")
                     .ToLowerInvariant();
 
+                var documentKey = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N"));
+
+                var document = new Document
+                {
+                    Abstract = message.Abstract,
+                    CreatedOn = DateTimeOffset.Now,
+                    Extension = extension,
+                    FileSize = message.File.Length,
+                    ModifiedOn = DateTimeOffset.Now,
+                    ThumbnailPath = "",
+                    Title = message.Title,
+                    PageCount = 0,
+                    Path = "",
+                    Key = Convert.ToBase64String(documentKey.Protect(null, dataProtectionScope))
+                };
+
+                _db.Documents.Add(document);
+
+                // add the document to the selected libraries
+
+                document.Libraries.AddRange(libraries.Select(l => new LibraryDocument
+                {
+                    Library = l
+                }));
+
                 using (var trans = await _db.Database.BeginTransactionAsync())
                 {
-                    var documentKey = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N"));
-
-                    var document = new Document
-                    {
-                        Abstract = message.Abstract,
-                        CreatedOn = DateTimeOffset.Now,
-                        Extension = extension,
-                        FileSize = message.File.Length,
-                        ModifiedOn = DateTimeOffset.Now,
-                        ThumbnailPath = "",
-                        Title = message.Title,
-                        PageCount = 0,
-                        Path = "",
-                        Key = Convert.ToBase64String(documentKey.Protect(null, dataProtectionScope))
-                    };
-
-                    _db.Documents.Add(document);
-
-                    document.Libraries.Add(new LibraryDocument {Library = library});
-
                     await _db.SaveChangesAsync();
 
                     // generate the document paths
 
-                    var destPath = GetNewFileName(_settings.DocumentDirectory, document.Id);
+                    var destPath = GetNewFileName(_settings.Value.DocumentDirectory, document.Id);
 
                     Debug.Assert(destPath != null);
 

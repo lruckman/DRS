@@ -5,23 +5,33 @@ var Modal = require('react-bootstrap').Modal;
 var FileDrop = require('react-file-drop');
 
 var AddDocument = React.createClass({displayName: "AddDocument",
+    getInitialState () {
+        return {
+            libraryIds: [],
+            disableAbstract: true
+        };
+    },
     save: function () {
-        var files = this.refs.file.files;
-        var libraryId = this.refs.library.value.trim();
         var title = this.refs.title.value.trim();
         var abstract = this.refs.abstract.value.trim();
         var genAbstract = this.refs.generateAbstract.checked;
+        var libraryIds = this.state.libraryIds;
 
-        this.props.onSubmit(files, libraryId, title, abstract, genAbstract);
+        this.props.onSubmit(this.props.file, libraryIds, title, abstract, genAbstract);
+
+        this.setState({ libraryIds: [] });
+    },
+    handleSelectChange (value) {
+        if (typeof value === 'string') {
+            this.setState({ libraryIds: [value] });
+            return;
+        }
+        this.setState({ libraryIds: value });
+    },
+    handleGenerateAbstractChange (e) {
+        this.setState({ disableAbstract: e.target.checked });
     },
     render: function () {
-        var libraryNodes = this.props.libraries.map(function(library) {
-            return (
-                React.createElement("option", {key: library.Value, value: library.Value}, 
-                    library.Text
-                )
-            );
-        }.bind(this));
         return (
               React.createElement(Modal, {show: this.props.showModal, onHide: this.props.onClose}, 
                 React.createElement(Modal.Header, {closeButton: true}, 
@@ -30,47 +40,51 @@ var AddDocument = React.createClass({displayName: "AddDocument",
                 React.createElement(Modal.Body, null, 
                     React.createElement("form", {className: "form-horizontal"}, 
                         React.createElement("div", {className: "form-group"}, 
-                            React.createElement("label", {htmlFor: "library", className: "col-sm-2 control-label"}, "Library"), 
+                            React.createElement("label", {className: "col-sm-2 control-label"}, "File"), 
                             React.createElement("div", {className: "col-sm-10"}, 
-                                React.createElement("select", {ref: "library", id: "library", className: "form-control"}, 
-                                    libraryNodes
+                                React.createElement("div", {className: "form-control-static"}, 
+                                    React.createElement("strong", null, this.props.file ? this.props.file.name : ""), " ", React.createElement("small", {className: "text-muted"}, this.props.file ? (this.props.file.size / 1024).toFixed(2) : "", " KB")
                                 )
-                            )
-                        ), 
-                        this.props.file ? this.props.file.name : "", 
-                        this.props.file ? this.props.file.size : "", 
-                        React.createElement("div", {className: "form-group"}, 
-                            React.createElement("label", {htmlFor: "file", className: "col-sm-2 control-label"}, "Document"), 
-                            React.createElement("div", {className: "col-sm-10"}, 
-                                React.createElement("input", {type: "file", ref: "file", id: "file", className: "form-control"})
                             )
                         ), 
                         React.createElement("div", {className: "form-group"}, 
                             React.createElement("label", {htmlFor: "title", className: "col-sm-2 control-label"}, "Title"), 
                             React.createElement("div", {className: "col-sm-10"}, 
-                                React.createElement("input", {type: "text", ref: "title", id: "title", className: "form-control"})
+                                React.createElement("input", {type: "text", ref: "title", id: "title", className: "form-control", placeholder: "Title", autofocus: true})
                             )
                         ), 
                         React.createElement("div", {className: "form-group"}, 
                             React.createElement("label", {htmlFor: "abstract", className: "col-sm-2 control-label"}, "Abstract"), 
                             React.createElement("div", {className: "col-sm-10"}, 
-                                React.createElement("textarea", {ref: "abstract", id: "abstract", className: "form-control", rows: "3"})
+                                React.createElement("textarea", {ref: "abstract", id: "abstract", className: "form-control", rows: "3", placeholder: "Abstract", disabled: this.state.disableAbstract})
                             )
                         ), 
                         React.createElement("div", {className: "form-group"}, 
                             React.createElement("div", {className: "col-sm-offset-2 col-sm-10"}, 
                                 React.createElement("div", {className: "checkbox"}, 
                                     React.createElement("label", null, 
-                                        React.createElement("input", {type: "checkbox", ref: "generateAbstract"}), " Automatically generate abstract"
+                                        React.createElement("input", {type: "checkbox", ref: "generateAbstract", defaultChecked: this.state.disableAbstract, onChange: this.handleGenerateAbstractChange}), " Automatically generate abstract"
                                     )
                                 )
+                            )
+                        ), 
+                        React.createElement("div", {className: "form-group"}, 
+                            React.createElement("label", {htmlFor: "libraries", className: "col-sm-2 control-label"}, "Libraries"), 
+                            React.createElement("div", {className: "col-sm-10"}, 
+                                React.createElement(Select, {multi: true, value: this.state.libraryIds, 
+                                        placeholder: "Libraries", 
+                                        simpleValue: true, 
+                                        valueKey: "Value", 
+                                        labelKey: "Text", 
+                                        options: this.props.libraries, 
+                                        onChange: this.handleSelectChange})
                             )
                         )
                     )
                 ), 
                 React.createElement(Modal.Footer, null, 
                   React.createElement(Button, {onClick: this.props.onClose}, "Close"), 
-                    React.createElement(Button, {onClick: this.save}, "Save")
+                    React.createElement(Button, {onClick: this.save, bsStyle: "primary"}, "Save Changes")
                 )
               )
         );
@@ -80,25 +94,19 @@ var AddDocument = React.createClass({displayName: "AddDocument",
 var SearchForm = React.createClass({displayName: "SearchForm",
     getInitialState () {
         return {
-            libraries: []
+            libraryIds: []
         };
     },
     search: function() {
         var q = this.refs.search.value.trim();
-        var libraries = [];
-        if (this.state.libraries !== null) {
-            this.state.libraries.forEach(function(lib) {
-                libraries.push(lib.Value);
-            });
-        }
-        this.props.onSearchSubmit(q, libraries);
+        this.props.onSearchSubmit(q, this.state.libraryIds || []);
     },
     handleSubmit: function(e) {
         e.preventDefault();
         this.search();
     },
     handleSelectChange (value) {
-        this.setState({ libraries: value });
+        this.setState({ libraryIds: value });
         this.search();
     },
     render: function () {
@@ -116,9 +124,10 @@ var SearchForm = React.createClass({displayName: "SearchForm",
                 ), 
                 React.createElement("div", {className: "form-group"}, 
                     React.createElement("label", {htmlFor: ""}, "Filter by libraries"), 
-                    React.createElement(Select, {multi: true, value: this.state.libraries, 
+                    React.createElement(Select, {multi: true, value: this.state.libraryIds, 
                             valueKey: "Value", 
                             labelKey: "Text", 
+                            simpleValue: true, 
                             options: this.props.libraries, 
                             placeholder: "All libraries", 
                             onChange: this.handleSelectChange})
@@ -169,10 +178,10 @@ var ResultList = React.createClass({displayName: "ResultList",
 });
 
 var SearchBox = React.createClass({displayName: "SearchBox",
-    loadResultsFromServer: function (search, libraries) {
+    loadResultsFromServer: function (search, libraryIds) {
         var xhr = new XMLHttpRequest();
 
-        xhr.open('get', this.props.searchUrl + "?q=" + search + "&libraries=" + libraries.join("&libraries="), true);
+        xhr.open('get', this.props.searchUrl + "?q=" + search + "&libraryids=" + libraryIds.join("&libraryids="), true);
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var data = JSON.parse(xhr.responseText);
@@ -183,31 +192,52 @@ var SearchBox = React.createClass({displayName: "SearchBox",
         }.bind(this);
         xhr.send();
     },
-    handleSearchSubmit: function (search, libraryId) {
-        this.loadResultsFromServer(search, libraryId);
+    handleSearchSubmit: function (search, libraryIds) {
+        this.loadResultsFromServer(search, libraryIds);
     },
-    handleAddSubmit: function (files, libraryId, title, abstract, genAbstract) {
+    handleAddSubmit: function (file, libraryIds, title, abstract, genAbstract) {
         var xhr = new XMLHttpRequest();
         xhr.open('post', this.props.addDocumentUrl, true);
+
         xhr.onload = function () {
             if (xhr.status === 201) {
-                alert('document created.');
-            } else {
-                alert(xhr.status + 'An error occurred!');
+
+                // copy add object so we can update it
+
+                var add = this.state.add;
+
+                if ( (add.index+1) < add.files.length) {
+
+                    // set the next file
+
+                    add.file = add.files[++add.index]; 
+
+                    // update state
+
+                    this.setState({ add: add });
+
+                    return;
+                }
+
+                alert((add.index + 1) + ' documents created.');
+                return;
             }
+
+            alert(xhr.status + 'An error occurred!');
+
         }.bind(this);
 
         var formData = new FormData();
 
-        formData.append('libraryid', libraryId);
+        libraryIds.forEach(function(libraryId) {
+            formData.append('libraryids', libraryId);
+        });
+
         formData.append('title', title);
         formData.append('abstract', abstract);
         formData.append('generateAbstract', genAbstract);
 
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-            formData.append('file', file, file.name);
-        }
+        formData.append('file', file);
 
         xhr.send(formData);
     },
@@ -217,9 +247,14 @@ var SearchBox = React.createClass({displayName: "SearchBox",
     handleFileDrop: function (files, event) {
         console.log(files, event);
 
-        var add = this.state.add;
-        add.file = files[0]; // files is read-only // todo: correctly track the file we are indexing
+        // get the default state for the add object
+
+        var add = this.getInitialState().add;
+
+        // update the defaults
+
         add.files = files;
+        add.file = files[add.index];
         add.show = true;
 
         this.setState({ add: add });
@@ -229,8 +264,9 @@ var SearchBox = React.createClass({displayName: "SearchBox",
             data: [],
             add: {
                 show: false,
+                file: null,
                 files: [],
-                file: null
+                index: 0
             }
         };
     },
@@ -239,20 +275,19 @@ var SearchBox = React.createClass({displayName: "SearchBox",
     render: function() {
         return (
             React.createElement("div", {className: "search-box row"}, 
-                React.createElement(FileDrop, {frame: window, 
+                React.createElement(FileDrop, {frame: window, targetAlwaysVisible: true, 
                           onDrop: this.handleFileDrop}, 
                     React.createElement("i", {className: "fa fa-cloud-upload fa-5x"}), 
-                    React.createElement("h4", null, "Drag & Drop files here to index")
+                    React.createElement("h4", null, "Drop Files Here to Add")
                 ), 
                 React.createElement(AddDocument, {libraries: this.props.libraries, 
                              file: this.state.add.file, 
-                             onSubmit: this.props.onAddSubmit, 
+                             onSubmit: this.handleAddSubmit, 
                              onClose: this.handleAddClose, 
                              showModal: this.state.add.show}), 
                 React.createElement("div", {className: "col-sm-3"}, 
                     React.createElement(SearchForm, {libraries: this.props.libraries, 
-                                onSearchSubmit: this.handleSearchSubmit, 
-                                onAddSubmit: this.handleAddSubmit})
+                                onSearchSubmit: this.handleSearchSubmit})
                 ), 
                 React.createElement("div", {className: "col-sm-9"}, 
                     React.createElement(ResultList, {data: this.state.data})

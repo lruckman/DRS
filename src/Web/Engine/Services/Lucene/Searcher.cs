@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
+using Microsoft.Extensions.OptionsModel;
 using SimpleLucene;
 using SimpleLucene.Impl;
 
@@ -17,9 +18,9 @@ namespace Web.Engine.Services.Lucene
     {
         private readonly string _indexPath;
 
-        public Searcher(DRSSettings settings)
+        public Searcher(IOptions<DRSSettings> settings)
         {
-            _indexPath = settings.IndexDirectory;
+            _indexPath = settings.Value.IndexDirectory;
         }
 
         public IEnumerable<int> Search(string query)

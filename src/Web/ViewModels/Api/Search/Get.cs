@@ -16,7 +16,7 @@ namespace Web.ViewModels.Api.Search
     {
         public class Query : IAsyncRequest<Result>
         {
-            public int?[] Libraries { get; set; }
+            public int?[] LibraryIds { get; set; }
 
             public string Q { get; set; }
 
@@ -66,7 +66,7 @@ namespace Web.ViewModels.Api.Search
 
                     query = query
                         .Where(d => documentIds.Contains(d.Id) /*&&
-                                d.Libraries.Count(l => l.LibraryId == message.LibraryId.Value) > 0*/);
+                                d.LibraryIds.Count(l => l.LibraryId == message.LibraryIds.Value) > 0*/);
                 }
 
                 var result = new Result
@@ -77,7 +77,7 @@ namespace Web.ViewModels.Api.Search
                 if (result.TotalCount > message.MaxResults * (message.PageIndex + 1))
                 {
                     result.NextLink =
-                        $"/api/search/?q={message.Q}{string.Join("&libraries=",message.Libraries)}&orderby={message.OrderBy}&pageindex={message.PageIndex + 1}";
+                        $"/api/search/?{nameof(message.Q)}={message.Q}{string.Join($"&{nameof(message.LibraryIds)}=",message.LibraryIds)}&{nameof(message.OrderBy)}={message.OrderBy}&{nameof(message.PageIndex)}={message.PageIndex + 1}";
                 }
                 
                 result.Documents = await query
