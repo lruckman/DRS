@@ -2,6 +2,7 @@
 var Select = require('react-select');
 var Button = require('react-bootstrap').Button;
 var Modal = require('react-bootstrap').Modal;
+var ProgressBar = require('react-bootstrap').ProgressBar;
 var FileDrop = require('react-file-drop');
 
 var EditDocument = React.createClass({
@@ -22,6 +23,7 @@ var EditDocument = React.createClass({
     getInitialState () {
         return {
             uploading: false,
+            uploadPercentComplete: 0,
             showModal: false,
             filesToIndex: [],
             currentFileIndex: 0,
@@ -38,7 +40,7 @@ var EditDocument = React.createClass({
     },
     handleDrop: function (files) {
         var state = this.getInitialState();
-
+        //todo: something if they are still indexing files
         state.filesToIndex = files;
         state.currentFileIndex = 0;
 
@@ -48,6 +50,8 @@ var EditDocument = React.createClass({
     // upload the file
     upload: function(file) {
         var xhr = new XMLHttpRequest();
+
+        this.setState({ uploading: true });
 
         xhr.open('post', this.props.source, true);
         xhr.setRequestHeader('Accept', 'application/json');
@@ -80,6 +84,11 @@ var EditDocument = React.createClass({
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = function () {
 
+            this.setState({
+                uploading: false,
+                uploadPercentComplete: 0,
+            });
+
             if (xhr.status === 200) {
 
                 var data = JSON.parse(xhr.responseText);
@@ -97,6 +106,14 @@ var EditDocument = React.createClass({
 
             alert(xhr.status + 'An error occurred!');
 
+        }.bind(this);
+        xhr.onprogress = function(e) {
+            if (e.lengthComputable) {  //evt.loaded the bytes browser receive
+                //evt.total the total bytes seted by the header
+                //
+                var percentComplete = (e.loaded / e.total) * 100;
+                this.setState({ uploadPercentComplete: percentComplete });
+            }
         }.bind(this);
 
         xhr.send();
@@ -182,13 +199,36 @@ var EditDocument = React.createClass({
             <div>
                 <FileDrop 
                     frame={window}
-                    onDrop={this.handleDrop}>
-                    <i className="fa fa-cloud-upload fa-5x"></i>
-                    <h4>Drop Files Here to Add</h4>
+                    onDrop={this.handleDrop}
+                >
+                    <div className="inner">
+                        <div>
+                            <i className="fa fa-file-archive-o fa-4x"></i> &nbsp;
+                            <i className="fa fa-file-pdf-o fa-5x"></i> &nbsp;
+                            <i className="fa fa-file-text-o fa-4x"></i>
+                        </div>
+                        <h4>Drop to index your files</h4>
+                    </div>
                 </FileDrop>
+                <Modal 
+                    bsSize="sm" 
+                    show={this.state.uploading}
+                >
+                    <Modal.Body>
+                        <ProgressBar 
+                            active
+                            striped
+                            bsStyle="success"
+                            now={this.state.uploadPercentComplete}
+                            label={'Uploading... ' + this.state.document.title + ' - %(percent)s%'} 
+                        />
+                    </Modal.Body>
+                </Modal>
                 <Modal bsSize="lg" show={this.state.showModal} onHide={this.props.onClose}>
                     <Modal.Header closeButton>
-                      <Modal.Title>Update Document</Modal.Title>
+                      <Modal.Title>
+                        Update Document <small>({ this.state.currentFileIndex + 1} of { this.state.filesToIndex.length })</small>
+                      </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <form className="form-horizontal">
@@ -213,7 +253,7 @@ var EditDocument = React.createClass({
                                                    placeholder="Title"
                                                    autofocus />
                                         </div>
-                                            </div>
+                                    </div>
                                     <div className="form-group">
                                         <label htmlFor="abstract" className="col-sm-2 control-label">Abstract</label>
                                         <div className="col-sm-10">
@@ -221,8 +261,7 @@ var EditDocument = React.createClass({
                                                       rows="14"
                                                       placeholder="Abstract"
                                                       ref="abstract"
-                                                      defaultValue={this.state.document.abstract}
-                                             />
+                                                      defaultValue={this.state.document.abstract} />
                                         </div>
                                     </div>
                                     <div className="form-group">
@@ -246,8 +285,8 @@ var EditDocument = React.createClass({
                       <Button onClick={this.close}>Close</Button>
                         <Button onClick={this.save} bsStyle="primary">Save Changes</Button>
                     </Modal.Footer>
-              </Modal>
-            </div>
+                </Modal>
+</div>
         );
     }
 });

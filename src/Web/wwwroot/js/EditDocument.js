@@ -2,6 +2,7 @@ var React = require('react');
 var Select = require('react-select');
 var Button = require('react-bootstrap').Button;
 var Modal = require('react-bootstrap').Modal;
+var ProgressBar = require('react-bootstrap').ProgressBar;
 var FileDrop = require('react-file-drop');
 
 var EditDocument = React.createClass({displayName: "EditDocument",
@@ -22,6 +23,7 @@ var EditDocument = React.createClass({displayName: "EditDocument",
     getInitialState () {
         return {
             uploading: false,
+            uploadPercentComplete: 0,
             showModal: false,
             filesToIndex: [],
             currentFileIndex: 0,
@@ -38,7 +40,7 @@ var EditDocument = React.createClass({displayName: "EditDocument",
     },
     handleDrop: function (files) {
         var state = this.getInitialState();
-
+        //todo: something if they are still indexing files
         state.filesToIndex = files;
         state.currentFileIndex = 0;
 
@@ -48,6 +50,8 @@ var EditDocument = React.createClass({displayName: "EditDocument",
     // upload the file
     upload: function(file) {
         var xhr = new XMLHttpRequest();
+
+        this.setState({ uploading: true });
 
         xhr.open('post', this.props.source, true);
         xhr.setRequestHeader('Accept', 'application/json');
@@ -80,6 +84,11 @@ var EditDocument = React.createClass({displayName: "EditDocument",
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = function () {
 
+            this.setState({
+                uploading: false,
+                uploadPercentComplete: 0,
+            });
+
             if (xhr.status === 200) {
 
                 var data = JSON.parse(xhr.responseText);
@@ -97,6 +106,14 @@ var EditDocument = React.createClass({displayName: "EditDocument",
 
             alert(xhr.status + 'An error occurred!');
 
+        }.bind(this);
+        xhr.onprogress = function(e) {
+            if (e.lengthComputable) {  //evt.loaded the bytes browser receive
+                //evt.total the total bytes seted by the header
+                //
+                var percentComplete = (e.loaded / e.total) * 100;
+                this.setState({ uploadPercentComplete: percentComplete });
+            }
         }.bind(this);
 
         xhr.send();
@@ -182,13 +199,36 @@ var EditDocument = React.createClass({displayName: "EditDocument",
             React.createElement("div", null, 
                 React.createElement(FileDrop, {
                     frame: window, 
-                    onDrop: this.handleDrop}, 
-                    React.createElement("i", {className: "fa fa-cloud-upload fa-5x"}), 
-                    React.createElement("h4", null, "Drop Files Here to Add")
+                    onDrop: this.handleDrop
+                }, 
+                    React.createElement("div", {className: "inner"}, 
+                        React.createElement("div", null, 
+                            React.createElement("i", {className: "fa fa-file-archive-o fa-4x"}), "  ", 
+                            React.createElement("i", {className: "fa fa-file-pdf-o fa-5x"}), "  ", 
+                            React.createElement("i", {className: "fa fa-file-text-o fa-4x"})
+                        ), 
+                        React.createElement("h4", null, "Drop to index your files")
+                    )
+                ), 
+                React.createElement(Modal, {
+                    bsSize: "sm", 
+                    show: this.state.uploading
+                }, 
+                    React.createElement(Modal.Body, null, 
+                        React.createElement(ProgressBar, {
+                            active: true, 
+                            striped: true, 
+                            bsStyle: "success", 
+                            now: this.state.uploadPercentComplete, 
+                            label: 'Uploading... ' + this.state.document.title + ' - %(percent)s%'}
+                        )
+                    )
                 ), 
                 React.createElement(Modal, {bsSize: "lg", show: this.state.showModal, onHide: this.props.onClose}, 
                     React.createElement(Modal.Header, {closeButton: true}, 
-                      React.createElement(Modal.Title, null, "Update Document")
+                      React.createElement(Modal.Title, null, 
+                        "Update Document ", React.createElement("small", null, "(",  this.state.currentFileIndex + 1, " of ",  this.state.filesToIndex.length, ")")
+                      )
                     ), 
                     React.createElement(Modal.Body, null, 
                         React.createElement("form", {className: "form-horizontal"}, 
@@ -213,7 +253,7 @@ var EditDocument = React.createClass({displayName: "EditDocument",
                                                    placeholder: "Title", 
                                                    autofocus: true})
                                         )
-                                            ), 
+                                    ), 
                                     React.createElement("div", {className: "form-group"}, 
                                         React.createElement("label", {htmlFor: "abstract", className: "col-sm-2 control-label"}, "Abstract"), 
                                         React.createElement("div", {className: "col-sm-10"}, 
@@ -221,8 +261,7 @@ var EditDocument = React.createClass({displayName: "EditDocument",
                                                       rows: "14", 
                                                       placeholder: "Abstract", 
                                                       ref: "abstract", 
-                                                      defaultValue: this.state.document.abstract}
-                                             )
+                                                      defaultValue: this.state.document.abstract})
                                         )
                                     ), 
                                     React.createElement("div", {className: "form-group"}, 
@@ -246,8 +285,8 @@ var EditDocument = React.createClass({displayName: "EditDocument",
                       React.createElement(Button, {onClick: this.close}, "Close"), 
                         React.createElement(Button, {onClick: this.save, bsStyle: "primary"}, "Save Changes")
                     )
-              )
-            )
+                )
+)
         );
     }
 });
