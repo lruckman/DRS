@@ -54,7 +54,11 @@ namespace Web
             services.AddReact();
 
             services
-                .AddMvc(options => { options.Filters.Add(new ValidateModelStateActionFilter()); })
+                .AddMvc(options =>
+                {
+                    options.Filters.Add(new ValidateModelStateActionFilter());
+                    options.Filters.Add(new DRSExceptionFilter());
+                })
                 .AddJsonOptions(options =>
                     {
                         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();

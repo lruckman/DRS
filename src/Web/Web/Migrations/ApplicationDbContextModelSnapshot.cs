@@ -184,6 +184,18 @@ namespace Web.Migrations
                     b.HasKey("Id");
                 });
 
+            modelBuilder.Entity("Web.Models.DocumentContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Content");
+
+                    b.Property<int>("DocumentId");
+
+                    b.HasKey("Id");
+                });
+
             modelBuilder.Entity("Web.Models.Library", b =>
                 {
                     b.Property<int>("Id")
@@ -239,6 +251,13 @@ namespace Web.Migrations
                     b.HasOne("Web.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Web.Models.DocumentContent", b =>
+                {
+                    b.HasOne("Web.Models.Document")
+                        .WithOne()
+                        .HasForeignKey("Web.Models.DocumentContent", "DocumentId");
                 });
 
             modelBuilder.Entity("Web.Models.LibraryDocument", b =>

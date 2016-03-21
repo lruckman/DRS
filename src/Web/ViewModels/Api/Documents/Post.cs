@@ -23,27 +23,14 @@ namespace Web.ViewModels.Api.Documents
         public class Command : IAsyncRequest<int?>
         {
             public IFormFile File { get; set; }
-            public string Title { get; set; }
-            public string Abstract { get; set; }
-            public int? LibraryIds { get; set; }
-            public bool GenerateAbstract { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
             public CommandValidator(ApplicationDbContext db)
             {
-                RuleFor(m => m.Abstract)
-                    .Length(0, 512);
                 RuleFor(m => m.File)
                     .NotNull();
-                RuleFor(m => m.LibraryIds)
-                    .NotNull()
-                    .MustAsync((libraryId, cancellationToken) =>
-                        db.Libraries.AnyAsync(l => l.Id == libraryId.Value));
-                RuleFor(m => m.Title)
-                    .NotNull()
-                    .Length(1, 60);
             }
         }
 
@@ -64,10 +51,6 @@ namespace Web.ViewModels.Api.Documents
             {
                 const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
 
-                var libraries = await _db.Libraries
-                    .Where(l => l.Id == message.LibraryIds.Value)
-                    .ToArrayAsync();
-
                 var extension = Path.GetExtension(message.File.FileName() ?? "")
                     .ToLowerInvariant();
 
@@ -75,26 +58,18 @@ namespace Web.ViewModels.Api.Documents
 
                 var document = new Document
                 {
-                    Abstract = message.Abstract,
                     CreatedOn = DateTimeOffset.Now,
                     Extension = extension,
                     FileSize = message.File.Length,
                     ModifiedOn = DateTimeOffset.Now,
                     ThumbnailPath = "",
-                    Title = message.Title,
+                    Title = message.File.FileName(),
                     PageCount = 0,
                     Path = "",
                     Key = Convert.ToBase64String(documentKey.Protect(null, dataProtectionScope))
                 };
 
                 _db.Documents.Add(document);
-
-                // add the document to the selected libraries
-
-                document.Libraries.AddRange(libraries.Select(l => new LibraryDocument
-                {
-                    Library = l
-                }));
 
                 using (var trans = await _db.Database.BeginTransactionAsync())
                 {
@@ -124,15 +99,14 @@ namespace Web.ViewModels.Api.Documents
 
                     var fileContents = await parser.GetContentAsync();
 
-                    if (message.GenerateAbstract)
-                    {
-                        document.Abstract = fileContents?.Truncate(512);
-                    }
+                    document.Abstract = fileContents?.Truncate(512);
 
                     var indexSuccessful = _indexer.Index(new Index.Command
                     {
                         Id = document.Id,
-                        Contents = fileContents
+                        Abstract = document.Abstract,
+                        Contents = fileContents,
+                        Title = document.Title
                     });
 
                     if (!indexSuccessful)

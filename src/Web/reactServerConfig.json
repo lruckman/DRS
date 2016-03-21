@@ -5,8 +5,24 @@
             "path": "./node_modules/react-dom/dist/react-dom"
         },
         {
+            "name": "EditDocument",
+            "path": "./wwwroot/js/EditDocument.js"
+        },
+        {
+            "name": "Result",
+            "path": "./wwwroot/js/Result.js"
+        },
+        {
+            "name": "ResultList",
+            "path": "./wwwroot/js/ResultList.js"
+        },
+        {
+            "name": "SearchForm",
+            "path": "./wwwroot/js/SearchForm.js"
+        },
+        {
             "name": "SearchBox",
-            "path": "./wwwroot/js/document-index.js"
+            "path": "./wwwroot/js/SearchBox.js"
         }
     ]
 }

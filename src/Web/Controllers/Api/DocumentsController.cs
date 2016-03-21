@@ -40,6 +40,7 @@ namespace Web.Controllers.Api
             return File(model.FileContents, model.ContentType);
         }
 
+        [HttpPost]
         public async Task<IActionResult> Post(Post.Command command)
         {
             var documentId = await _mediator.SendAsync(command);
@@ -51,6 +52,14 @@ namespace Web.Controllers.Api
 
             return CreatedAtAction(nameof(ViewModels.Api.Documents.Get)
                 , new RouteValueDictionary(new Get.Query {Id = documentId}), null);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Put(Put.Command command)
+        {
+            var documentId = await _mediator.SendAsync(command);
+
+            return await Get(new Get.Query {Id = documentId});
         }
     }
 }

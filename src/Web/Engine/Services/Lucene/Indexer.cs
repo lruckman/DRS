@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Microsoft.Extensions.OptionsModel;
 using SimpleLucene.Impl;
@@ -41,15 +40,7 @@ namespace Web.Engine.Services.Lucene
         {
             using (var indexService = GetIndexService())
             {
-                var result = indexService.IndexEntities(command, c =>
-                {
-                    var doc = new Document();
-                    doc.Add(new Field(Constants.LuceneFieldId, c.Id.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-                    doc.Add(new Field(Constants.LuceneFieldOCR, c.Contents, Field.Store.NO, Field.Index.ANALYZED));
-
-                    return doc;
-                });
-
+                var result = indexService.IndexEntities(command, new Index.CommandDefinition());
                 return result.Success;
             }
         }
