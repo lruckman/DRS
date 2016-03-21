@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,8 +11,6 @@ using Microsoft.Data.Entity;
 using Microsoft.Extensions.OptionsModel;
 using Web.Engine;
 using Web.Engine.Extensions;
-using Web.Engine.Services.Lucene;
-using Web.Engine.Services.Lucene.Models;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -27,7 +24,7 @@ namespace Web.ViewModels.Api.Documents
 
         public class CommandValidator : AbstractValidator<Command>
         {
-            public CommandValidator(ApplicationDbContext db)
+            public CommandValidator()
             {
                 RuleFor(m => m.File)
                     .NotNull();
@@ -37,13 +34,11 @@ namespace Web.ViewModels.Api.Documents
         public class CommandHandler : IAsyncRequestHandler<Command, int?>
         {
             private readonly ApplicationDbContext _db;
-            private readonly IIndexer _indexer;
             private readonly IOptions<DRSSettings> _settings;
 
-            public CommandHandler(ApplicationDbContext db, IIndexer indexer, IOptions<DRSSettings> settings)
+            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings)
             {
                 _db = db;
-                _indexer = indexer;
                 _settings = settings;
             }
 
@@ -100,20 +95,10 @@ namespace Web.ViewModels.Api.Documents
                     var fileContents = await parser.GetContentAsync();
 
                     document.Abstract = fileContents?.Truncate(512);
-
-                    var indexSuccessful = _indexer.Index(new Index.Command
+                    document.Content = new DocumentContent
                     {
-                        Id = document.Id,
-                        Abstract = document.Abstract,
-                        Contents = fileContents,
-                        Title = document.Title
-                    });
-
-                    if (!indexSuccessful)
-                    {
-                        trans.Rollback();
-                        return null;
-                    }
+                        Content = fileContents
+                    };
 
                     // update the paths on the record
 
@@ -149,10 +134,6 @@ namespace Web.ViewModels.Api.Documents
                     catch
                     {
                         // some clean ups
-
-                        // lucene
-
-                        _indexer.Remove(document.Id.ToString());
 
                         // thumbnail
 

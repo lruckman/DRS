@@ -37,5 +37,7 @@ namespace Web.Models
         public DateTimeOffset ModifiedOn { get; set; }
 
         public virtual List<LibraryDocument> Libraries { get; set; } = new List<LibraryDocument>();
+
+        public virtual DocumentContent Content { get; set; }
     }
 }

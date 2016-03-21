@@ -7,7 +7,6 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Data.Entity;
 using Web.Engine;
-using Web.Engine.Services.Lucene;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Search
@@ -39,48 +38,41 @@ namespace Web.ViewModels.Api.Search
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
-            private readonly ISearcher _searcher;
             private readonly IConfigurationProvider _configurationProvider;
 
-            public QueryHandler(ApplicationDbContext db, ISearcher searcher, IConfigurationProvider configurationProvider)
+            public QueryHandler(ApplicationDbContext db,
+                IConfigurationProvider configurationProvider)
             {
                 _db = db;
-                _searcher = searcher;
                 _configurationProvider = configurationProvider;
             }
 
             public async Task<Result> Handle(Query message)
             {
-                //todo: limit by active
-                IQueryable<Document> query = _db.Documents;
+                var documentQuery = _db.Documents
+                    .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(message.Q))
                 {
-                    var documentIds = _searcher
-                        .Search(message.Q);
-
-                    //todo: work around for bug, use Count()>0 rather then Any
-                    // https://github.com/aspnet/EntityFramework/issues/3317
-
-                    //todo: re-add library filter once EF fixes
-
-                    query = query
-                        .Where(d => documentIds.Contains(d.Id) /*&&
-                                d.LibraryIds.Count(l => l.LibraryId == message.LibraryIds.Value) > 0*/);
+                    documentQuery = documentQuery
+                        .FromSql(
+                            $"SELECT d.* FROM [dbo].[{nameof(Document)}] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key]",
+                            message.Q);
                 }
 
                 var result = new Result
                 {
-                    TotalCount = await query.CountAsync()
+                    TotalCount = await documentQuery
+                        .CountAsync()
                 };
 
                 if (result.TotalCount > message.MaxResults * (message.PageIndex + 1))
                 {
                     result.NextLink =
-                        $"/api/search/?{nameof(message.Q)}={message.Q}{string.Join($"&{nameof(message.LibraryIds)}=",message.LibraryIds)}&{nameof(message.OrderBy)}={message.OrderBy}&{nameof(message.PageIndex)}={message.PageIndex + 1}";
+                        $"/api/search/?{nameof(message.Q)}={message.Q}{string.Join($"&{nameof(message.LibraryIds)}=", message.LibraryIds)}&{nameof(message.OrderBy)}={message.OrderBy}&{nameof(message.PageIndex)}={message.PageIndex + 1}";
                 }
-                
-                result.Documents = await query
+
+                result.Documents = await documentQuery
                     .OrderBy(d => d.Id)
                     .Skip(message.MaxResults * message.PageIndex)
                     .Take(message.MaxResults)

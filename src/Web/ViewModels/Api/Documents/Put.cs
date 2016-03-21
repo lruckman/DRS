@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.Data.Entity;
-using Web.Engine.Services.Lucene;
-using Web.Engine.Services.Lucene.Models;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -41,12 +39,10 @@ namespace Web.ViewModels.Api.Documents
         public class CommandHandler : IAsyncRequestHandler<Command, int>
         {
             private readonly ApplicationDbContext _db;
-            private readonly IIndexer _indexer;
 
-            public CommandHandler(ApplicationDbContext db, IIndexer indexer)
+            public CommandHandler(ApplicationDbContext db)
             {
                 _db = db;
-                _indexer = indexer;
             }
 
             public async Task<int> Handle(Command message)
@@ -70,20 +66,6 @@ namespace Web.ViewModels.Api.Documents
                 {
                     Library = l
                 }));
-
-                var indexSuccessful = _indexer.Index(new Index.Command
-                {
-                    Id = document.Id,
-                    Abstract = document.Abstract,
-                    Contents = null, //todo: refetch document contents?
-                    Title = document.Title
-                });
-
-                if (!indexSuccessful)
-                {
-                    //todo: something else
-                    throw new Exception("Unable to update document index.");
-                }
 
                 await _db.SaveChangesAsync();
 

@@ -27,8 +27,6 @@
         "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
         "MediatR": "2.0.2",
         "Ghostscript.NET": "1.2.0",
-        "Lucene.Net": "3.0.3",
-        "SimpleLuceneFix": "1.1.0",
         "iTextSharp": "5.5.8",
         "itextsharp.pdfa": "5.5.8",
         "itextsharp.xtra": "5.5.8",

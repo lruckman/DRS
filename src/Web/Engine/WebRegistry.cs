@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.AspNet.Mvc.ModelBinding.Validation;
 using StructureMap;
 using StructureMap.Graph;
-using Web.Engine.Services.Lucene;
 
 namespace Web.Engine
 {
@@ -40,14 +39,6 @@ namespace Web.Engine
                 .Use<SingleInstanceFactory>(ctx => t => ctx.GetInstance(t));
             For<MultiInstanceFactory>()
                 .Use<MultiInstanceFactory>(ctx => t => ctx.GetAllInstances(t));
-
-            // Lucene
-
-            For<IIndexer>()
-                .Use<Indexer>();
-
-            For<ISearcher>()
-                .Use<Searcher>();
 
             // AutoMapper
 
