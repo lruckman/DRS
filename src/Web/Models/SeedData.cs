@@ -16,7 +16,7 @@ namespace Web.Models
                 {
                     CreatedOn = DateTimeOffset.Now,
                     ModifiedOn = DateTimeOffset.Now,
-                    Name = "My First Library"
+                    Name = "Private"
                 });
                 context.SaveChanges();
             }

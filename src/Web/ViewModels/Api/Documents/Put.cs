@@ -15,7 +15,7 @@ namespace Web.ViewModels.Api.Documents
             public int? Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
-            public int? LibraryIds { get; set; }
+            public int[] LibraryIds { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -28,8 +28,8 @@ namespace Web.ViewModels.Api.Documents
                     .Length(0, 512);
                 RuleFor(m => m.LibraryIds)
                     .NotNull()
-                    .MustAsync((libraryId, cancellationToken) =>
-                        db.Libraries.AnyAsync(l => l.Id == libraryId.Value));
+                    .MustAsync((libraryIds, cancellationToken) =>
+                        db.Libraries.AllAsync(l => libraryIds.Contains(l.Id)));
                 RuleFor(m => m.Title)
                     .NotNull()
                     .Length(1, 60);
@@ -47,25 +47,32 @@ namespace Web.ViewModels.Api.Documents
 
             public async Task<int> Handle(Command message)
             {
-                var libraries = await _db.Libraries
-                    .Where(l => l.Id == message.LibraryIds.Value)
-                    .ToArrayAsync();
-
                 var document = await _db.Documents
+                    .Include(d => d.Libraries)
                     .SingleAsync(d => d.Id == message.Id.Value);
 
                 document.ModifiedOn = DateTimeOffset.Now;
                 document.Title = message.Title;
                 document.Abstract = message.Abstract;
 
-                // add the document to the selected libraries
+                // remove deleted libraries
 
-                document.Libraries.Clear();
+                document.Libraries.RemoveAll(ld => !message.LibraryIds.Contains(ld.LibraryId));
 
-                document.Libraries.AddRange(libraries.Select(l => new LibraryDocument
-                {
-                    Library = l
-                }));
+                // add new libraries
+
+                var newLibraries = await _db.Libraries
+                    .Where(l => message.LibraryIds.Contains(l.Id)
+                                && !document.Libraries
+                                    .Select(ld => ld.LibraryId)
+                                    .Contains(l.Id))
+                    .Select(l => new LibraryDocument
+                    {
+                        LibraryId = l.Id
+                    })
+                    .ToArrayAsync();
+
+                document.Libraries.AddRange(newLibraries);
 
                 await _db.SaveChangesAsync();
 

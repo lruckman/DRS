@@ -3,6 +3,8 @@
     padding-top: 50px;
 }
 
+.body-content { padding-top: 20px; }
+
 .input-group.integrated .input-group-addon {
     background: white !important;
     padding-left: 2px;

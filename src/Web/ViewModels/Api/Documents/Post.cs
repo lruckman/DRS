@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -66,6 +67,15 @@ namespace Web.ViewModels.Api.Documents
 
                 _db.Documents.Add(document);
 
+                //todo: add to indexers private library (hardcoded for now)
+
+                document.Libraries.Add(await _db.Libraries
+                    .Select(l => new LibraryDocument
+                    {
+                        Library = l
+                    })
+                    .FirstAsync());
+
                 using (var trans = await _db.Database.BeginTransactionAsync())
                 {
                     await _db.SaveChangesAsync();
@@ -94,7 +104,8 @@ namespace Web.ViewModels.Api.Documents
 
                     var fileContents = await parser.GetContentAsync();
 
-                    document.Abstract = fileContents?.Truncate(512);
+                    document.Abstract = fileContents?.NormalizeLineEndings()?.Truncate(512);
+
                     document.Content = new DocumentContent
                     {
                         Content = fileContents

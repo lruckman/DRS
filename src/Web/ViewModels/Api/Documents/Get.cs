@@ -49,7 +49,7 @@ namespace Web.ViewModels.Api.Documents
                 protected override void Configure()
                 {
                     CreateMap<Document, Result>()
-                        .ForMember(d => d.LibraryIds, o => o.MapFrom(s => s.Libraries.Select(l => l.LibraryId)))
+                        .ForMember(d => d.LibraryIds, o => o.MapFrom(s => s.Libraries.Select(l => l.LibraryId.ToString())))
                         .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"));
                 }
             }
@@ -63,7 +63,7 @@ namespace Web.ViewModels.Api.Documents
             public string ThumbnailLink { get; set; }
             public string CreatedOn { get; set; }
             public string ModifiedOn { get; set; }
-            public int[] LibraryIds { get; set; }
+            public string[] LibraryIds { get; set; }
             public long FileSize { get; set; }
             public int PageCount { get; set; }
         }

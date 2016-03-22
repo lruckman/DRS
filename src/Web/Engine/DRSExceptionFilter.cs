@@ -48,8 +48,7 @@ namespace Web.Engine
             var jsonResult = new JsonResult(new
             {
                 code = 500,
-                context.Exception.Message,
-                context.Exception.StackTrace
+                context.Exception
             });
 
             jsonResult.StatusCode = (int)HttpStatusCode.InternalServerError;
