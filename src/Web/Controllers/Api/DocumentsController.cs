@@ -1,12 +1,14 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Routing;
 using Web.ViewModels.Api.Documents;
 
 namespace Web.Controllers.Api
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class DocumentsController : BaseController
     {

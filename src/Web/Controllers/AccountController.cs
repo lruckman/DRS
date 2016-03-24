@@ -31,53 +31,57 @@ namespace Web.Controllers
             _logger = loggerFactory.CreateLogger<AccountController>();
         }
 
-        ////
-        //// GET: /Account/Login
-        //[HttpGet]
-        //[AllowAnonymous]
-        //public IActionResult Login(string returnUrl = null)
-        //{
-        //    ViewData["ReturnUrl"] = returnUrl;
-        //    return View();
-        //}
+        //
+        // GET: /Account/Login
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Login(string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
 
-        ////
-        //// POST: /Account/Login
-        //[HttpPost]
-        //[AllowAnonymous]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
-        //{
-        //    ViewData["ReturnUrl"] = returnUrl;
-        //    if (ModelState.IsValid)
-        //    {
-        //        // This doesn't count login failures towards account lockout
-        //        // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        //        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
-        //        if (result.Succeeded)
-        //        {
-        //            _logger.LogInformation(1, "User logged in.");
-        //            return RedirectToLocal(returnUrl);
-        //        }
-        //        if (result.RequiresTwoFactor)
-        //        {
-        //            return RedirectToAction(nameof(SendCode), new { ReturnUrl = returnUrl, RememberMe = model.RememberMe });
-        //        }
-        //        if (result.IsLockedOut)
-        //        {
-        //            _logger.LogWarning(2, "User account locked out.");
-        //            return View("Lockout");
-        //        }
-        //        else
-        //        {
-        //            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-        //            return View(model);
-        //        }
-        //    }
+        //
+        // POST: /Account/Login
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
 
-        //    // If we got this far, something failed, redisplay form
-        //    return View(model);
-        //}
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, true);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation(1, "User logged in.");
+                return RedirectToLocal(returnUrl);
+            }
+
+            // todo: disabled for now
+            //if (result.RequiresTwoFactor)
+            //{
+            //    return RedirectToAction(nameof(SendCode), new
+            //    {
+            //        ReturnUrl = returnUrl,
+            //        model.RememberMe
+            //    });
+            //}
+
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning(2, "User account locked out.");
+                return View("Lockout");
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View(model);
+        }
 
         ////
         //// GET: /Account/Register
@@ -118,16 +122,16 @@ namespace Web.Controllers
         //    return View(model);
         //}
 
-        ////
-        //// POST: /Account/LogOff
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> LogOff()
-        //{
-        //    await _signInManager.SignOutAsync();
-        //    _logger.LogInformation(4, "User logged out.");
-        //    return RedirectToAction(nameof(HomeController.Index), "Home");
-        //}
+        //
+        // POST: /Account/LogOff
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogOff()
+        {
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation(4, "User logged out.");
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
 
         ////
         //// POST: /Account/ExternalLogin
@@ -327,8 +331,8 @@ namespace Web.Controllers
         //    return View();
         //}
 
-        ////
-        //// GET: /Account/SendCode
+        //
+        // GET: /Account/SendCode
         //[HttpGet]
         //[AllowAnonymous]
         //public async Task<ActionResult> SendCode(string returnUrl = null, bool rememberMe = false)
@@ -375,7 +379,7 @@ namespace Web.Controllers
         //    }
         //    else if (model.SelectedProvider == "Phone")
         //    {
-        //       // await _smsSender.SendSmsAsync(await _userManager.GetPhoneNumberAsync(user), message);
+        //        // await _smsSender.SendSmsAsync(await _userManager.GetPhoneNumberAsync(user), message);
         //    }
 
         //    return RedirectToAction(nameof(VerifyCode), new { Provider = model.SelectedProvider, ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
@@ -443,17 +447,15 @@ namespace Web.Controllers
         //    return await _userManager.FindByIdAsync(HttpContext.User.GetUserId());
         //}
 
-        //private IActionResult RedirectToLocal(string returnUrl)
-        //{
-        //    if (Url.IsLocalUrl(returnUrl))
-        //    {
-        //        return Redirect(returnUrl);
-        //    }
-        //    else
-        //    {
-        //        return RedirectToAction(nameof(HomeController.Index), "Home");
-        //    }
-        //}
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+        }
 
         //#endregion
     }

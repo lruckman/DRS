@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Web.ViewModels.Api.Search;
 
 namespace Web.Controllers.Api
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class SearchController : BaseController
     {
