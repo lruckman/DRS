@@ -3,7 +3,6 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Web.Engine.FileParsers;
 
 namespace Web.Engine.Extensions
 {
@@ -41,23 +40,6 @@ namespace Web.Engine.Extensions
             }
         }
 
-        //public static void Encrypt(this byte[] buffer, MemoryProtectionScope scope)
-        //{
-        //    if (buffer.Length <= 0)
-        //    {
-        //        throw new ArgumentException(nameof(buffer));
-        //    }
-
-        //    if (buffer == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(buffer));
-        //    }
-
-        //    // Encrypt the data in memory. The result is stored in the same same array as the original data.
-
-        //    ProtectedMemory.Protect(buffer, scope);
-        //}
-
         public static byte[] Unprotect(this byte[] buffer, byte[] optionalEntropy,
             DataProtectionScope scope)
         {
@@ -88,7 +70,7 @@ namespace Web.Engine.Extensions
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static async Task<int> ProtectToStreamAsync(this byte[] buffer, byte[] optionalEntropy,
-            DataProtectionScope scope, Stream stream, 
+            DataProtectionScope scope, Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             if (buffer.Length <= 0)
@@ -131,55 +113,6 @@ namespace Web.Engine.Extensions
         public static byte[] Protect(this byte[] buffer, byte[] optionalEntropy, DataProtectionScope scope)
         {
             return ProtectedData.Protect(buffer, optionalEntropy, scope);
-        }
-
-        //public static byte[] DecryptToBytes(this Stream stream, byte[] optionalEntropy, DataProtectionScope scope, int length)
-        //{
-        //    if (stream == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(stream));
-        //    }
-
-        //    if (length <= 0)
-        //    {
-        //        throw new ArgumentException(nameof(length));
-        //    }
-
-        //    if (optionalEntropy == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(optionalEntropy));
-        //    }
-
-        //    if (optionalEntropy.Length <= 0)
-        //    {
-        //        throw new ArgumentException(nameof(optionalEntropy));
-        //    }
-
-        //    var inBuffer = new byte[length];
-        //    byte[] outBuffer;
-
-        //    // Read the encrypted data from a stream.
-
-        //    if (stream.CanRead)
-        //    {
-        //        stream.Read(inBuffer, 0, length);
-
-        //        outBuffer = ProtectedData.Unprotect(inBuffer, optionalEntropy, scope);
-        //    }
-        //    else
-        //    {
-        //        throw new IOException("Could not read the stream.");
-        //    }
-
-        //    // Return the length that was written to the stream. 
-
-        //    return outBuffer;
-
-        //}
-
-        public static IFileParser Parse(this byte[] buffer, string fileExtension)
-        {
-            return new Pdf(buffer);
         }
     }
 }

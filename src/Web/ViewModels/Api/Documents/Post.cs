@@ -12,6 +12,7 @@ using Microsoft.Data.Entity;
 using Microsoft.Extensions.OptionsModel;
 using Web.Engine;
 using Web.Engine.Extensions;
+using Web.Engine.FileParsers;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -98,11 +99,11 @@ namespace Web.ViewModels.Api.Documents
 
                     // get a parser
 
-                    var parser = buffer.Parse(extension);
+                    var parser = FileParser.Get(extension, buffer);
 
                     // index in lucene
 
-                    var fileContents = await parser.GetContentAsync();
+                    var fileContents = await parser.ContentAsync();
 
                     document.Abstract = fileContents?.NormalizeLineEndings()?.Truncate(512);
 
@@ -132,7 +133,7 @@ namespace Web.ViewModels.Api.Documents
                                 .SaveProtectedAsAsync(document.ThumbnailPath, documentKey, dataProtectionScope);
                         }
 
-                        document.PageCount = await parser.GetNumberOfPagesAsync();
+                        document.PageCount = await parser.NumberOfPagesAsync();
 
                         // encrypt and save the uploaded file
 

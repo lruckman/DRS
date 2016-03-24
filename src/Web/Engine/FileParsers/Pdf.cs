@@ -1,4 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using System;
+using System.Drawing.Imaging;
 using System.IO;
 using Ghostscript.NET.Rasterizer;
 using iTextSharp.text.pdf;
@@ -8,11 +9,7 @@ namespace Web.Engine.FileParsers
 {
     public class Pdf : FileParser
     {
-        public Pdf(byte[] buffer) : base(buffer)
-        {
-        }
-
-        protected override string Content(int? pageNumber)
+        protected override string ExtractContent(int? pageNumber)
         {
             using (var reader = new PdfReader(Buffer))
             {
@@ -35,7 +32,7 @@ namespace Web.Engine.FileParsers
             }
         }
 
-        protected override int NumberOfPages()
+        protected override int ExtractNumberOfPages()
         {
             using (var reader = new PdfReader(Buffer))
             {
@@ -43,8 +40,13 @@ namespace Web.Engine.FileParsers
             }
         }
 
-        protected override void SaveThumbnail(int pageNumber, int dpi, Stream outputStream)
+        protected override void ExtractThumbnail(Stream outputStream, int pageNumber, int dpi)
         {
+            if (outputStream == null)
+            {
+                throw new ArgumentNullException(nameof(outputStream));
+            }
+
             using (var rasterizer = new GhostscriptRasterizer())
             {
                 using (var stream = new MemoryStream(Buffer))
@@ -58,6 +60,12 @@ namespace Web.Engine.FileParsers
                     }
                 }
             }
+        }
+
+        public static readonly string[] SupportedFileTypes = {".pdf"};
+
+        public Pdf(byte[] buffer) : base(buffer)
+        {
         }
     }
 }
