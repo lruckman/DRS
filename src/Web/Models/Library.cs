@@ -12,6 +12,9 @@ namespace Web.Models
         [Required, MaxLength(56)]
         public string Name { get; set; }
 
+        [Required, MaxLength(450)]
+        public string CreatedByUserId { get; set; }
+
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ModifiedOn { get; set; }
 

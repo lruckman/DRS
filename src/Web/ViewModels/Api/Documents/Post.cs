@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,11 +38,13 @@ namespace Web.ViewModels.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IOptions<DRSSettings> _settings;
+            private readonly IUserAccessor _userAccessor;
 
-            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings)
+            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor)
             {
                 _db = db;
                 _settings = settings;
+                _userAccessor = userAccessor;
             }
 
             public async Task<int?> Handle(Command message)
@@ -52,9 +55,10 @@ namespace Web.ViewModels.Api.Documents
                     .ToLowerInvariant();
 
                 var documentKey = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N"));
-
+                
                 var document = new Document
                 {
+                    CreatedByUserId = _userAccessor.User.GetUserId(),
                     CreatedOn = DateTimeOffset.Now,
                     Extension = extension,
                     FileSize = message.File.Length,

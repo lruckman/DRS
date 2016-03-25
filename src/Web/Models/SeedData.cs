@@ -15,30 +15,34 @@ namespace Web.Models
             var userManager = (UserManager<ApplicationUser>) app.ApplicationServices
                 .GetService(typeof (UserManager<ApplicationUser>));
 
+            // add a test user
+
+            var defaultUser = new ApplicationUser
+            {
+                UserName = "test@localhost.com",
+                Email = "test@localhost.com"
+            };
+
+            if (!context.Users.Any())
+            {
+                userManager
+                    .CreateAsync(defaultUser, "P@ssword1")
+                    .Wait();
+            }
+
+            // add a library
+
             if (!context.Libraries.Any())
             {
                 context.Libraries.Add(new Library
                 {
+                    CreatedByUserId = userManager.GetUserIdAsync(defaultUser).Result,
                     CreatedOn = DateTimeOffset.Now,
                     ModifiedOn = DateTimeOffset.Now,
                     Name = "Private"
                 });
+
                 context.SaveChanges();
-            }
-
-            // add a test user
-
-            if (!context.Users.Any())
-            {
-                var defaultUser = new ApplicationUser
-                {
-                    UserName = "test@localhost.com",
-                    Email = "test@localhost.com"
-                };
-
-                userManager
-                    .CreateAsync(defaultUser, "P@ssword1")
-                    .Wait();
             }
         }
     }
