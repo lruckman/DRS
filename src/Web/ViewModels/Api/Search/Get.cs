@@ -113,6 +113,7 @@ namespace Web.ViewModels.Api.Search
                 public string ModifiedOn { get; set; }
                 public long FileSize { get; set; }
                 public int PageCount { get; set; }
+                public string Icon => "fa fa-file-pdf-o";
             }
         }
     }

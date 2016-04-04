@@ -19,7 +19,7 @@ var SearchBox = React.createClass({
         }.bind(this);
         xhr.send();
     },
-    handleSearchSubmit: function (search, libraryIds) {
+    handleSearchFormSubmit: function (search, libraryIds) {
         this.loadResultsFromServer(search, libraryIds || []);
     },
     handleDocumentUpdated: function (location) {
@@ -27,10 +27,13 @@ var SearchBox = React.createClass({
     },
     handleDocumentClose: function () {
     },
-    
+    handleResultListSelect: function(result) {
+        
+    },
     getInitialState: function() {
         return {
-            data: []
+            data: { documents: [] },
+            selected: { }
         };
     },
     componentWillMount: function() {
@@ -47,13 +50,15 @@ var SearchBox = React.createClass({
                 <div className="col-sm-3">
                     <SearchForm 
                         libraries={this.props.libraries}
-                        onSearchSubmit={this.handleSearchSubmit} 
+                        onSearchSubmit={this.handleSearchFormSubmit} 
+                    />
+                    <ResultList 
+                        data={this.state.data.documents}
+                        nextLink={this.state.data.nextLink}
+                        onSelect={this.handleResultListSelect}
                     />
                 </div>
                 <div className="col-sm-9">
-                    <ResultList 
-                        data={this.state.data} 
-                    />
                 </div>
             </div>
         );

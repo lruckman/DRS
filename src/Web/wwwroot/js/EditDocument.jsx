@@ -34,7 +34,8 @@ var EditDocument = React.createClass({
                 abstract: '',
                 libraryIds: [],
                 thumbnailLink: '',
-                location: ''
+                location: '',
+                icon: ''
             }
         };
     },
@@ -68,6 +69,15 @@ var EditDocument = React.createClass({
 
             alert(xhr.status + 'An error occurred!');
 
+        }.bind(this);
+        xhr.onprogress = function (e) {
+            if (e.lengthComputable) {  //evt.loaded the bytes browser receive
+                //evt.total the total bytes seted by the header
+                //
+                var percentComplete = (e.loaded / e.total) * 100;
+                console.log(percentComplete);
+                this.setState({ uploadPercentComplete: percentComplete });
+            }
         }.bind(this);
 
         var formData = new FormData();
@@ -106,14 +116,6 @@ var EditDocument = React.createClass({
 
             alert(xhr.status + 'An error occurred!');
 
-        }.bind(this);
-        xhr.onprogress = function(e) {
-            if (e.lengthComputable) {  //evt.loaded the bytes browser receive
-                //evt.total the total bytes seted by the header
-                //
-                var percentComplete = (e.loaded / e.total) * 100;
-                this.setState({ uploadPercentComplete: percentComplete });
-            }
         }.bind(this);
 
         xhr.send();
@@ -224,7 +226,7 @@ var EditDocument = React.createClass({
                         />
                     </Modal.Body>
                 </Modal>
-                <Modal bsSize="lg" show={this.state.showModal} onHide={this.props.onClose}>
+                <Modal bsSize="lg" show={this.state.showModal} onHide={this.close}>
                     <Modal.Header closeButton>
                       <Modal.Title>
                         Update Document <small>({ this.state.currentFileIndex + 1} of { this.state.filesToIndex.length })</small>
@@ -246,35 +248,41 @@ var EditDocument = React.createClass({
                                     <div className="form-group">
                                         <label htmlFor="title" className="col-sm-2 control-label">Title</label>
                                         <div className="col-sm-10">
-                                            <input type="text"
-                                                   defaultValue={this.state.document.title}
-                                                   ref="title"
-                                                   className="form-control"
-                                                   placeholder="Title"
-                                                   autofocus />
+                                            <input 
+                                                type="text"
+                                                defaultValue={this.state.document.title}
+                                                ref="title"
+                                                className="form-control"
+                                                placeholder="Title"
+                                                autofocus 
+                                            />
                                         </div>
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="abstract" className="col-sm-2 control-label">Abstract</label>
                                         <div className="col-sm-10">
-                                            <textarea className="form-control"
-                                                      rows="14"
-                                                      placeholder="Abstract"
-                                                      ref="abstract"
-                                                      defaultValue={this.state.document.abstract} />
+                                            <textarea 
+                                                className="form-control"
+                                                rows="14"
+                                                placeholder="Abstract"
+                                                ref="abstract"
+                                                defaultValue={this.state.document.abstract} 
+                                            />
                                         </div>
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor="libraries" className="col-sm-2 control-label">Libraries</label>
                                         <div className="col-sm-10">
-                                            <Select multi
-                                                    placeholder="Libraries"
-                                                    simpleValue
-                                                    value={this.state.document.libraryIds}
-                                                    valueKey="Value"
-                                                    labelKey="Text"
-                                                    options={this.props.libraries}
-                                                    onChange={this.handleLibraryChange} />
+                                            <Select 
+                                                multi
+                                                placeholder="Libraries"
+                                                simpleValue
+                                                value={this.state.document.libraryIds}
+                                                valueKey="Value"
+                                                labelKey="Text"
+                                                options={this.props.libraries}
+                                                onChange={this.handleLibraryChange}
+                                            />
                                         </div>
                                     </div>
                                 </div>
