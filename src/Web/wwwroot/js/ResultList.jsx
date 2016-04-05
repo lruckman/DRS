@@ -1,6 +1,6 @@
 ﻿var React = require('react');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
-var Result = require('Result');
+var classNames = require('classnames');
 
 var ResultList = React.createClass({
     propTypes: {
@@ -24,25 +24,31 @@ var ResultList = React.createClass({
             onSelect: function() {}
         }
     },
-    handleSelect: function() {
-        // this.props.onSelect();
+    getInitialState: function () {
+        return {
+            activeIndex: 0
+        };
+    },
+    resultHandleClick: function (index, e) {
+        e.preventDefault();
+        console.log('selected ' + index);
+        this.setState({ activeIndex: 0 });
     },
     render: function () {
-        var resultNodes = this.props.data.map(function (result) {
+        var resultNodes = this.props.data.map(function (result, index) {
+            var resultClass = classNames({
+                'list-group-item': true,
+                'active': index === this.state.activeIndex
+            });
+            var boundClick = this.resultHandleClick.bind(this, index);
             return (
-                <Result 
-                    key={result.id} 
-                    title={result.title} 
-                    thumbnailLink={result.thumbnailLink} 
-                    viewLink={result.viewLink}
-                    icon={result.icon}
-                >
-                    {result.abstract}
-                </Result>
+                <a href={result.viewLink} target="_blank" className={resultClass} key={result.id} onClick={boundClick}>
+                    <i className={result.icon}></i>&nbsp;{result.title}
+                </a>
             );
-        });
+        }, this);
         return (
-            <div className="result-list clearfix" data-next-link={this.props.nextLink}>
+            <div className="list-group" data-next-link={this.props.nextLink}>
                 <ReactCSSTransitionGroup 
                     transitionName="result" 
                     transitionEnterTimeout={500} 
