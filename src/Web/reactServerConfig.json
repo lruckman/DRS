@@ -9,10 +9,6 @@
             "path": "./wwwroot/js/EditDocument.js"
         },
         {
-            "name": "Result",
-            "path": "./wwwroot/js/Result.js"
-        },
-        {
             "name": "ResultList",
             "path": "./wwwroot/js/ResultList.js"
         },

@@ -19,21 +19,49 @@ var SearchBox = React.createClass({
         }.bind(this);
         xhr.send();
     },
-    handleSearchFormSubmit: function (search, libraryIds) {
+    searchHandleSubmit: function (search, libraryIds) {
         this.loadResultsFromServer(search, libraryIds || []);
     },
-    handleDocumentUpdated: function (location) {
+    documentHandleUpdate: function (location) {
        
     },
-    handleDocumentClose: function () {
+    documentHandleClose: function () {
     },
-    handleResultListSelect: function(result) {
-        
+    resultHandleSelect: function (location) {
+        var xhr = new XMLHttpRequest();
+
+        xhr.open('get', location, true);
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.onload = function () {
+
+            if (xhr.status === 200) {
+
+                this.setState({
+                    selectedDocument: JSON.parse(xhr.responseText)
+                });
+
+                return;
+            }
+
+            alert(xhr.status + 'An error occurred!');
+
+        }.bind(this);
+
+        xhr.send();
     },
     getInitialState: function() {
         return {
             data: { documents: [] },
-            selected: { }
+            selectedDocument: {
+                pageCount: 0,
+                fileSize: 0,
+                title: '',
+                abstract: '',
+                libraryIds: [],
+                thumbnailLink: '',
+                location: '',
+                icon: ''
+            }
         };
     },
     componentWillMount: function() {
@@ -44,21 +72,21 @@ var SearchBox = React.createClass({
                 <EditDocument 
                     libraries={this.props.libraries}
                     source={this.props.addDocumentUrl}
-                    onUpdated={this.handleDocumentUpdated}
-                    onClose={this.handleDocumentClose}
-                />
+                    onUpdate={this.documentHandleUpdate}
+                    onClose={this.documentHandleClose} />
                 <div className="col-sm-3">
                     <SearchForm 
                         libraries={this.props.libraries}
-                        onSearchSubmit={this.handleSearchFormSubmit} 
-                    />
+                        onSearchSubmit={this.searchHandleSubmit} />
                     <ResultList 
                         data={this.state.data.documents}
                         nextLink={this.state.data.nextLink}
-                        onSelect={this.handleResultListSelect}
-                    />
+                        onSelect={this.resultHandleSelect} />
                 </div>
                 <div className="col-sm-9">
+                    <img
+                        src={this.state.selectedDocument.thumbnailLink}
+                        className="img-responsive img-thumbnail" />
                 </div>
             </div>
         );

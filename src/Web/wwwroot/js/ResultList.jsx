@@ -8,7 +8,7 @@ var ResultList = React.createClass({
                 React.PropTypes.shape({
                     id: React.PropTypes.number,
                     abstract: React.PropTypes.string,
-                    viewLink: React.PropTypes.string,
+                    location: React.PropTypes.string,
                     thumbnailLink: React.PropTypes.string,
                     title: React.PropTypes.string,
                     icon: React.PropTypes.string
@@ -31,8 +31,8 @@ var ResultList = React.createClass({
     },
     resultHandleClick: function (index, e) {
         e.preventDefault();
-        console.log('selected ' + index);
-        this.setState({ activeIndex: 0 });
+        this.setState({ activeIndex: index });
+        this.props.onSelect(this.props.data[index].location);
     },
     render: function () {
         var resultNodes = this.props.data.map(function (result, index) {
@@ -42,7 +42,7 @@ var ResultList = React.createClass({
             });
             var boundClick = this.resultHandleClick.bind(this, index);
             return (
-                <a href={result.viewLink} target="_blank" className={resultClass} key={result.id} onClick={boundClick}>
+                <a href="#" target="_blank" className={resultClass} key={result.id} onClick={boundClick}>
                     <i className={result.icon}></i>&nbsp;{result.title}
                 </a>
             );
@@ -52,8 +52,7 @@ var ResultList = React.createClass({
                 <ReactCSSTransitionGroup 
                     transitionName="result" 
                     transitionEnterTimeout={500} 
-                    transitionLeaveTimeout={300}
-                >
+                    transitionLeaveTimeout={300} >
                   {resultNodes}
                 </ReactCSSTransitionGroup>
             </div>

@@ -9,14 +9,14 @@ var EditDocument = React.createClass({
     propTypes: {
         libraries: React.PropTypes.array,
         source: React.PropTypes.string,
-        onUpdated: React.PropTypes.func,
+        onUpdate: React.PropTypes.func,
         onClose: React.PropTypes.func
     },
     getDefaultProps: function() {
         return {
             libraries: [],
             source: '',
-            onUpdated: function () { },
+            onUpdate: function () { },
             onClose: function () { }
         }    
     },
@@ -146,7 +146,7 @@ var EditDocument = React.createClass({
 
             // successfully updated. notify parent.
 
-            this.props.onUpdated(this.state.document.location);
+            this.props.onUpdate(this.state.document.location);
 
             // increment the current file index
 

@@ -5,28 +5,10 @@
 
 .body-content { padding-top: 20px; }
 
-.input-group.integrated .input-group-addon {
-    background: white !important;
-    padding-left: 2px;
-    padding-right: 2px;
-}
-
-.input-group.integrated .form-control {
-    border-right: 0;
-    box-shadow: 0 0 0;
-}
-
-    .input-group.integrated .form-control:focus + .input-group-addon {
-        border-color: #66afe9;
-        outline: 0;
-    }
-
-.input-group.integrated button {
-    background: transparent;
-    border: 0;
-    color: #999;
-    outline: none;
-}
+.search-form { position: relative; z-index: 9;}
+.search { color: #aaa; font-size: 16px; position: relative; }
+    .search input { text-indent: 24px;}
+    .search .fa-search {  left: 10px; position: absolute; top: 8px; }
 
 .result-enter {
   opacity: 0.01;
@@ -487,12 +469,12 @@
         -webkit-transition: all 150ms linear;
         align-content: center;
         align-items: center;
+        border: 5px dashed #ccc;
+        bottom: 20px;
         display: flex;
         display: -webkit-box;
         display: -webkit-flex;
-        display: -ms-flexbox;
-        flex-direction: column;
-        border: 5px dashed #ccc; height: auto; width: auto; position:absolute; top: 20px; right: 20px; bottom: 20px; left: 20px; }
+        display: -ms-flexbox; flex-direction: column; height: auto; left: 20px;  position:absolute; right: 20px; top: 20px; width: auto;}
     .file-drop > .file-drop-target h4 { font-weight: bold; }
 
         .file-drop > .file-drop-target.file-drop-dragging-over-frame {
