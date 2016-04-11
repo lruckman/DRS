@@ -11,11 +11,11 @@ var SearchForm = React.createClass({
         this.props.onSearchSubmit(q, libraryIds || []);
     },
     searchHandleKeyUp: function (e) {
-        if (e.keyCode !== 13) {
-            return;
-        }
+        //if (e.keyCode !== 13) {
+        //    return;
+        //}
 
-        e.preventDefault();
+        //e.preventDefault();
 
         var q = this.refs.search.value.trim();
         var libraryIds = this.state.libraryIds;

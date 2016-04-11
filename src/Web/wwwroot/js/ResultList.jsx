@@ -6,12 +6,11 @@ var ResultList = React.createClass({
     propTypes: {
         data: React.PropTypes.arrayOf(
                 React.PropTypes.shape({
-                    id: React.PropTypes.number,
                     abstract: React.PropTypes.string,
-                    location: React.PropTypes.string,
+                    id: React.PropTypes.number,
+                    selfLink: React.PropTypes.string,
                     thumbnailLink: React.PropTypes.string,
-                    title: React.PropTypes.string,
-                    icon: React.PropTypes.string
+                    title: React.PropTypes.string
                 })
         ),
         nextLink: React.PropTypes.string,
@@ -32,23 +31,33 @@ var ResultList = React.createClass({
     resultHandleClick: function (index, e) {
         e.preventDefault();
         this.setState({ activeIndex: index });
-        this.props.onSelect(this.props.data[index].location);
+        this.props.onSelect(this.props.data[index].selfLink);
     },
     render: function () {
         var resultNodes = this.props.data.map(function (result, index) {
             var resultClass = classNames({
-                'list-group-item': true,
                 'active': index === this.state.activeIndex
             });
             var boundClick = this.resultHandleClick.bind(this, index);
             return (
-                <a href="#" target="_blank" className={resultClass} key={result.id} onClick={boundClick}>
-                    <i className={result.icon}></i>&nbsp;{result.title}
-                </a>
+                <div key={result.id} className="card">
+                    <a href="#" target="_blank" className="thumbnail-link" onClick={boundClick}>
+                        <div className="thumbnail" style={{backgroundImage: 'url(' + result.thumbnailLink + ')'}}>
+                        </div>
+                    </a>
+                    <div className="title-container">
+                        <a href={result.selfLink} title={result.title} className="title" onClick={boundClick}>
+                            {result.title}
+                        </a>
+                        <span className="abstract">
+                            {result.abstract}
+                        </span>
+                    </div>
+                </div>
             );
         }, this);
         return (
-            <div className="list-group" data-next-link={this.props.nextLink}>
+            <div data-next-link={this.props.nextLink}>
                 <ReactCSSTransitionGroup 
                     transitionName="result" 
                     transitionEnterTimeout={500} 

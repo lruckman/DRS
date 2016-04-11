@@ -1,7 +1,5 @@
-﻿body {
-    padding-bottom: 20px;
-    padding-top: 50px;
-}
+﻿body { background: #333; }
+body { color: #f7f7f7;}
 
 .body-content { padding-top: 20px; }
 
@@ -9,6 +7,11 @@
 .search { color: #aaa; font-size: 16px; position: relative; }
     .search input { text-indent: 24px;}
     .search .fa-search {  left: 10px; position: absolute; top: 8px; }
+
+    .card { float: left; margin-bottom: 20px; margin-right: 20px; width: 200px;}
+.card .thumbnail { background-position: 50% 50%; background-size: cover; height: 275px; margin-bottom: 10px;width:200px }
+.card .title { color: #fff; display: block; }
+.card .abstract { color: #999; display: block; font-size: .9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .result-enter {
   opacity: 0.01;
@@ -469,7 +472,7 @@
         -webkit-transition: all 150ms linear;
         align-content: center;
         align-items: center;
-        border: 5px dashed #ccc;
+        /*border: 2px dashed #ccc;*/
         bottom: 20px;
         display: flex;
         display: -webkit-box;
@@ -478,8 +481,8 @@
     .file-drop > .file-drop-target h4 { font-weight: bold; }
 
         .file-drop > .file-drop-target.file-drop-dragging-over-frame {
-            background-color: rgba(255, 255, 255, 0.85);
-            color: #888;
+            background-color: rgba(153, 153, 153, 0.85);
+            color: #fff;
             opacity: 1.0;
             z-index: 9999;
         }

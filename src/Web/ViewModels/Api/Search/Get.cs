@@ -88,8 +88,7 @@ namespace Web.ViewModels.Api.Search
                 {
                     CreateMap<Document, Result.Document>()
                         .ForMember(d => d.SelfLink, o => o.MapFrom(s => $"/api/documents/{s.Id}"))
-                        .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"))
-                        .ForMember(d => d.Location, o => o.MapFrom(s => $"/api/documents/{s.Id}"));
+                        .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"));
                 }
             }
         }
@@ -105,15 +104,9 @@ namespace Web.ViewModels.Api.Search
             {
                 public int Id { get; set; }
                 public string Title { get; set; }
-                public string Abstract { get; set; }
                 public string SelfLink { get; set; }
-                public string Location { get; set; }
                 public string ThumbnailLink { get; set; }
-                public string CreatedOn { get; set; }
-                public string ModifiedOn { get; set; }
-                public long FileSize { get; set; }
-                public int PageCount { get; set; }
-                public string Icon => "fa fa-file-pdf-o";
+                public string Abstract { get; set; }
             }
         }
     }

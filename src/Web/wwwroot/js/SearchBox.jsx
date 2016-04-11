@@ -78,15 +78,16 @@ var SearchBox = React.createClass({
                     <SearchForm 
                         libraries={this.props.libraries}
                         onSearchSubmit={this.searchHandleSubmit} />
-                    <ResultList 
-                        data={this.state.data.documents}
-                        nextLink={this.state.data.nextLink}
-                        onSelect={this.resultHandleSelect} />
                 </div>
                 <div className="col-sm-9">
                     <img
                         src={this.state.selectedDocument.thumbnailLink}
                         className="img-responsive img-thumbnail" />
+
+                    <ResultList 
+                        data={this.state.data.documents}
+                        nextLink={this.state.data.nextLink}
+                        onSelect={this.resultHandleSelect} />
                 </div>
             </div>
         );
