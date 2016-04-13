@@ -16,11 +16,14 @@ var SearchForm = React.createClass({
         //}
 
         //e.preventDefault();
+        clearTimeout(this.timer);
 
-        var q = this.refs.search.value.trim();
-        var libraryIds = this.state.libraryIds;
+        this.timer = setTimeout(function() {
+            var q = this.refs.search.value.trim();
+            var libraryIds = this.state.libraryIds;
 
-        this.search(q, libraryIds);
+            this.search(q, libraryIds);
+        }.bind(this), 250);
     },
     libraryHandleSelectChange (value) {
         var libraryIds = (typeof value === 'string')

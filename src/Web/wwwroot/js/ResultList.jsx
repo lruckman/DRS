@@ -40,7 +40,7 @@ var ResultList = React.createClass({
             });
             var boundClick = this.resultHandleClick.bind(this, index);
             return (
-                <div key={result.id} className="card">
+                <div key={result.id} className="card pulse">
                     <a href="#" target="_blank" className="thumbnail-link" onClick={boundClick}>
                         <div className="thumbnail" style={{backgroundImage: 'url(' + result.thumbnailLink + ')'}}>
                         </div>
