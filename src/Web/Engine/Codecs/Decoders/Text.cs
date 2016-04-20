@@ -1,17 +1,18 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Microsoft.Extensions.PlatformAbstractions;
 
-namespace Web.Engine.FileParsers
+namespace Web.Engine.Codecs.Decoders
 {
-    public class RawText : FileParser
+    public class Text : File
     {
         protected override string ExtractContent(int? pageNumber)
         {
             return Encoding.UTF8.GetString(Buffer);
         }
 
-        protected override int ExtractNumberOfPages()
+        protected override int ExtractPageCount()
         {
             return 1;
         }
@@ -23,7 +24,8 @@ namespace Web.Engine.FileParsers
 
         public static readonly string[] SupportedFileTypes = {".txt"};
 
-        public RawText(byte[] buffer) : base(buffer)
+        public Text(byte[] buffer, IApplicationEnvironment appEnvironment)
+            : base(buffer, appEnvironment)
         {
         }
     }

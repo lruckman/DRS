@@ -214,3 +214,10 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/src/Web/wwwroot/js/SearchForm.js
+/src/Web/wwwroot/js/SearchBox.js
+/src/Web/wwwroot/js/EditDocument.js
+/src/Web/wwwroot/js/dist/clientBundle.js
+/src/Web/wwwroot/js/ResultList.js
+/src/Web/wwwroot/lib/bootstrap
+/src/Web/wwwroot/lib/font-awesome

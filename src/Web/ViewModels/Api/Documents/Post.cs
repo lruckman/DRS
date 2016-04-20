@@ -11,9 +11,10 @@ using MediatR;
 using Microsoft.AspNet.Http;
 using Microsoft.Data.Entity;
 using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.PlatformAbstractions;
 using Web.Engine;
+using Web.Engine.Codecs.Decoders;
 using Web.Engine.Extensions;
-using Web.Engine.FileParsers;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -39,9 +40,11 @@ namespace Web.ViewModels.Api.Documents
             private readonly ApplicationDbContext _db;
             private readonly IOptions<DRSSettings> _settings;
             private readonly IUserAccessor _userAccessor;
+            private readonly IApplicationEnvironment _appEnvironment;
 
-            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor)
+            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor, IApplicationEnvironment appEnvironment)
             {
+                _appEnvironment = appEnvironment;
                 _db = db;
                 _settings = settings;
                 _userAccessor = userAccessor;
@@ -103,7 +106,7 @@ namespace Web.ViewModels.Api.Documents
 
                     // get a parser
 
-                    var parser = FileParser.Get(extension, buffer);
+                    var parser = Engine.Codecs.Decoders.File.Get(extension, buffer, _appEnvironment);
 
                     // index in lucene
 
@@ -129,7 +132,7 @@ namespace Web.ViewModels.Api.Documents
                         {
                             // save the thumbnail to the stream
 
-                            await parser.SaveThumbnailAsync(stream);
+                            await parser.ThumbnailAsync(stream);
 
                             // encrypt the stream and save it
 
@@ -137,7 +140,7 @@ namespace Web.ViewModels.Api.Documents
                                 .SaveProtectedAsAsync(document.ThumbnailPath, documentKey, dataProtectionScope);
                         }
 
-                        document.PageCount = await parser.NumberOfPagesAsync();
+                        document.PageCount = await parser.PageCountAsync();
 
                         // encrypt and save the uploaded file
 
@@ -153,16 +156,16 @@ namespace Web.ViewModels.Api.Documents
 
                         // thumbnail
 
-                        if (File.Exists(document.ThumbnailPath))
+                        if (System.IO.File.Exists(document.ThumbnailPath))
                         {
-                            File.Delete(document.ThumbnailPath);
+                            System.IO.File.Delete(document.ThumbnailPath);
                         }
 
                         // document
 
-                        if (File.Exists(document.Path))
+                        if (System.IO.File.Exists(document.Path))
                         {
-                            File.Delete(document.Path);
+                            System.IO.File.Delete(document.Path);
                         }
 
                         trans.Rollback();

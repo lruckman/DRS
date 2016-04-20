@@ -1,16 +1,17 @@
 ﻿using System;
 using System.IO;
+using Microsoft.Extensions.PlatformAbstractions;
 
-namespace Web.Engine.FileParsers
+namespace Web.Engine.Codecs.Decoders
 {
-    public class NotSupported : FileParser
+    public class Default : File
     {
         protected override string ExtractContent(int? pageNumber)
         {
             return null;
         }
 
-        protected override int ExtractNumberOfPages()
+        protected override int ExtractPageCount()
         {
             return 1;
         }
@@ -22,7 +23,8 @@ namespace Web.Engine.FileParsers
 
         public static readonly string[] SupportedFileTypes = {".*"};
 
-        public NotSupported(byte[] buffer) : base(buffer)
+        public Default(byte[] buffer, IApplicationEnvironment appEnvironment)
+            : base(buffer, appEnvironment)
         {
         }
     }

@@ -4,10 +4,11 @@ using System.IO;
 using Ghostscript.NET.Rasterizer;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
+using Microsoft.Extensions.PlatformAbstractions;
 
-namespace Web.Engine.FileParsers
+namespace Web.Engine.Codecs.Decoders
 {
-    public class Pdf : FileParser
+    public class Pdf : File
     {
         protected override string ExtractContent(int? pageNumber)
         {
@@ -32,7 +33,7 @@ namespace Web.Engine.FileParsers
             }
         }
 
-        protected override int ExtractNumberOfPages()
+        protected override int ExtractPageCount()
         {
             using (var reader = new PdfReader(Buffer))
             {
@@ -64,7 +65,8 @@ namespace Web.Engine.FileParsers
 
         public static readonly string[] SupportedFileTypes = {".pdf"};
 
-        public Pdf(byte[] buffer) : base(buffer)
+        public Pdf(byte[] buffer, IApplicationEnvironment appEnvironment)
+            : base(buffer, appEnvironment)
         {
         }
     }

@@ -2,40 +2,44 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.PlatformAbstractions;
 
-namespace Web.Engine.FileParsers
+namespace Web.Engine.Codecs.Decoders
 {
-    public abstract class FileParser : IFileParser
+    public abstract class File : IFile
     {
-        private static IDictionary<string, Type> _registeredParsers;
+        private static IDictionary<string, Type> _registeredFileDecoders;
         internal readonly byte[] Buffer;
+        internal readonly IApplicationEnvironment AppEnvironment;
 
-        static FileParser()
+        static File()
         {
-            RegisterParsers();
+            RegisterFileDecoders();
         }
 
-        protected FileParser(byte[] buffer)
+        protected File(byte[] buffer, IApplicationEnvironment appEnvironment)
         {
             if (buffer == null || buffer.LongLength == 0)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
 
+            AppEnvironment = appEnvironment;
             Buffer = buffer;
             FileLength = buffer.LongLength;
         }
 
-        private static void RegisterParsers()
+        private static void RegisterFileDecoders()
         {
-            _registeredParsers = new Dictionary<string, Type>();
+            _registeredFileDecoders = new Dictionary<string, Type>();
 
             Action<string, Type> register =
-                (ext, type) => { _registeredParsers.Add(ext.ToLower(), type); };
+                (ext, type) => { _registeredFileDecoders.Add(ext.ToLower(), type); };
 
+            Array.ForEach(Image.SupportedFileTypes, ext => register(ext, typeof(Image)));
             Array.ForEach(Pdf.SupportedFileTypes, ext => register(ext, typeof (Pdf)));
-            Array.ForEach(RawText.SupportedFileTypes, ext => register(ext, typeof(RawText)));
-            Array.ForEach(NotSupported.SupportedFileTypes, ext => register(ext, typeof(NotSupported)));
+            Array.ForEach(Text.SupportedFileTypes, ext => register(ext, typeof(Text)));
+            Array.ForEach(Default.SupportedFileTypes, ext => register(ext, typeof(Default)));
         }
 
         /// <summary>
@@ -64,21 +68,21 @@ namespace Web.Engine.FileParsers
         ///     Gets the number of pages for the specific file.
         /// </summary>
         /// <returns>An int containing the number of pages contained in the specific file.</returns>
-        public int NumberOfPages()
+        public int PageCount()
         {
-            return ExtractNumberOfPages();
+            return ExtractPageCount();
         }
 
         /// <summary>
         ///     Asynchronously gets the number of pages for the specific file.
         /// </summary>
         /// <returns>An int containing the number of pages contained in the specific file.</returns>
-        public async Task<int> NumberOfPagesAsync()
+        public async Task<int> PageCountAsync()
         {
-            return await Task.Factory.StartNew(ExtractNumberOfPages);
+            return await Task.Factory.StartNew(ExtractPageCount);
         }
 
-        protected abstract int ExtractNumberOfPages();
+        protected abstract int ExtractPageCount();
 
         /// <summary>
         ///     Gets a thunbmail for the specific file.
@@ -87,7 +91,7 @@ namespace Web.Engine.FileParsers
         /// <param name="pageNumber">The pageNumber you want the thumbnail created for, default pageNumber 1</param>
         /// <param name="dpi">Dots per inch for the thumbnail, default 72</param>
         /// <returns>An array of bytes containing the generated thumbnail</returns>
-        public void SaveThumbnail(Stream outputStream, int pageNumber, int dpi)
+        public void Thumbnail(Stream outputStream, int pageNumber, int dpi)
         {
             if (outputStream == null)
             {
@@ -104,14 +108,14 @@ namespace Web.Engine.FileParsers
         /// <param name="pageNumber">The pageNumber you want the thumbnail created for, default pageNumber 1</param>
         /// <param name="dpi">Dots per inch for the thumbnail, default 72</param>
         /// <returns>An array of bytes containing the generated thumbnail</returns>
-        public async Task SaveThumbnailAsync(Stream outputStream, int pageNumber = 1, int dpi = 72)
+        public async Task ThumbnailAsync(Stream outputStream, int pageNumber = 1, int dpi = 72)
         {
             if (outputStream == null)
             {
                 throw new ArgumentNullException(nameof(outputStream));
             }
 
-            await Task.Factory.StartNew(() => SaveThumbnail(outputStream, pageNumber, dpi));
+            await Task.Factory.StartNew(() => Thumbnail(outputStream, pageNumber, dpi));
         }
 
         protected abstract void ExtractThumbnail(Stream outputStream, int pageNumber, int dpi);
@@ -127,7 +131,7 @@ namespace Web.Engine.FileParsers
         /// <param name="fileExtension"></param>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        public static IFileParser Get(string fileExtension, byte[] buffer)
+        public static IFile Get(string fileExtension, byte[] buffer, IApplicationEnvironment appEnvironment)
         {
             if (fileExtension == null)
             {
@@ -136,11 +140,11 @@ namespace Web.Engine.FileParsers
 
             fileExtension = fileExtension.ToLower();
 
-            var parserType = _registeredParsers.ContainsKey(fileExtension)
-                ? _registeredParsers[fileExtension]
-                : _registeredParsers[".*"];
+            var parserType = _registeredFileDecoders.ContainsKey(fileExtension)
+                ? _registeredFileDecoders[fileExtension]
+                : _registeredFileDecoders[".*"];
 
-            return (IFileParser) Activator.CreateInstance(parserType, buffer);
+            return (IFile) Activator.CreateInstance(parserType, buffer, appEnvironment);
         }
     }
 }
