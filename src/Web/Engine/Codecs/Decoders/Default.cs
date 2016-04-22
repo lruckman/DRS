@@ -16,7 +16,7 @@ namespace Web.Engine.Codecs.Decoders
             return 1;
         }
 
-        protected override void ExtractThumbnail(Stream outputStream, int pageNumber, int dpi)
+        protected override void ExtractThumbnail(Stream outputStream, int width, int? height, int pageNumber)
         {
             throw new NotImplementedException();
         }

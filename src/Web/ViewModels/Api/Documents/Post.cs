@@ -132,7 +132,7 @@ namespace Web.ViewModels.Api.Documents
                         {
                             // save the thumbnail to the stream
 
-                            await parser.ThumbnailAsync(stream);
+                            await parser.ThumbnailAsync(stream, 600);
 
                             // encrypt the stream and save it
 
