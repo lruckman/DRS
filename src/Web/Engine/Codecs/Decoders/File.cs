@@ -43,35 +43,16 @@ namespace Web.Engine.Codecs.Decoders
         }
 
         /// <summary>
-        ///     Gets the text content for the specific file
-        /// </summary>
-        /// <param name="pageNumber">The pageNumber to pull content from, set to null to return content from all pages.</param>
-        /// <returns>A string containing the parsed text content from the specific file.</returns>
-        public string Content(int? pageNumber)
-        {
-            return ExtractContent(pageNumber);
-        }
-
-        /// <summary>
         ///     Asynchronously gets the text content for the specific file
         /// </summary>
         /// <param name="pageNumber">The pageNumber to pull content from, set to null to return content from all pages.</param>
         /// <returns>A string containing the parsed text content from the specific file.</returns>
         public async Task<string> ContentAsync(int? pageNumber = null)
         {
-            return await Task.Factory.StartNew(() => Content(pageNumber));
+            return await Task.Factory.StartNew(() => ExtractContent(pageNumber));
         }
 
         protected abstract string ExtractContent(int? pageNumber);
-
-        /// <summary>
-        ///     Gets the number of pages for the specific file.
-        /// </summary>
-        /// <returns>An int containing the number of pages contained in the specific file.</returns>
-        public int PageCount()
-        {
-            return ExtractPageCount();
-        }
 
         /// <summary>
         ///     Asynchronously gets the number of pages for the specific file.
@@ -85,40 +66,24 @@ namespace Web.Engine.Codecs.Decoders
         protected abstract int ExtractPageCount();
 
         /// <summary>
-        ///     Gets a thunbmail for the specific file.
-        /// </summary>
-        /// <param name="outputStream">Stream where the generated thumbnail will be saved to</param>
-        /// <param name="pageNumber">The pageNumber you want the thumbnail created for, default pageNumber 1</param>
-        /// <param name="dpi">Dots per inch for the thumbnail, default 72</param>
-        /// <returns>An array of bytes containing the generated thumbnail</returns>
-        public void Thumbnail(Stream outputStream, int pageNumber, int dpi)
-        {
-            if (outputStream == null)
-            {
-                throw new ArgumentNullException(nameof(outputStream));
-            }
-
-            ExtractThumbnail(outputStream, pageNumber, dpi);
-        }
-
-        /// <summary>
         ///     Asynchronously gets a thunbmail for the specific file.
         /// </summary>
         /// <param name="outputStream">Stream where the generated thumbnail will be saved to</param>
         /// <param name="pageNumber">The pageNumber you want the thumbnail created for, default pageNumber 1</param>
-        /// <param name="dpi">Dots per inch for the thumbnail, default 72</param>
+        /// <param name="width">Width of the generated thumbnail</param>
+        /// <param name="height">Height of the generate thumbnail. If null the thumbnail will be scaled to meet just the width.</param>
         /// <returns>An array of bytes containing the generated thumbnail</returns>
-        public async Task ThumbnailAsync(Stream outputStream, int pageNumber = 1, int dpi = 72)
+        public async Task ThumbnailAsync(Stream outputStream, int width, int? height = null, int pageNumber = 1)
         {
             if (outputStream == null)
             {
                 throw new ArgumentNullException(nameof(outputStream));
             }
 
-            await Task.Factory.StartNew(() => Thumbnail(outputStream, pageNumber, dpi));
+            await Task.Factory.StartNew(() => ExtractThumbnail(outputStream, width, height, pageNumber));
         }
 
-        protected abstract void ExtractThumbnail(Stream outputStream, int pageNumber, int dpi);
+        protected abstract void ExtractThumbnail(Stream outputStream, int width, int? height, int pageNumber);
 
         /// <summary>
         ///     Gets the size, in bytes, of the specific file.

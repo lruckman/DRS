@@ -5,6 +5,7 @@ using Ghostscript.NET.Rasterizer;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Extensions.PlatformAbstractions;
+using Web.Engine.Extensions;
 
 namespace Web.Engine.Codecs.Decoders
 {
@@ -41,7 +42,7 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        protected override void ExtractThumbnail(Stream outputStream, int pageNumber, int dpi)
+        protected override void ExtractThumbnail(Stream outputStream, int width, int? height, int pageNumber)
         {
             if (outputStream == null)
             {
@@ -54,10 +55,11 @@ namespace Web.Engine.Codecs.Decoders
                 {
                     rasterizer.Open(stream);
 
-                    using (var thumbnail = rasterizer.GetPage(dpi, dpi, pageNumber))
+                    using (var thumbnail = rasterizer
+                        .GetPage(200, 200, pageNumber)
+                        .ToFixedSize(width, height))
                     {
                         thumbnail.Save(outputStream, ImageFormat.Png);
-                        thumbnail.Dispose();
                     }
                 }
             }
