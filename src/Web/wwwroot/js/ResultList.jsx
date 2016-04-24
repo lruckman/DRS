@@ -10,7 +10,8 @@ var ResultList = React.createClass({
                     id: React.PropTypes.number,
                     selfLink: React.PropTypes.string,
                     thumbnailLink: React.PropTypes.string,
-                    title: React.PropTypes.string
+                    title: React.PropTypes.string,
+                    viewLink: React.PropTypes.string
                 })
         ),
         nextLink: React.PropTypes.string,
@@ -31,7 +32,18 @@ var ResultList = React.createClass({
     resultHandleClick: function (index, e) {
         e.preventDefault();
         this.setState({ activeIndex: index });
-        this.props.onSelect(this.props.data[index].selfLink);
+        this.clickStatus = 1;
+        this.clickTimer = setTimeout(function() {
+            if (this.clickStatus === 1) {
+                this.props.onSelect(this.props.data[index].selfLink);
+            }
+        }.bind(this), 200);
+    },
+    resultHandleDblClick: function(index, e) {
+        e.preventDefault();
+        clearTimeout(this.clickTimer);
+        this.clickStatus = 0;
+        window.open(this.props.data[index].viewLink, '_blank');
     },
     render: function () {
         var resultNodes = this.props.data.map(function (result, index) {
@@ -39,9 +51,10 @@ var ResultList = React.createClass({
                 'active': index === this.state.activeIndex
             });
             var boundClick = this.resultHandleClick.bind(this, index);
+            var boundDblClick = this.resultHandleDblClick.bind(this, index);
             return (
                 <div key={result.id} className="card pulse">
-                    <a href="#" target="_blank" className="thumbnail-link" onClick={boundClick}>
+                    <a href="#" target="_blank" className="thumbnail-link" onClick={boundClick} onDoubleClick={boundDblClick}>
                         <div className="thumbnail" style={{backgroundImage: 'url(' + result.thumbnailLink + ')'}}>
                         </div>
                     </a>

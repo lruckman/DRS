@@ -88,7 +88,8 @@ namespace Web.ViewModels.Api.Search
                 {
                     CreateMap<Document, Result.Document>()
                         .ForMember(d => d.SelfLink, o => o.MapFrom(s => $"/api/documents/{s.Id}"))
-                        .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"));
+                        .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"))
+                        .ForMember(d => d.ViewLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/view")); ;
                 }
             }
         }
@@ -105,6 +106,7 @@ namespace Web.ViewModels.Api.Search
                 public int Id { get; set; }
                 public string Title { get; set; }
                 public string SelfLink { get; set; }
+                public string ViewLink { get; set; }
                 public string ThumbnailLink { get; set; }
                 public string Abstract { get; set; }
             }
