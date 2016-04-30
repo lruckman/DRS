@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.Data.Entity;
+using MimeTypes;
 using Web.Engine.Extensions;
 using Web.Models;
 using File = System.IO.File;
@@ -54,7 +55,8 @@ namespace Web.ViewModels.Api.Files
                 var model = new Result
                 {
                     FileContents = File.ReadAllBytes(file.Path)
-                        .Unprotect(fileKey, dataProtectionScope)
+                        .Unprotect(fileKey, dataProtectionScope),
+                    ContentType = MimeTypeMap.GetMimeType(file.Extension)
                 };
 
                 return model;
@@ -64,7 +66,7 @@ namespace Web.ViewModels.Api.Files
         public class Result
         {
             public byte[] FileContents { get; set; }
-            public string ContentType => "application/pdf";
+            public string ContentType { get; set; }
         }
     }
 }

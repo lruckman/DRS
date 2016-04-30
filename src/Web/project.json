@@ -34,7 +34,8 @@
         "FluentValidation": "6.2.1",
         "React.AspNet": "2.2.1",
         "AutoMapper": "4.2.1",
-        "StructureMap.Dnx": "0.4.0-rc1-final"
+        "StructureMap.Dnx": "0.4.0-rc1-final",
+        "MediaTypeMap": "2.1.0"
     },
 
   "commands": {
