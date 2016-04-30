@@ -54,10 +54,11 @@ namespace Web.ViewModels.Api.Search
 
                 if (!string.IsNullOrWhiteSpace(message.Q))
                 {
+                    //todo: preselect files
                     documentQuery = documentQuery
                         .FromSql(
-                            $"SELECT d.* FROM [dbo].[{nameof(Document)}] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key]",
-                            message.Q);
+                            $"SELECT d.* FROM [dbo].[{nameof(Document)}s] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key] AND d.Status = @p1 AND EXISTS (SELECT 1 FROM [dbo].[{nameof(File)}s] AS f WHERE f.DocumentId = d.Id AND f.Status = @p1)",
+                            message.Q, (int) StatusTypes.Active);
                 }
 
                 var result = new Result
@@ -73,9 +74,9 @@ namespace Web.ViewModels.Api.Search
                 }
 
                 result.Documents = await documentQuery
-                    .OrderBy(d => d.Id)
-                    .Skip(message.MaxResults * message.PageIndex)
-                    .Take(message.MaxResults)
+                    //todo: reinstate, broken when uncommented
+                    //.Skip(message.MaxResults * message.PageIndex)
+                    //.Take(message.MaxResults)
                     .ProjectTo<Result.Document>(_configurationProvider)
                     .ToArrayAsync();
 
@@ -87,9 +88,12 @@ namespace Web.ViewModels.Api.Search
                 protected override void Configure()
                 {
                     CreateMap<Document, Result.Document>()
-                        .ForMember(d => d.SelfLink, o => o.MapFrom(s => $"/api/documents/{s.Id}"))
-                        .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"))
-                        .ForMember(d => d.ViewLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/view")); ;
+                        .ForMember(d => d.File, o => o.MapFrom(s =>
+                            s.Files
+                                .Where(f => f.Status == StatusTypes.Active)
+                                .OrderByDescending(f => f.VersionNum)
+                                .Single()));
+                    CreateMap<File, Result.Document.FileResult>();
                 }
             }
         }
@@ -105,10 +109,19 @@ namespace Web.ViewModels.Api.Search
             {
                 public int Id { get; set; }
                 public string Title { get; set; }
-                public string SelfLink { get; set; }
-                public string ViewLink { get; set; }
-                public string ThumbnailLink { get; set; }
+                public string SelfLink => $"/api/documents/{Id}";
                 public string Abstract { get; set; }
+
+                public FileResult File { get; set; }
+
+                public class FileResult
+                {
+                    public int Id { get; set; }
+                    public long Size { get; set; }
+                    public int PageCount { get; set; }
+                    public string ThumbnailLink => $"/api/files/{Id}/thumbnail";
+                    public string ViewLink => $"/api/files/{Id}/view";
+                }
             }
         }
     }

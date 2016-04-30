@@ -5,13 +5,12 @@ using Microsoft.Data.Entity.Metadata;
 using Microsoft.Data.Entity.Migrations;
 using Web.Models;
 
-namespace Web.Migrations
+namespace web.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20151221004753_DocumentsAndLibraries")]
-    partial class DocumentsAndLibraries
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.0-rc1-16348")
@@ -152,29 +151,93 @@ namespace Web.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("Abstract")
+                        .HasAnnotation("MaxLength", 512);
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasAnnotation("MaxLength", 450);
+
                     b.Property<DateTimeOffset>("CreatedOn");
+
+                    b.Property<DateTimeOffset>("ModifiedOn");
+
+                    b.Property<int>("Status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasAnnotation("MaxLength", 60);
+
+                    b.HasKey("Id");
+
+                    b.HasAnnotation("Relational:TableName", "Documents");
+                });
+
+            modelBuilder.Entity("Web.Models.DocumentContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Content");
+
+                    b.Property<int>("DocumentId");
+
+                    b.HasKey("Id");
+
+                    b.HasAnnotation("Relational:TableName", "DocumentContents");
+                });
+
+            modelBuilder.Entity("Web.Models.File", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasAnnotation("MaxLength", 450);
+
+                    b.Property<DateTimeOffset>("CreatedOn");
+
+                    b.Property<int>("DocumentId");
 
                     b.Property<string>("Extension")
                         .IsRequired()
                         .HasAnnotation("MaxLength", 16);
 
+                    b.Property<string>("Key")
+                        .HasAnnotation("MaxLength", 1024);
+
                     b.Property<DateTimeOffset>("ModifiedOn");
+
+                    b.Property<int>("PageCount");
 
                     b.Property<string>("Path")
                         .IsRequired()
                         .HasAnnotation("MaxLength", 256);
 
+                    b.Property<long>("Size");
+
+                    b.Property<int>("Status");
+
                     b.Property<string>("ThumbnailPath")
                         .IsRequired()
                         .HasAnnotation("MaxLength", 256);
 
+                    b.Property<int>("VersionNum");
+
                     b.HasKey("Id");
+
+                    b.HasAnnotation("Relational:TableName", "Files");
                 });
 
             modelBuilder.Entity("Web.Models.Library", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasAnnotation("MaxLength", 450);
 
                     b.Property<DateTimeOffset>("CreatedOn");
 
@@ -184,11 +247,11 @@ namespace Web.Migrations
                         .IsRequired()
                         .HasAnnotation("MaxLength", 56);
 
-                    b.Property<string>("RootPath")
-                        .IsRequired()
-                        .HasAnnotation("MaxLength", 256);
+                    b.Property<int>("Status");
 
                     b.HasKey("Id");
+
+                    b.HasAnnotation("Relational:TableName", "Libraries");
                 });
 
             modelBuilder.Entity("Web.Models.LibraryDocument", b =>
@@ -198,6 +261,22 @@ namespace Web.Migrations
                     b.Property<int>("DocumentId");
 
                     b.HasKey("LibraryId", "DocumentId");
+
+                    b.HasAnnotation("Relational:TableName", "LibraryDocuments");
+                });
+
+            modelBuilder.Entity("Web.Models.StatusType", b =>
+                {
+                    b.Property<int>("Id");
+
+                    b.Property<string>("Name")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasAnnotation("Relational:Schema", "Lookup");
+
+                    b.HasAnnotation("Relational:TableName", "StatusTypes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityRoleClaim<string>", b =>
@@ -230,6 +309,20 @@ namespace Web.Migrations
                     b.HasOne("Web.Models.ApplicationUser")
                         .WithMany()
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Web.Models.DocumentContent", b =>
+                {
+                    b.HasOne("Web.Models.Document")
+                        .WithOne()
+                        .HasForeignKey("Web.Models.DocumentContent", "DocumentId");
+                });
+
+            modelBuilder.Entity("Web.Models.File", b =>
+                {
+                    b.HasOne("Web.Models.Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId");
                 });
 
             modelBuilder.Entity("Web.Models.LibraryDocument", b =>

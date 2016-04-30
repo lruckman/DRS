@@ -49,8 +49,15 @@ namespace Web.ViewModels.Api.Documents
                 protected override void Configure()
                 {
                     CreateMap<Document, Result>()
-                        .ForMember(d => d.LibraryIds, o => o.MapFrom(s => s.Libraries.Select(l => l.LibraryId.ToString())))
-                        .ForMember(d => d.ThumbnailLink, o => o.MapFrom(s => $"/api/documents/{s.Id}/thumbnail"));
+                        .ForMember(d => d.File, o => o.MapFrom(s =>
+                            s.Files
+                                .Where(f => f.Status == StatusTypes.Active)
+                                .OrderByDescending(f => f.VersionNum)
+                                .Single()))
+                        .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
+                            s.Libraries
+                                .Select(l => l.LibraryId.ToString())));
+                    CreateMap<File, Result.FileResult>();
                 }
             }
         }
@@ -60,12 +67,18 @@ namespace Web.ViewModels.Api.Documents
             public int Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
-            public string ThumbnailLink { get; set; }
             public string CreatedOn { get; set; }
             public string ModifiedOn { get; set; }
             public string[] LibraryIds { get; set; }
-            public long FileSize { get; set; }
-            public int PageCount { get; set; }
+            public FileResult File { get; set; }
+
+            public class FileResult
+            {
+                public int Id { get; set; }
+                public long Size { get; set; }
+                public int PageCount { get; set; }
+                public string ThumbnailLink => $"/api/files/{Id}/thumbnail";
+            }
         }
     }
 }

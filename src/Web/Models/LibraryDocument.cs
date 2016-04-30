@@ -1,5 +1,8 @@
-﻿namespace Web.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Web.Models
 {
+    [Table("LibraryDocuments")]
     public class LibraryDocument
     {
         public int LibraryId { get; set; }

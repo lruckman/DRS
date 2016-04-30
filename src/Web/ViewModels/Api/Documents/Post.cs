@@ -13,9 +13,9 @@ using Microsoft.Data.Entity;
 using Microsoft.Extensions.OptionsModel;
 using Microsoft.Extensions.PlatformAbstractions;
 using Web.Engine;
-using Web.Engine.Codecs.Decoders;
 using Web.Engine.Extensions;
 using Web.Models;
+using File = Web.Models.File;
 
 namespace Web.ViewModels.Api.Documents
 {
@@ -42,7 +42,8 @@ namespace Web.ViewModels.Api.Documents
             private readonly IUserAccessor _userAccessor;
             private readonly IApplicationEnvironment _appEnvironment;
 
-            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor, IApplicationEnvironment appEnvironment)
+            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor,
+                IApplicationEnvironment appEnvironment)
             {
                 _appEnvironment = appEnvironment;
                 _db = db;
@@ -57,25 +58,42 @@ namespace Web.ViewModels.Api.Documents
                 var extension = Path.GetExtension(message.File.FileName() ?? "")
                     .ToLowerInvariant();
 
-                var documentKey = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N"));
-                
+                var fileKey = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N"));
+
+                // create and add the document
+
                 var document = new Document
                 {
                     CreatedByUserId = _userAccessor.User.GetUserId(),
                     CreatedOn = DateTimeOffset.Now,
-                    Extension = extension,
-                    FileSize = message.File.Length,
                     ModifiedOn = DateTimeOffset.Now,
-                    ThumbnailPath = "",
-                    Title = message.File.FileName(),
-                    PageCount = 0,
-                    Path = "",
-                    Key = Convert.ToBase64String(documentKey.Protect(null, dataProtectionScope))
+                    Status = StatusTypes.Active,
+                    Title = message.File.FileName()
                 };
 
                 _db.Documents.Add(document);
 
+                // create and add the file
+
+                var file = new File
+                {
+                    CreatedByUserId = _userAccessor.User.GetUserId(),
+                    CreatedOn = DateTimeOffset.Now,
+                    Extension = extension,
+                    Key = Convert.ToBase64String(fileKey.Protect(null, dataProtectionScope)),
+                    ModifiedOn = DateTimeOffset.Now,
+                    PageCount = 0,
+                    Path = "",
+                    Size = message.File.Length,
+                    Status = StatusTypes.Active,
+                    ThumbnailPath = "",
+                    VersionNum = 1
+                };
+
+                document.Files.Add(file);
+
                 //todo: add to indexers private library (hardcoded for now)
+                // add document to the default library
 
                 document.Libraries.Add(await _db.Libraries
                     .Select(l => new LibraryDocument
@@ -86,11 +104,13 @@ namespace Web.ViewModels.Api.Documents
 
                 using (var trans = await _db.Database.BeginTransactionAsync())
                 {
+                    // commit what we have now so we can use the file id to proceed with the rest
+
                     await _db.SaveChangesAsync();
 
                     // generate the document paths
 
-                    var destPath = GetNewFileName(_settings.Value.DocumentDirectory, document.Id);
+                    var destPath = GetNewFileName(_settings.Value.DocumentDirectory, file.Id);
 
                     Debug.Assert(destPath != null);
 
@@ -106,13 +126,16 @@ namespace Web.ViewModels.Api.Documents
 
                     // get a parser
 
-                    var parser = Engine.Codecs.Decoders.File.Get(extension, buffer, _appEnvironment);
+                    var parser = Engine.Codecs.Decoders.File
+                        .Get(extension, buffer, _appEnvironment);
 
                     // index in lucene
 
                     var fileContents = await parser.ContentAsync();
 
-                    document.Abstract = fileContents?.NormalizeLineEndings()?.Truncate(512);
+                    document.Abstract = fileContents
+                        ?.NormalizeLineEndings()
+                        ?.Truncate(512);
 
                     document.Content = new DocumentContent
                     {
@@ -121,8 +144,8 @@ namespace Web.ViewModels.Api.Documents
 
                     // update the paths on the record
 
-                    document.Path = destPath;
-                    document.ThumbnailPath = $"{destPath}{Constants.ThumbnailExtension}";
+                    file.Path = destPath;
+                    file.ThumbnailPath = $"{destPath}{Constants.ThumbnailExtension}";
 
                     try
                     {
@@ -137,14 +160,14 @@ namespace Web.ViewModels.Api.Documents
                             // encrypt the stream and save it
 
                             await stream.ToArray()
-                                .SaveProtectedAsAsync(document.ThumbnailPath, documentKey, dataProtectionScope);
+                                .SaveProtectedAsAsync(file.ThumbnailPath, fileKey, dataProtectionScope);
                         }
 
-                        document.PageCount = await parser.PageCountAsync();
+                        file.PageCount = await parser.PageCountAsync();
 
                         // encrypt and save the uploaded file
 
-                        await buffer.SaveProtectedAsAsync(document.Path, documentKey, dataProtectionScope);
+                        await buffer.SaveProtectedAsAsync(file.Path, fileKey, dataProtectionScope);
 
                         // save and commit
 
@@ -156,16 +179,16 @@ namespace Web.ViewModels.Api.Documents
 
                         // thumbnail
 
-                        if (System.IO.File.Exists(document.ThumbnailPath))
+                        if (System.IO.File.Exists(file.ThumbnailPath))
                         {
-                            System.IO.File.Delete(document.ThumbnailPath);
+                            System.IO.File.Delete(file.ThumbnailPath);
                         }
 
                         // document
 
-                        if (System.IO.File.Exists(document.Path))
+                        if (System.IO.File.Exists(file.Path))
                         {
-                            System.IO.File.Delete(document.Path);
+                            System.IO.File.Delete(file.Path);
                         }
 
                         trans.Rollback();
@@ -183,11 +206,12 @@ namespace Web.ViewModels.Api.Documents
 
             private static string GetNewFileName(string rootPath, int seed)
             {
-                var subFolder1 = ((seed / 1024) / 1024);
-                var subFolder2 = ((seed / 1024) - (((seed / 1024) / 1024) * 1024));
+                var subFolder1 = Math.Ceiling(seed/1024m/1024m/1024m);
+                var subFolder2 = Math.Ceiling(subFolder1/1024m/1024m);
+                var subFolder3 = Math.Ceiling(subFolder2/1024m);
 
                 return Path.Combine(rootPath,
-                    $@"{subFolder1}\{subFolder2}\{Guid.NewGuid():N}.bin");
+                    $@"{subFolder1}\{subFolder2}\{subFolder3}\{Guid.NewGuid():N}.bin");
             }
         }
     }

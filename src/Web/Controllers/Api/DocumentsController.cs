@@ -19,27 +19,12 @@ namespace Web.Controllers.Api
             _mediator = mediator;
         }
 
-        [HttpGet("{id:int}/view")]
-        public async Task<IActionResult> View(View.Query query)
-        {
-            var model = await _mediator.SendAsync(query);
-            return File(model.FileContents, model.ContentType);
-        }
-
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(Get.Query query)
         {
             var model = await _mediator.SendAsync(query);
 
             return Ok(model);
-        }
-
-        [HttpGet("{id:int}/thumbnail")]
-        public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
-        {
-            var model = await _mediator.SendAsync(query);
-
-            return File(model.FileContents, model.ContentType);
         }
 
         [HttpPost]

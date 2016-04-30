@@ -6,7 +6,9 @@ namespace Web.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Document> Documents { get; set; }
-        public DbSet<Library> Libraries { get; set; } 
+        public DbSet<File> Files { get; set; }
+        public DbSet<Library> Libraries { get; set; }
+        public DbSet<StatusType> StatusTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -25,6 +27,9 @@ namespace Web.Models
                 .WithMany(p => p.Libraries)
                 .HasForeignKey(pt => pt.DocumentId);
 
+            builder.Entity<StatusType>()
+                .Property(x => x.Id)
+                .ValueGeneratedNever();
         }
     }
 }

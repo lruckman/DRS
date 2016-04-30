@@ -53,14 +53,15 @@ var SearchBox = React.createClass({
         return {
             data: { documents: [] },
             selectedDocument: {
-                pageCount: 0,
-                fileSize: 0,
+                file: {
+                    size: 0,
+                    pageCount: 0,
+                    thumbnailLink: ''
+                },
                 title: '',
                 abstract: '',
                 libraryIds: [],
-                thumbnailLink: '',
-                location: '',
-                icon: ''
+                location: ''
             }
         };
     },
@@ -81,7 +82,7 @@ var SearchBox = React.createClass({
                 </div>
                 <div className="col-sm-9">
                     <img
-                        src={this.state.selectedDocument.thumbnailLink}
+                        src={this.state.selectedDocument.file.thumbnailLink}
                         className="img-responsive img-thumbnail" />
 
                     <ResultList 

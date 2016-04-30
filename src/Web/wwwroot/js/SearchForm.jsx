@@ -11,11 +11,6 @@ var SearchForm = React.createClass({
         this.props.onSearchSubmit(q, libraryIds || []);
     },
     searchHandleKeyUp: function (e) {
-        //if (e.keyCode !== 13) {
-        //    return;
-        //}
-
-        //e.preventDefault();
         clearTimeout(this.timer);
 
         this.timer = setTimeout(function() {

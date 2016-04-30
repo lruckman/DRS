@@ -44,6 +44,21 @@ namespace Web.Models
 
                 context.SaveChanges();
             }
+
+            // Statuses
+
+            if (!context.StatusTypes.Any())
+            {
+                foreach (StatusTypes val in Enum.GetValues(typeof(StatusTypes)))
+                {
+                    context.StatusTypes.Add(new StatusType
+                    {
+                        Id = (int)val,
+                        Name = val.ToString()
+                    });
+                }
+                context.SaveChanges();
+            }
         }
     }
 }

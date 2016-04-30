@@ -5,31 +5,33 @@ var classNames = require('classnames');
 var ResultList = React.createClass({
     propTypes: {
         data: React.PropTypes.arrayOf(
-                React.PropTypes.shape({
-                    abstract: React.PropTypes.string,
-                    id: React.PropTypes.number,
-                    selfLink: React.PropTypes.string,
+            React.PropTypes.shape({
+                abstract: React.PropTypes.string,
+                file: React.PropTypes.shape({
                     thumbnailLink: React.PropTypes.string,
-                    title: React.PropTypes.string,
                     viewLink: React.PropTypes.string
-                })
+                }),
+                id: React.PropTypes.number,
+                selfLink: React.PropTypes.string,
+                title: React.PropTypes.string
+            })
         ),
         nextLink: React.PropTypes.string,
         onSelect: React.PropTypes.func
     },
-    getDefaultProps: function () {
+    getDefaultProps: function() {
         return {
             data: [],
             nextLink: '',
             onSelect: function() {}
         }
     },
-    getInitialState: function () {
+    getInitialState: function() {
         return {
             activeIndex: 0
         };
     },
-    resultHandleClick: function (index, e) {
+    resultHandleClick: function(index, e) {
         e.preventDefault();
         this.setState({ activeIndex: index });
         this.clickStatus = 1;
@@ -43,10 +45,10 @@ var ResultList = React.createClass({
         e.preventDefault();
         clearTimeout(this.clickTimer);
         this.clickStatus = 0;
-        window.open(this.props.data[index].viewLink, '_blank');
+        window.open(this.props.data[index].file.viewLink, '_blank');
     },
-    render: function () {
-        var resultNodes = this.props.data.map(function (result, index) {
+    render: function() {
+        var resultNodes = this.props.data.map(function(result, index) {
             var resultClass = classNames({
                 'active': index === this.state.activeIndex
             });
@@ -55,7 +57,7 @@ var ResultList = React.createClass({
             return (
                 <div key={result.id} className="card pulse">
                     <a href="#" target="_blank" className="thumbnail-link" onClick={boundClick} onDoubleClick={boundDblClick}>
-                        <div className="thumbnail" style={{backgroundImage: 'url(' + result.thumbnailLink + ')'}}>
+                        <div className="thumbnail" style={{ backgroundImage: 'url(' + result.file.thumbnailLink + ')' }}>
                         </div>
                     </a>
                     <div className="title-container">
@@ -71,10 +73,10 @@ var ResultList = React.createClass({
         }, this);
         return (
             <div data-next-link={this.props.nextLink}>
-                <ReactCSSTransitionGroup 
-                    transitionName="result" 
-                    transitionEnterTimeout={500} 
-                    transitionLeaveTimeout={300} >
+                <ReactCSSTransitionGroup
+                transitionName="result"
+                transitionEnterTimeout={500}
+                transitionLeaveTimeout={300} >
                   {resultNodes}
                 </ReactCSSTransitionGroup>
             </div>

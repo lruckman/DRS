@@ -28,14 +28,15 @@ var EditDocument = React.createClass({
             filesToIndex: [],
             currentFileIndex: 0,
             document: {
-                pageCount: 0,
-                fileSize: 0,
-                title: '',
                 abstract: '',
+                file: {
+                    pageCount: 0,
+                    size: 0,
+                    thumbnailLink: ''
+                },
                 libraryIds: [],
-                thumbnailLink: '',
                 location: '',
-                icon: ''
+                title: ''
             }
         };
     },
@@ -236,12 +237,12 @@ var EditDocument = React.createClass({
                         <form className="form-horizontal">
                             <div className="row">
                                 <div className="col-md-4">
-                                    <img src={this.state.document.thumbnailLink} className="img-responsive thumbnail" />
+                                    <img src={this.state.document.file.thumbnailLink} className="img-responsive thumbnail" />
                                     <dl className="text-muted dl-horizontal">
                                         <dt>Pages:</dt>
-                                        <dd>{this.state.document.pageCount}</dd>
+                                        <dd>{this.state.document.file.pageCount}</dd>
                                         <dt>File Size:</dt>
-                                        <dd>{ (this.state.document.fileSize / 1024).toFixed(2) } KB</dd>
+                                        <dd>{ (this.state.document.file.size / 1024).toFixed(2) } KB</dd>
                                     </dl>
                                 </div>
                                 <div className="col-md-8">
