@@ -78,6 +78,9 @@ namespace Web.ViewModels.Api.Documents
                 public long Size { get; set; }
                 public int PageCount { get; set; }
                 public string ThumbnailLink => $"/api/files/{Id}/thumbnail";
+                public string CreatedOn { get; set; }
+                public string ModifiedOn { get; set; }
+                public string VersionNum { get; set; }
             }
         }
     }

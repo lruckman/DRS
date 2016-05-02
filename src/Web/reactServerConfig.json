@@ -5,6 +5,10 @@
             "path": "./node_modules/react-dom/dist/react-dom"
         },
         {
+            "name": "DocumentProperties",
+            "path": "./wwwroot/js/DocumentProperties.js"
+        },
+        {
             "name": "EditDocument",
             "path": "./wwwroot/js/EditDocument.js"
         },

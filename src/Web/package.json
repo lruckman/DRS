@@ -24,6 +24,7 @@
     "react-bootstrap": "^0.28.3",
     "react-file-drop": "^0.1.8",
     "react-addons-css-transition-group": "^0.14.7",
-    "classnames": "2.2.3"
+    "classnames": "2.2.3",
+    "moment": "^2.13.0"
   }
 }

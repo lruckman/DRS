@@ -1,7 +1,9 @@
 ﻿var React = require('react');
+var DocumentProperties = require('DocumentProperties');
 var EditDocument = require('EditDocument');
 var ResultList = require('ResultList');
 var SearchForm = require('SearchForm');
+var classNames = require('classnames');
 
 var SearchBox = React.createClass({
     loadResultsFromServer: function (search, libraryIds) {
@@ -27,9 +29,8 @@ var SearchBox = React.createClass({
     },
     documentHandleClose: function () {
     },
-    resultHandleSelect: function (location) {
+    resultListHandleSelect: function (location) {
         var xhr = new XMLHttpRequest();
-
         xhr.open('get', location, true);
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = function () {
@@ -52,22 +53,19 @@ var SearchBox = React.createClass({
     getInitialState: function() {
         return {
             data: { documents: [] },
-            selectedDocument: {
-                file: {
-                    size: 0,
-                    pageCount: 0,
-                    thumbnailLink: ''
-                },
-                title: '',
-                abstract: '',
-                libraryIds: [],
-                location: ''
-            }
+            selectedDocument: { file: {}}
         };
     },
     componentWillMount: function() {
     },
-    render: function() {
+    render: function () {
+        var resultsPanelClassNames = classNames({
+            'col-sm-9': this.state.selectedDocument === null,
+            'col-sm-7': this.state.selectedDocument !== null
+        });
+        var propertyPanelClassNames = classNames({
+                'col-sm-2': this.state.selectedDocument !== null
+        });
         return (
             <div className="search-box row">
                 <EditDocument 
@@ -80,15 +78,15 @@ var SearchBox = React.createClass({
                         libraries={this.props.libraries}
                         onSearchSubmit={this.searchHandleSubmit} />
                 </div>
-                <div className="col-sm-9">
-                    <img
-                        src={this.state.selectedDocument.file.thumbnailLink}
-                        className="img-responsive img-thumbnail" />
-
+                <div className={resultsPanelClassNames}>
                     <ResultList 
                         data={this.state.data.documents}
                         nextLink={this.state.data.nextLink}
-                        onSelect={this.resultHandleSelect} />
+                        onSelect={this.resultListHandleSelect} />
+                </div>
+                <div className={propertyPanelClassNames}>
+                    <DocumentProperties
+                        document={this.state.selectedDocument} />
                 </div>
             </div>
         );
