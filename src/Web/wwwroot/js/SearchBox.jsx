@@ -53,7 +53,7 @@ var SearchBox = React.createClass({
     getInitialState: function() {
         return {
             data: { documents: [] },
-            selectedDocument: { file: {}}
+            selectedDocument: null
         };
     },
     componentWillMount: function() {
@@ -64,7 +64,9 @@ var SearchBox = React.createClass({
             'col-sm-7': this.state.selectedDocument !== null
         });
         var propertyPanelClassNames = classNames({
-                'col-sm-2': this.state.selectedDocument !== null
+            'col-sm-2': this.state.selectedDocument !== null,
+            'hidden': this.state.selectedDocument === null,
+            'slide-in-right': true
         });
         return (
             <div className="search-box row">
@@ -86,7 +88,7 @@ var SearchBox = React.createClass({
                 </div>
                 <div className={propertyPanelClassNames}>
                     <DocumentProperties
-                        document={this.state.selectedDocument} />
+                        document={this.state.selectedDocument || undefined} />
                 </div>
             </div>
         );
