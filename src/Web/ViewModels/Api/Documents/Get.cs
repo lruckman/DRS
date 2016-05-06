@@ -80,7 +80,7 @@ namespace Web.ViewModels.Api.Documents
                 public string ThumbnailLink => $"/api/files/{Id}/thumbnail";
                 public string CreatedOn { get; set; }
                 public string ModifiedOn { get; set; }
-                public string VersionNum { get; set; }
+                public int VersionNum { get; set; }
             }
         }
     }
