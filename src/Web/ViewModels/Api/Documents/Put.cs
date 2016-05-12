@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.Data.Entity;
+using Web.Engine;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -39,10 +41,13 @@ namespace Web.ViewModels.Api.Documents
         public class CommandHandler : IAsyncRequestHandler<Command, int>
         {
             private readonly ApplicationDbContext _db;
+            private readonly IUserAccessor _userAccessor;
 
-            public CommandHandler(ApplicationDbContext db)
+            public CommandHandler(ApplicationDbContext db,
+                IUserAccessor userAccessor)
             {
                 _db = db;
+                _userAccessor = userAccessor;
             }
 
             public async Task<int> Handle(Command message)
@@ -55,24 +60,32 @@ namespace Web.ViewModels.Api.Documents
                 document.Title = message.Title;
                 document.Abstract = message.Abstract;
 
+                var userId = _userAccessor.User.GetUserId();
+
+                // get all the user libraries
+
+                var userLibraryIds = await _db.UserLibraries
+                    .Where(ul => ul.ApplicationUserId == userId)
+                    .Select(ul => ul.LibraryId)
+                    .ToArrayAsync();
+
                 // remove deleted libraries
 
-                document.Libraries.RemoveAll(ld => !message.LibraryIds.Contains(ld.LibraryId));
+                var deletedLibraryIds = document.Libraries
+                    .Select(l => l.LibraryId)
+                    .Except(message.LibraryIds)
+                    .ToArray();
+
+                document.Libraries.RemoveAll(ld => deletedLibraryIds.Contains(ld.LibraryId));
 
                 // add new libraries
 
-                var newLibraries = await _db.Libraries
-                    .Where(l => message.LibraryIds.Contains(l.Id)
-                                && !document.Libraries
-                                    .Select(ld => ld.LibraryId)
-                                    .Contains(l.Id))
-                    .Select(l => new LibraryDocument
-                    {
-                        LibraryId = l.Id
-                    })
-                    .ToArrayAsync();
+                var newLibraryIds = message.LibraryIds
+                    .Except(document.Libraries.Select(l => l.LibraryId))
+                    .Intersect(userLibraryIds)
+                    .ToArray();
 
-                document.Libraries.AddRange(newLibraries);
+                document.Libraries.AddRange(newLibraryIds.Select(id => new LibraryDocument {LibraryId = id}));
 
                 await _db.SaveChangesAsync();
 

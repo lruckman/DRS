@@ -34,14 +34,41 @@ namespace Web.Models
 
             if (!context.Libraries.Any())
             {
-                context.Libraries.Add(new Library
+                var personalLibrary = new Library
                 {
                     CreatedByUserId = userManager.GetUserIdAsync(defaultUser).Result,
                     CreatedOn = DateTimeOffset.Now,
                     ModifiedOn = DateTimeOffset.Now,
                     Name = "Private"
-                });
+                };
 
+                context.Libraries.Add(personalLibrary);
+                context.SaveChanges();
+
+                // give the default user full access to their private cabinet
+
+                defaultUser.LibraryAccessList.Add(new UserLibrary
+                {
+                    LibraryId = personalLibrary.Id,
+                    Permissions = PermissionTypes.Full
+                });
+            }
+
+            // Permission Types
+
+            if (!context.PermissionTypes.Any())
+            {
+                foreach (PermissionTypes val in Enum.GetValues(typeof(PermissionTypes)))
+                {
+                    if (val != PermissionTypes.Full)
+                    {
+                        context.PermissionTypes.Add(new PermissionType
+                        {
+                            Id = (int) val,
+                            Name = val.ToString()
+                        });
+                    }
+                }
                 context.SaveChanges();
             }
 

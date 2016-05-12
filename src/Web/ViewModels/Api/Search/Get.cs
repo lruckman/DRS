@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -15,7 +16,7 @@ namespace Web.ViewModels.Api.Search
     {
         public class Query : IAsyncRequest<Result>
         {
-            public int?[] LibraryIds { get; set; }
+            public int?[] LibraryIds { get; set; } = {};
 
             public string Q { get; set; }
 
@@ -32,6 +33,8 @@ namespace Web.ViewModels.Api.Search
             {
                 RuleFor(m => m.MaxResults)
                     .InclusiveBetween(0, 100);
+                RuleFor(m => m.LibraryIds)
+                    .Must(li => li.All(item => item != null));
             }
         }
 
@@ -39,12 +42,15 @@ namespace Web.ViewModels.Api.Search
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _configurationProvider;
+            private readonly IUserAccessor _userAccessor;
 
             public QueryHandler(ApplicationDbContext db,
-                IConfigurationProvider configurationProvider)
+                IConfigurationProvider configurationProvider,
+                IUserAccessor userAccessor)
             {
                 _db = db;
                 _configurationProvider = configurationProvider;
+                _userAccessor = userAccessor;
             }
 
             public async Task<Result> Handle(Query message)
@@ -54,12 +60,41 @@ namespace Web.ViewModels.Api.Search
 
                 if (!string.IsNullOrWhiteSpace(message.Q))
                 {
-                    //todo: preselect files
                     documentQuery = documentQuery
                         .FromSql(
                             $"SELECT d.* FROM [dbo].[{nameof(Document)}s] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key] AND d.Status = @p1 AND EXISTS (SELECT 1 FROM [dbo].[{nameof(File)}s] AS f WHERE f.DocumentId = d.Id AND f.Status = @p1)",
                             message.Q, (int) StatusTypes.Active);
                 }
+
+                var userId = _userAccessor.User.GetUserId();
+
+                // get all the user libraries
+
+                var userLibraryIds = await _db.UserLibraries
+                    .Where(ul => ul.ApplicationUserId == userId)
+                    .Select(ul => (int?)ul.LibraryId)
+                    .ToArrayAsync();
+
+                if (message.LibraryIds.Any())
+                {
+                    // out of what was selected what can the user actually search on
+
+                    message.LibraryIds = userLibraryIds
+                        .Intersect(message.LibraryIds)
+                        .ToArray();
+                }
+
+                if (!message.LibraryIds.Any())
+                {
+                    // no libraries so default to all the user libraries
+
+                    message.LibraryIds = userLibraryIds;
+                }
+
+                // limit based on libraries the user can access
+
+                documentQuery = documentQuery
+                    .Where(dq => dq.Libraries.Any(l => message.LibraryIds.Contains(l.LibraryId)));
 
                 var result = new Result
                 {

@@ -11,7 +11,7 @@ namespace Web.Engine
 {
     public interface ISelectListProvider
     {
-        Task<IEnumerable<SelectListItem>> GetLibraries(int userId = 0);
+        Task<IEnumerable<SelectListItem>> GetLibraries(string userId);
     }
 
     public class SelectListProvider : ISelectListProvider
@@ -25,9 +25,11 @@ namespace Web.Engine
             _configurationProvider = configurationProvider;
         }
 
-        public async Task<IEnumerable<SelectListItem>> GetLibraries(int userId = 0)
+        public async Task<IEnumerable<SelectListItem>> GetLibraries(string userId)
         {
-            return await _db.Libraries
+            return await _db.UserLibraries
+                .Where(ul => ul.ApplicationUserId == userId)
+                .Select(ul => ul.Library)
                 .OrderBy(l => l.Name)
                 .ProjectTo<SelectListItem>(_configurationProvider)
                 .ToArrayAsync();

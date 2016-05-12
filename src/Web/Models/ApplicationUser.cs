@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
+﻿using System.Collections.Generic;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace Web.Models
 {
     // Add profile data for application users by adding properties to the ApplicationUser class
     public class ApplicationUser : IdentityUser
     {
+        public virtual List<UserLibrary> LibraryAccessList { get; set; } = new List<UserLibrary>();
+        public virtual List<UserDocument> DocumentAccessList { get; set; } = new List<UserDocument>();
     }
 }
