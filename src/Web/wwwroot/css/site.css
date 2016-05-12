@@ -8,10 +8,12 @@ body { color: #f7f7f7;}
     .search input { text-indent: 24px;}
     .search .fa-search {  left: 10px; position: absolute; top: 8px; }
 
-    .card { float: left; margin-bottom: 20px; margin-right: 20px; width: 200px;}
-.card .thumbnail { background-position: 50% 50%; background-size: cover; height: 275px; margin-bottom: 10px;width:200px }
-.card .title { color: #fff; display: block; }
-.card .abstract { color: #999; display: block; font-size: .9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card { float: left; margin-bottom: 20px; margin-right: 20px; width: 200px;}
+    .card .thumbnail { background-position: 50% 50%; background-size: cover; height: 275px; margin-bottom: 10px;width:200px }
+    .card .title { color: #fff; display: block; }
+    .card .abstract { color: #999; display: block; font-size: .9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .search-box .card { max-height: 322px; min-height: 322px;}
 
 .pulse {
   -webkit-animation-name: pulse;
