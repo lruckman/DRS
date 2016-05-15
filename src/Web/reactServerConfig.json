@@ -9,8 +9,8 @@
             "path": "./wwwroot/js/DocumentProperties.js"
         },
         {
-            "name": "EditDocument",
-            "path": "./wwwroot/js/EditDocument.js"
+            "name": "DocumentEdit",
+            "path": "./wwwroot/js/DocumentEdit.js"
         },
         {
             "name": "ResultList",

@@ -4,29 +4,31 @@ var Button = require('react-bootstrap').Button;
 var Modal = require('react-bootstrap').Modal;
 var ProgressBar = require('react-bootstrap').ProgressBar;
 var FileDrop = require('react-file-drop');
+var update = require('react-addons-update');
 
-var EditDocument = React.createClass({
+var DocumentEdit = React.createClass({
     propTypes: {
-        libraries: React.PropTypes.array,
-        source: React.PropTypes.string,
+        libraries: React.PropTypes.array.isRequired,
+        location: React.PropTypes.string,
         onUpdate: React.PropTypes.func,
         onClose: React.PropTypes.func
     },
     getDefaultProps: function() {
         return {
             libraries: [],
-            source: '',
             onUpdate: function () { },
             onClose: function () { }
         }    
     },
     getInitialState () {
         return {
-            uploading: false,
-            uploadPercentComplete: 0,
+            add: {
+                uploading: false,
+                uploadPercent: 0,
+                files: [],
+                count: 0
+            },
             showModal: false,
-            filesToIndex: [],
-            currentFileIndex: 0,
             document: {
                 abstract: '',
                 file: {
@@ -40,24 +42,47 @@ var EditDocument = React.createClass({
             }
         };
     },
-    handleDrop: function (files) {
+    componentWillReceiveProps: function (props) {
+        if (props.location && this.props.location !== props.location) {
+            this.edit(props.location);
+        }
+        this.setState({
+            showModal: false
+        });
+    },
+    handleFileDrop: function (files) {
         var state = this.getInitialState();
-        //todo: something if they are still indexing files
-        state.filesToIndex = files;
-        state.currentFileIndex = 0;
 
+        for (var i = 0, file; file = files[i]; i++) {
+            state.add.files.push(file);
+        }
+
+        state.add.count = state.add.files.length;
+
+        this.upload(state.add.files.pop());
         this.setState(state);
-        this.upload(files[0]);
     },
     // upload the file
     upload: function(file) {
         var xhr = new XMLHttpRequest();
 
-        this.setState({ uploading: true });
+        this.setState({
+            add: update(this.state.add, {
+                uploading: { $set: true }
+            })
+        });
 
-        xhr.open('post', this.props.source, true);
+        xhr.open('post', '/api/documents', true);
         xhr.setRequestHeader('Accept', 'application/json');
+
         xhr.onload = function () {
+
+            this.setState({
+                add: update(this.state.add, {
+                    uploading: { $set: false },
+                    uploadPercent: { $set: 0 }
+                })
+            });
 
             if (xhr.status === 201) {
 
@@ -68,16 +93,22 @@ var EditDocument = React.createClass({
                 return;
             }
 
-            alert(xhr.status + 'An error occurred!');
+            alert(xhr.status + ' An error occurred!');
 
         }.bind(this);
+
         xhr.onprogress = function (e) {
             if (e.lengthComputable) {  //evt.loaded the bytes browser receive
                 //evt.total the total bytes seted by the header
                 //
                 var percentComplete = (e.loaded / e.total) * 100;
                 console.log(percentComplete);
-                this.setState({ uploadPercentComplete: percentComplete });
+
+                this.setState({
+                    add: update(this.state.add, {
+                        uploadPercent: { $set: percentComplete }
+                    })
+                });
             }
         }.bind(this);
 
@@ -94,11 +125,6 @@ var EditDocument = React.createClass({
         xhr.open('get', location, true);
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.onload = function () {
-
-            this.setState({
-                uploading: false,
-                uploadPercentComplete: 0,
-            });
 
             if (xhr.status === 200) {
 
@@ -133,11 +159,13 @@ var EditDocument = React.createClass({
         var xhr = new XMLHttpRequest();
         xhr.open('put', this.state.document.location, true);
         xhr.setRequestHeader('Accept', 'application/json');
+
         xhr.onload = function () {
 
             if (xhr.status !== 200) {
-                // error occurred
+
                 alert(xhr.status + 'An error occurred!');
+
                 return;
             }
 
@@ -149,16 +177,21 @@ var EditDocument = React.createClass({
 
             this.props.onUpdate(this.state.document.location);
 
-            // increment the current file index
-
-            var fileIndex = ++this.state.currentFileIndex;
-
-            if (fileIndex < this.state.filesToIndex.length) {
+            if (this.state.add.files.length > 0) {
 
                 // we have other files to index move to next
 
-                this.setState({ currentFileIndex: fileIndex });
-                this.upload(this.state.files[fileIndex]);
+                var files = this.state.add.files.slice();
+
+                // upload the next
+                
+                this.upload(files.pop());
+
+                this.setState({
+                    add: update(this.state.add, {
+                        files: { $set: files }
+                    })
+                });
 
                 return;
             }
@@ -202,8 +235,7 @@ var EditDocument = React.createClass({
             <div>
                 <FileDrop 
                     frame={window}
-                    onDrop={this.handleDrop}
-                >
+                    onDrop={this.handleFileDrop}>
                     <div className="inner">
                         <div>
                             <i className="fa fa-file-archive-o fa-4x"></i> &nbsp;
@@ -214,23 +246,28 @@ var EditDocument = React.createClass({
                     </div>
                 </FileDrop>
                 <Modal 
+                    backdrop="static"
                     bsSize="sm" 
-                    show={this.state.uploading}
-                >
+                    show={this.state.add.uploading}>
                     <Modal.Body>
                         <ProgressBar 
                             active
                             striped
                             bsStyle="success"
-                            now={this.state.uploadPercentComplete}
-                            label={'Uploading... ' + this.state.document.title + ' - %(percent)s%'} 
-                        />
+                            max={100}
+                            min={0}
+                            now={this.state.add.uploadPercent}
+                            label={'Uploading... - %(percent)s%'} />
                     </Modal.Body>
                 </Modal>
-                <Modal bsSize="lg" show={this.state.showModal} onHide={this.close}>
+                <Modal 
+                    backdrop="static"
+                    bsSize="lg" 
+                    show={this.state.showModal} 
+                    onHide={this.close}>
                     <Modal.Header closeButton>
                       <Modal.Title>
-                        Update Document <small>({ this.state.currentFileIndex + 1} of { this.state.filesToIndex.length })</small>
+                        Update Document
                       </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
@@ -295,9 +332,9 @@ var EditDocument = React.createClass({
                         <Button onClick={this.save} bsStyle="primary">Save Changes</Button>
                     </Modal.Footer>
                 </Modal>
-</div>
+            </div>
         );
     }
 });
 
-module.exports = EditDocument;
+module.exports = DocumentEdit;

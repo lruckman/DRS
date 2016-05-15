@@ -1,6 +1,6 @@
 ﻿var React = require('react');
 var DocumentProperties = require('DocumentProperties');
-var EditDocument = require('EditDocument');
+var DocumentEdit = require('DocumentEdit');
 var ResultList = require('ResultList');
 var SearchForm = require('SearchForm');
 var classNames = require('classnames');
@@ -21,15 +21,14 @@ var SearchBox = React.createClass({
         }.bind(this);
         xhr.send();
     },
-    searchHandleSubmit: function (search, libraryIds) {
+    handleSearchSubmit: function (search, libraryIds) {
         this.loadResultsFromServer(search, libraryIds || []);
     },
-    documentHandleUpdate: function (location) {
-       
+    handleDocumentUpdate: function(location) {
     },
-    documentHandleClose: function () {
+    handleDocumentClose: function () {
     },
-    resultListHandleSelect: function (location) {
+    handleResultSelect: function (location) {
         var xhr = new XMLHttpRequest();
         xhr.open('get', location, true);
         xhr.setRequestHeader('Accept', 'application/json');
@@ -38,13 +37,14 @@ var SearchBox = React.createClass({
             if (xhr.status === 200) {
 
                 this.setState({
-                    selectedDocument: JSON.parse(xhr.responseText)
+                    selectedDocument: JSON.parse(xhr.responseText),
+                    editDocument: location
                 });
 
                 return;
             }
 
-            alert(xhr.status + 'An error occurred!');
+            alert(xhr.status + ' An error occurred!');
 
         }.bind(this);
 
@@ -53,7 +53,8 @@ var SearchBox = React.createClass({
     getInitialState: function() {
         return {
             data: { documents: [] },
-            selectedDocument: null
+            selectedDocument: null,
+            editDocument: null
         };
     },
     componentWillMount: function() {
@@ -70,21 +71,20 @@ var SearchBox = React.createClass({
         });
         return (
             <div className="search-box row">
-                <EditDocument 
-                    libraries={this.props.libraries}
-                    source={this.props.addDocumentUrl}
-                    onUpdate={this.documentHandleUpdate}
-                    onClose={this.documentHandleClose} />
+                <DocumentEdit libraries={this.props.libraries}
+                              location={this.state.editDocument}
+                              onUpdate={this.handleDocumentUpdate}
+                              onClose={this.handleDocumentClose} />
                 <div className="col-sm-3">
                     <SearchForm 
                         libraries={this.props.libraries}
-                        onSearchSubmit={this.searchHandleSubmit} />
+                        onSearchSubmit={this.handleSearchSubmit} />
                 </div>
                 <div className={resultsPanelClassNames}>
                     <ResultList 
                         data={this.state.data.documents}
                         nextLink={this.state.data.nextLink}
-                        onSelect={this.resultListHandleSelect} />
+                        onSelect={this.handleResultSelect} />
                 </div>
                 <div className={propertyPanelClassNames}>
                     <DocumentProperties
