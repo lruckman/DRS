@@ -111,6 +111,7 @@ body { color: #f7f7f7;}
 .modal-content { border-radius: 2px; }
 .modal-header { border: none; padding: 24px 24px 0; }
 .modal-footer { border: none; padding: 0 7px 7px; }
+.modal-title { color: #333; }
 
 .btn { border: none; font-weight: bold; padding: 8px 16px; text-transform: uppercase }
 .btn:hover { background-color:rgba(153, 153, 153, 0.2);color: inherit; }
