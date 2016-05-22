@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using Web.Engine.Extensions;
 using Web.Models;
 using File = System.IO.File;

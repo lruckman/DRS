@@ -1,13 +1,12 @@
 ﻿using System;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.Data.Entity;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
-using React.AspNet;
 using StructureMap;
 using Web.Engine;
 using Web.Models;
@@ -20,7 +19,8 @@ namespace Web
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", true, true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true);
 
             if (env.IsDevelopment())
@@ -34,16 +34,14 @@ namespace Web
         }
 
         private static IConfigurationRoot Configuration { get; set; }
-        public static Container IoContainer = null;
+        public static Container IoContainer = null; //todo: remove this
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddEntityFramework()
-                .AddSqlServer()
-                .AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
+            services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.Configure<DRSSettings>(Configuration.GetSection("DRS"));
 
@@ -51,7 +49,7 @@ namespace Web
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddReact();
+            //services.AddReact();
 
             services
                 .AddMvc(options =>
@@ -74,7 +72,7 @@ namespace Web
 
             IoContainer = container;
 
-            return container.GetInstance<IServiceProvider>();
+           return container.GetInstance<IServiceProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,9 +83,9 @@ namespace Web
 
             if (env.IsDevelopment())
             {
-                app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
 
                 // prepopulates database
 
@@ -98,29 +96,27 @@ namespace Web
                 app.UseExceptionHandler("/Home/Error");
 
                 // For more details on creating database during deployment see http://go.microsoft.com/fwlink/?LinkID=615859
-                try
-                {
-                    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
-                        .CreateScope())
-                    {
-                        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
-                            .Database.Migrate();
-                    }
-                }
-                catch
-                {
-                }
+                //try
+                //{
+                //    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
+                //        .CreateScope())
+                //    {
+                //        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
+                //            .Database.Migrate();
+                //    }
+                //}
+                //catch
+                //{
+                //}
             }
 
-            app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
-
-            app.UseReact(config =>
-            {
-                config
-                    .SetReuseJavaScriptEngines(true)
-                    .SetLoadBabel(false)
-                    .AddScriptWithoutTransform("~/js/dist/serverBundle.js");
-            });
+            //app.UseReact(config =>
+            //{
+            //    config
+            //        .SetReuseJavaScriptEngines(true)
+            //        .SetLoadBabel(false)
+            //        .AddScriptWithoutTransform("~/js/dist/serverBundle.js");
+            //});
 
             app.UseStaticFiles();
 
@@ -135,8 +131,5 @@ namespace Web
                     "{controller=Home}/{action=Index}/{id?}");
             });
         }
-
-        // Entry point for the application.
-        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
     }
 }

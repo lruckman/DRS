@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Web.ViewModels.Api.Search;
 
 namespace Web.Controllers.Api

@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using MimeTypes;
 using Web.Engine.Extensions;
 using Web.Models;

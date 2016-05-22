@@ -1,22 +1,23 @@
-using System;
-using Microsoft.Data.Entity;
-using Microsoft.Data.Entity.Infrastructure;
-using Microsoft.Data.Entity.Metadata;
-using Microsoft.Data.Entity.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Web.Models;
 
-namespace web.Migrations
+namespace Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20160522070035_InitialDatabase")]
+    partial class InitialDatabase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0-rc1-16348")
+                .HasAnnotation("ProductVersion", "1.0.0-rc2-20896")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole", b =>
                 {
                     b.Property<string>("Id");
 
@@ -32,12 +33,12 @@ namespace web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
-                        .HasAnnotation("Relational:Name", "RoleNameIndex");
+                        .HasName("RoleNameIndex");
 
-                    b.HasAnnotation("Relational:TableName", "AspNetRoles");
+                    b.ToTable("AspNetRoles");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -51,10 +52,12 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:TableName", "AspNetRoleClaims");
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -68,10 +71,12 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:TableName", "AspNetUserClaims");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider");
 
@@ -84,10 +89,12 @@ namespace web.Migrations
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
-                    b.HasAnnotation("Relational:TableName", "AspNetUserLogins");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId");
 
@@ -95,7 +102,26 @@ namespace web.Migrations
 
                     b.HasKey("UserId", "RoleId");
 
-                    b.HasAnnotation("Relational:TableName", "AspNetUserRoles");
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserRoles");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId");
+
+                    b.Property<string>("LoginProvider");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Value");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens");
                 });
 
             modelBuilder.Entity("Web.Models.ApplicationUser", b =>
@@ -138,12 +164,12 @@ namespace web.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
-                        .HasAnnotation("Relational:Name", "EmailIndex");
+                        .HasName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
-                        .HasAnnotation("Relational:Name", "UserNameIndex");
+                        .HasName("UserNameIndex");
 
-                    b.HasAnnotation("Relational:TableName", "AspNetUsers");
+                    b.ToTable("AspNetUsers");
                 });
 
             modelBuilder.Entity("Web.Models.Document", b =>
@@ -170,7 +196,7 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:TableName", "Documents");
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("Web.Models.DocumentContent", b =>
@@ -184,7 +210,9 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:TableName", "DocumentContents");
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("DocumentContents");
                 });
 
             modelBuilder.Entity("Web.Models.File", b =>
@@ -227,7 +255,9 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:TableName", "Files");
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("Files");
                 });
 
             modelBuilder.Entity("Web.Models.Library", b =>
@@ -251,7 +281,7 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:TableName", "Libraries");
+                    b.ToTable("Libraries");
                 });
 
             modelBuilder.Entity("Web.Models.LibraryDocument", b =>
@@ -262,7 +292,11 @@ namespace web.Migrations
 
                     b.HasKey("LibraryId", "DocumentId");
 
-                    b.HasAnnotation("Relational:TableName", "LibraryDocuments");
+                    b.HasIndex("DocumentId");
+
+                    b.HasIndex("LibraryId");
+
+                    b.ToTable("LibraryDocuments");
                 });
 
             modelBuilder.Entity("Web.Models.PermissionType", b =>
@@ -274,9 +308,7 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:Schema", "Lookup");
-
-                    b.HasAnnotation("Relational:TableName", "PermissionTypes");
+                    b.ToTable("PermissionTypes","Lookup");
                 });
 
             modelBuilder.Entity("Web.Models.StatusType", b =>
@@ -288,9 +320,7 @@ namespace web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAnnotation("Relational:Schema", "Lookup");
-
-                    b.HasAnnotation("Relational:TableName", "StatusTypes");
+                    b.ToTable("StatusTypes","Lookup");
                 });
 
             modelBuilder.Entity("Web.Models.UserDocument", b =>
@@ -303,7 +333,11 @@ namespace web.Migrations
 
                     b.HasKey("DocumentId", "ApplicationUserId");
 
-                    b.HasAnnotation("Relational:TableName", "UserDocuments");
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("UserDocuments");
                 });
 
             modelBuilder.Entity("Web.Models.UserLibrary", b =>
@@ -316,86 +350,103 @@ namespace web.Migrations
 
                     b.HasKey("LibraryId", "ApplicationUserId");
 
-                    b.HasAnnotation("Relational:TableName", "UserLibraries");
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("LibraryId");
+
+                    b.ToTable("UserLibraries");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNet.Identity.EntityFramework.IdentityRole")
+                    b.HasOne("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole")
                         .WithMany()
-                        .HasForeignKey("RoleId");
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityUserClaim<string>", b =>
-                {
-                    b.HasOne("Web.Models.ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserClaim<string>", b =>
                 {
                     b.HasOne("Web.Models.ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNet.Identity.EntityFramework.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNet.Identity.EntityFramework.IdentityRole")
+                    b.HasOne("Web.Models.ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("RoleId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Web.Models.ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Web.Models.DocumentContent", b =>
                 {
                     b.HasOne("Web.Models.Document")
                         .WithOne()
-                        .HasForeignKey("Web.Models.DocumentContent", "DocumentId");
+                        .HasForeignKey("Web.Models.DocumentContent", "DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Web.Models.File", b =>
                 {
                     b.HasOne("Web.Models.Document")
                         .WithMany()
-                        .HasForeignKey("DocumentId");
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Web.Models.LibraryDocument", b =>
                 {
                     b.HasOne("Web.Models.Document")
                         .WithMany()
-                        .HasForeignKey("DocumentId");
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Web.Models.Library")
                         .WithMany()
-                        .HasForeignKey("LibraryId");
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Web.Models.UserDocument", b =>
                 {
                     b.HasOne("Web.Models.ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Web.Models.Document")
                         .WithMany()
-                        .HasForeignKey("DocumentId");
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Web.Models.UserLibrary", b =>
                 {
                     b.HasOne("Web.Models.ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Web.Models.Library")
                         .WithMany()
-                        .HasForeignKey("LibraryId");
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
         }
     }

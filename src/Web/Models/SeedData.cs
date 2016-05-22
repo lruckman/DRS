@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Identity;
 
 namespace Web.Models
 {

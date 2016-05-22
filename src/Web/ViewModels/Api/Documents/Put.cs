@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using Web.Engine;
 using Web.Models;
 
@@ -60,7 +59,7 @@ namespace Web.ViewModels.Api.Documents
                 document.Title = message.Title;
                 document.Abstract = message.Abstract;
 
-                var userId = _userAccessor.User.GetUserId();
+                var userId = _userAccessor.UserId;
 
                 // get all the user libraries
 

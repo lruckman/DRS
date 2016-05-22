@@ -1,6 +1,4 @@
-﻿@using System.Security.Claims
-@using System.Threading.Tasks
-@using Newtonsoft.Json
+﻿@using Newtonsoft.Json
 @using Web.Engine
 @inject ISelectListProvider SelectListProvider
 @inject IUserAccessor UserAccessor
@@ -14,7 +12,7 @@
             SearchBox({
                 searchUrl: "/api/search",
                 addDocumentUrl: "/api/documents",
-                libraries: @Html.Raw(JsonConvert.SerializeObject(await SelectListProvider.GetLibraries(UserAccessor.User.GetUserId())))
+                libraries: @Html.Raw(JsonConvert.SerializeObject(await SelectListProvider.GetLibraries(UserAccessor.UserId)))
             }),
             document.getElementById('content')
         );

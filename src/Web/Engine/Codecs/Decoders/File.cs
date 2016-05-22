@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Web.Engine.Codecs.Decoders
 {
@@ -10,21 +10,21 @@ namespace Web.Engine.Codecs.Decoders
     {
         private static IDictionary<string, Type> _registeredFileDecoders;
         internal readonly byte[] Buffer;
-        internal readonly IApplicationEnvironment AppEnvironment;
+        internal readonly IHostingEnvironment HostingEnvironment;
 
         static File()
         {
             RegisterFileDecoders();
         }
 
-        protected File(byte[] buffer, IApplicationEnvironment appEnvironment)
+        protected File(byte[] buffer, IHostingEnvironment hostingEnvironment)
         {
             if (buffer == null || buffer.LongLength == 0)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            AppEnvironment = appEnvironment;
+            HostingEnvironment = hostingEnvironment;
             Buffer = buffer;
             FileLength = buffer.LongLength;
         }
@@ -36,10 +36,10 @@ namespace Web.Engine.Codecs.Decoders
             Action<string, Type> register =
                 (ext, type) => { _registeredFileDecoders.Add(ext.ToLower(), type); };
 
-            Array.ForEach(Image.SupportedFileTypes, ext => register(ext, typeof(Image)));
+            Array.ForEach(Image.SupportedFileTypes, ext => register(ext, typeof (Image)));
             Array.ForEach(Pdf.SupportedFileTypes, ext => register(ext, typeof (Pdf)));
-            Array.ForEach(Text.SupportedFileTypes, ext => register(ext, typeof(Text)));
-            Array.ForEach(Default.SupportedFileTypes, ext => register(ext, typeof(Default)));
+            Array.ForEach(Text.SupportedFileTypes, ext => register(ext, typeof (Text)));
+            Array.ForEach(Default.SupportedFileTypes, ext => register(ext, typeof (Default)));
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Web.Engine.Codecs.Decoders
         /// <param name="fileExtension"></param>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        public static IFile Get(string fileExtension, byte[] buffer, IApplicationEnvironment appEnvironment)
+        public static IFile Get(string fileExtension, byte[] buffer, IHostingEnvironment hostingEnvironment)
         {
             if (fileExtension == null)
             {
@@ -109,7 +109,7 @@ namespace Web.Engine.Codecs.Decoders
                 ? _registeredFileDecoders[fileExtension]
                 : _registeredFileDecoders[".*"];
 
-            return (IFile) Activator.CreateInstance(parserType, buffer, appEnvironment);
+            return (IFile) Activator.CreateInstance(parserType, buffer, hostingEnvironment);
         }
     }
 }

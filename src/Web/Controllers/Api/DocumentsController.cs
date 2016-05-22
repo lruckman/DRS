@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Routing;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Web.ViewModels.Api.Documents;
 
 namespace Web.Controllers.Api
@@ -34,7 +34,7 @@ namespace Web.Controllers.Api
 
             if (documentId == null)
             {
-                return new HttpStatusCodeResult((int) HttpStatusCode.InternalServerError);
+                return StatusCode((int) HttpStatusCode.InternalServerError);
             }
 
             return CreatedAtAction(nameof(ViewModels.Api.Documents.Get)

@@ -4,8 +4,9 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
-using Microsoft.Data.Entity;
+using Web.Engine;
 using Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Web.ViewModels.Api.Documents
 {
@@ -29,17 +30,25 @@ namespace Web.ViewModels.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _configurationProvider;
+            private readonly IUserAccessor _userAccessor; 
 
-            public QueryHandler(ApplicationDbContext db, IConfigurationProvider configurationProvider)
+            public QueryHandler(ApplicationDbContext db, 
+                IConfigurationProvider configurationProvider,
+                IUserAccessor userAccessor)
             {
                 _db = db;
                 _configurationProvider = configurationProvider;
+                _userAccessor = userAccessor;
             }
 
             public async Task<Result> Handle(Query message)
             {
+                var userId = _userAccessor.UserId;
+
                 return await _db.Documents
-                    .Where(d => d.Id == message.Id)
+                    .Where(d => d.Id == message.Id /*&& d.UserPermissions
+                        .Any(up => up.ApplicationUserId == userId
+                                   && (up.Permissions & PermissionTypes.Read) != 0)*/)
                     .ProjectTo<Result>(_configurationProvider)
                     .SingleOrDefaultAsync();
             }

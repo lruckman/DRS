@@ -2,16 +2,15 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
-using Microsoft.AspNet.Http;
-using Microsoft.Data.Entity;
-using Microsoft.Extensions.OptionsModel;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Web.Engine;
 using Web.Engine.Extensions;
 using Web.Models;
@@ -40,12 +39,12 @@ namespace Web.ViewModels.Api.Documents
             private readonly ApplicationDbContext _db;
             private readonly IOptions<DRSSettings> _settings;
             private readonly IUserAccessor _userAccessor;
-            private readonly IApplicationEnvironment _appEnvironment;
+            private readonly IHostingEnvironment _hostingEnvironment;
 
             public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor,
-                IApplicationEnvironment appEnvironment)
+                IHostingEnvironment hostingEnvironment)
             {
-                _appEnvironment = appEnvironment;
+                _hostingEnvironment = hostingEnvironment;
                 _db = db;
                 _settings = settings;
                 _userAccessor = userAccessor;
@@ -64,7 +63,7 @@ namespace Web.ViewModels.Api.Documents
 
                 var document = new Document
                 {
-                    CreatedByUserId = _userAccessor.User.GetUserId(),
+                    CreatedByUserId = _userAccessor.UserId,
                     CreatedOn = DateTimeOffset.Now,
                     ModifiedOn = DateTimeOffset.Now,
                     Status = StatusTypes.Active,
@@ -77,7 +76,7 @@ namespace Web.ViewModels.Api.Documents
 
                 var file = new File
                 {
-                    CreatedByUserId = _userAccessor.User.GetUserId(),
+                    CreatedByUserId = _userAccessor.UserId,
                     CreatedOn = DateTimeOffset.Now,
                     Extension = extension,
                     Key = Convert.ToBase64String(fileKey.Protect(null, dataProtectionScope)),
@@ -127,7 +126,7 @@ namespace Web.ViewModels.Api.Documents
                     // get a parser
 
                     var parser = Engine.Codecs.Decoders.File
-                        .Get(extension, buffer, _appEnvironment);
+                        .Get(extension, buffer, _hostingEnvironment);
 
                     // index in lucene
 
@@ -206,9 +205,9 @@ namespace Web.ViewModels.Api.Documents
 
             private static string GetNewFileName(string rootPath, int seed)
             {
-                var subFolder1 = Math.Ceiling(seed/1024m/1024m/1024m);
-                var subFolder2 = Math.Ceiling(subFolder1/1024m/1024m);
-                var subFolder3 = Math.Ceiling(subFolder2/1024m);
+                var subFolder1 = Math.Ceiling(seed / 1024m / 1024m / 1024m);
+                var subFolder2 = Math.Ceiling(subFolder1 / 1024m / 1024m);
+                var subFolder3 = Math.Ceiling(subFolder2 / 1024m);
 
                 return Path.Combine(rootPath,
                     $@"{subFolder1}\{subFolder2}\{subFolder3}\{Guid.NewGuid():N}.bin");

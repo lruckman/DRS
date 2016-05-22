@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.Data.Entity;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Web.Models
 {
@@ -12,7 +12,11 @@ namespace Web.Models
         public DbSet<PermissionType> PermissionTypes { get; set; }
 
         public DbSet<UserLibrary> UserLibraries { get; set; }
-        public DbSet<UserDocument> UserDocuments { get; set; }  
+        public DbSet<UserDocument> UserDocuments { get; set; }
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

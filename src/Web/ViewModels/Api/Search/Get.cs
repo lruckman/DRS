@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
-using Microsoft.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using Web.Engine;
 using Web.Models;
 
@@ -66,13 +65,13 @@ namespace Web.ViewModels.Api.Search
                             message.Q, (int) StatusTypes.Active);
                 }
 
-                var userId = _userAccessor.User.GetUserId();
+                var userId = _userAccessor.UserId;
 
                 // get all the user libraries
 
                 var userLibraryIds = await _db.UserLibraries
-                    .Where(ul => ul.ApplicationUserId == userId)
-                    .Select(ul => (int?)ul.LibraryId)
+                    .Where(ul => ul.ApplicationUserId == userId && (ul.Permissions & PermissionTypes.Read) != 0)
+                    .Select(ul => (int?) ul.LibraryId)
                     .ToArrayAsync();
 
                 if (message.LibraryIds.Any())

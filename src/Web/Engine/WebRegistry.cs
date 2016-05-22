@@ -4,7 +4,7 @@ using System.Reflection;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
-using Microsoft.AspNet.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using StructureMap;
 using StructureMap.Graph;
 
@@ -72,8 +72,8 @@ namespace Web.Engine
 
             // Fluent Validation
 
-            For<IModelValidatorProvider>()
-                .Use<FluentValidationModelValidatorProvider>();
+            For<IObjectModelValidator>()
+                .Use<FluebtValudationObjectValidator>();
             For<IValidatorFactory>()
                 .Use<StructureMapValidatorFactory>();
         }

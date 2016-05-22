@@ -1,8 +1,7 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Web.ViewModels.Api.Files;
 
 namespace Web.Controllers.Api
@@ -25,7 +24,7 @@ namespace Web.Controllers.Api
 
             if (model == null)
             {
-                return new HttpStatusCodeResult((int) HttpStatusCode.NotFound);
+                return NotFound();
             }
 
             return File(model.FileContents, model.ContentType);
@@ -46,7 +45,7 @@ namespace Web.Controllers.Api
 
             if (model == null)
             {
-                return new HttpStatusCodeResult((int) HttpStatusCode.NotFound);
+                return NotFound();
             }
 
             return File(model.FileContents, model.ContentType);

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.AspNetCore.Hosting;
 using Tesseract;
 using Web.Engine.Extensions;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
@@ -16,15 +16,15 @@ namespace Web.Engine.Codecs.Decoders
             ".png", ".bmp", ".tiff", ".tif"
         };
 
-        public Image(byte[] buffer, IApplicationEnvironment appEnvironment)
-            : base(buffer, appEnvironment)
+        public Image(byte[] buffer, IHostingEnvironment hostingEnvironment)
+            : base(buffer, hostingEnvironment)
         {
         }
 
         protected override string ExtractContent(int? pageNumber)
         {
             using (
-                var engine = new TesseractEngine(AppEnvironment.ApplicationBasePath + "\\wwwroot\\app_data\\tessdata",
+                var engine = new TesseractEngine(HostingEnvironment.WebRootPath + "\\app_data\\tessdata",
                     "eng", EngineMode.Default))
             {
                 using (var memoryStream = new MemoryStream(Buffer))

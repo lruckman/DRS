@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Web.Engine
 {
@@ -17,11 +17,11 @@ namespace Web.Engine
 
             if (filterContext.HttpContext.Request.Method.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
             {
-                filterContext.Result = controller.HttpBadRequest();
+                filterContext.Result = controller.BadRequest();
             }
             else
             {
-                filterContext.Result = controller.HttpBadRequest(controller.ModelState);
+                filterContext.Result = controller.BadRequest(controller.ModelState);
             }
         }
 

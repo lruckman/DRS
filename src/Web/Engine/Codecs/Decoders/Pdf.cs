@@ -4,7 +4,7 @@ using System.IO;
 using Ghostscript.NET.Rasterizer;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.AspNetCore.Hosting;
 using Web.Engine.Extensions;
 
 namespace Web.Engine.Codecs.Decoders
@@ -67,8 +67,8 @@ namespace Web.Engine.Codecs.Decoders
 
         public static readonly string[] SupportedFileTypes = {".pdf"};
 
-        public Pdf(byte[] buffer, IApplicationEnvironment appEnvironment)
-            : base(buffer, appEnvironment)
+        public Pdf(byte[] buffer, IHostingEnvironment hostingEnvironment)
+            : base(buffer, hostingEnvironment)
         {
         }
     }
