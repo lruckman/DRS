@@ -90,7 +90,15 @@
 
     "buildOptions": {
         "emitEntryPoint": true,
-        "preserveCompilationContext": true
+        "preserveCompilationContext": true,
+        "copyToOutput": {
+            "mappings": {
+                "./x64/liblept172.dll": { "include": "./wwwroot/app_data/tessdata/x64/liblept172.dll" },
+                "./x64/libtesseract304.dll": { "include": "./wwwroot/app_data/tessdata/x64/libtesseract304.dll" },
+                "./x86/liblept172.dll": { "include": "./wwwroot/app_data/tessdata/x86/liblept172.dll" },
+                "./x86/libtesseract304.dll": { "include": "./wwwroot/app_data/tessdata/x86/libtesseract304.dll" }
+            }
+        }
     },
 
     "publishOptions": {
