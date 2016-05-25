@@ -24,7 +24,6 @@ namespace Web.Models
         public DateTimeOffset ModifiedOn { get; set; }
 
         public virtual List<LibraryDocument> Libraries { get; set; } = new List<LibraryDocument>();
-        public virtual List<UserDocument> UserPermissions { get; set; } = new List<UserDocument>();
         public virtual List<File> Files { get; set; } = new List<File>();
 
         public virtual DocumentContent Content { get; set; }

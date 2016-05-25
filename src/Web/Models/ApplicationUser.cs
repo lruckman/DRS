@@ -7,6 +7,5 @@ namespace Web.Models
     public class ApplicationUser : IdentityUser
     {
         public virtual List<UserLibrary> LibraryAccessList { get; set; } = new List<UserLibrary>();
-        public virtual List<UserDocument> DocumentAccessList { get; set; } = new List<UserDocument>();
     }
 }

@@ -12,7 +12,6 @@ namespace Web.Models
         public DbSet<PermissionType> PermissionTypes { get; set; }
 
         public DbSet<UserLibrary> UserLibraries { get; set; }
-        public DbSet<UserDocument> UserDocuments { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -36,21 +35,6 @@ namespace Web.Models
                 .HasOne(ld => ld.Document)
                 .WithMany(d => d.Libraries)
                 .HasForeignKey(ld => ld.DocumentId);
-
-            // user document permissions: one-to-many
-
-            builder.Entity<UserDocument>()
-                .HasKey(udp => new { udp.DocumentId, udp.ApplicationUserId });
-
-            builder.Entity<UserDocument>()
-                .HasOne(udp => udp.ApplicationUser)
-                .WithMany(au => au.DocumentAccessList)
-                .HasForeignKey(udp => udp.ApplicationUserId);
-
-            builder.Entity<UserDocument>()
-                .HasOne(udp => udp.Document)
-                .WithMany(d => d.UserPermissions)
-                .HasForeignKey(udp => udp.DocumentId);
 
             // user library permissions: one-to-many
 
