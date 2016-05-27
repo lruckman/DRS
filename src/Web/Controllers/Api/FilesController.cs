@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Web.Engine.Exceptions;
 using Web.ViewModels.Api.Files;
 
 namespace Web.Controllers.Api
@@ -20,14 +21,21 @@ namespace Web.Controllers.Api
         [HttpGet("{id:int}/view")]
         public async Task<IActionResult> View(View.Query query)
         {
-            var model = await _mediator.SendAsync(query);
-
-            if (model == null)
+            try
             {
-                return NotFound();
-            }
+                var model = await _mediator.SendAsync(query);
 
-            return File(model.FileContents, model.ContentType);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+
+                return File(model.FileContents, model.ContentType);
+            }
+            catch (UnauthorizedException)
+            {
+                return Unauthorized();
+            }
         }
 
         //[HttpGet("{id:int}")]
@@ -41,14 +49,21 @@ namespace Web.Controllers.Api
         [HttpGet("{id:int}/thumbnail")]
         public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
         {
-            var model = await _mediator.SendAsync(query);
-
-            if (model == null)
+            try
             {
-                return NotFound();
-            }
+                var model = await _mediator.SendAsync(query);
 
-            return File(model.FileContents, model.ContentType);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+
+                return File(model.FileContents, model.ContentType);
+            }
+            catch (UnauthorizedException)
+            {
+                return Unauthorized();
+            }
         }
 
         //[HttpPost]

@@ -4,9 +4,10 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
-using Web.Engine;
-using Web.Models;
 using Microsoft.EntityFrameworkCore;
+using Web.Engine.Exceptions;
+using Web.Engine.Helpers;
+using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
 {
@@ -30,25 +31,28 @@ namespace Web.ViewModels.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _configurationProvider;
-            private readonly IUserAccessor _userAccessor; 
+            private readonly IDocumentSecurity _documentSecurity;
 
-            public QueryHandler(ApplicationDbContext db, 
+            public QueryHandler(ApplicationDbContext db,
                 IConfigurationProvider configurationProvider,
-                IUserAccessor userAccessor)
+                IDocumentSecurity documentSecurity)
             {
                 _db = db;
                 _configurationProvider = configurationProvider;
-                _userAccessor = userAccessor;
+                _documentSecurity = documentSecurity;
             }
 
             public async Task<Result> Handle(Query message)
             {
-                var userId = _userAccessor.UserId;
+                if (!await _documentSecurity.HasDocumentPermissionAsync(message.Id.Value, PermissionTypes.Read))
+                {
+                    throw new UnauthorizedException("Insufficient access permissions.", PermissionTypes.Read);
+                }
+
+                var userLibraryIds = await _documentSecurity.GetUserLibraryIdsAsync(PermissionTypes.Read);
 
                 return await _db.Documents
-                    .Where(d => d.Id == message.Id /*&& d.UserPermissions
-                        .Any(up => up.ApplicationUserId == userId
-                                   && (up.Permissions & PermissionTypes.Read) != 0)*/)
+                    .Where(d => d.Id == message.Id && d.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId)))
                     .ProjectTo<Result>(_configurationProvider)
                     .SingleOrDefaultAsync();
             }

@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Web.Engine.Exceptions;
 using Web.ViewModels.Api.Documents;
 
 namespace Web.Controllers.Api
@@ -22,9 +23,16 @@ namespace Web.Controllers.Api
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(Get.Query query)
         {
-            var model = await _mediator.SendAsync(query);
+            try
+            {
+                var model = await _mediator.SendAsync(query);
 
-            return Ok(model);
+                return Ok(model);
+            }
+            catch (UnauthorizedException)
+            {
+                return Unauthorized();
+            }
         }
 
         [HttpPost]
@@ -44,9 +52,16 @@ namespace Web.Controllers.Api
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(Put.Command command)
         {
-            var documentId = await _mediator.SendAsync(command);
+            try
+            {
+                var documentId = await _mediator.SendAsync(command);
 
-            return await Get(new Get.Query {Id = documentId});
+                return await Get(new Get.Query {Id = documentId});
+            }
+            catch (UnauthorizedException)
+            {
+                return Unauthorized();
+            }
         }
     }
 }

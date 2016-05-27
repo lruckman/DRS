@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Web.Engine;
 using Web.Engine.Extensions;
+using Web.Engine.Helpers;
 using Web.Models;
 using File = Web.Models.File;
 
@@ -40,12 +41,14 @@ namespace Web.ViewModels.Api.Documents
             private readonly IOptions<DRSSettings> _settings;
             private readonly IUserAccessor _userAccessor;
             private readonly IHostingEnvironment _hostingEnvironment;
+            private readonly IDocumentSecurity _documentSecurity;
 
             public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor,
-                IHostingEnvironment hostingEnvironment)
+                IHostingEnvironment hostingEnvironment, IDocumentSecurity documentSecurity)
             {
                 _hostingEnvironment = hostingEnvironment;
                 _db = db;
+                _documentSecurity = documentSecurity;
                 _settings = settings;
                 _userAccessor = userAccessor;
             }

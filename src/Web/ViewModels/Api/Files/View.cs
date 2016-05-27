@@ -6,7 +6,9 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MimeTypes;
+using Web.Engine.Exceptions;
 using Web.Engine.Extensions;
+using Web.Engine.Helpers;
 using Web.Models;
 using File = System.IO.File;
 
@@ -30,15 +32,22 @@ namespace Web.ViewModels.Api.Files
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
+            private readonly IDocumentSecurity _documentSecurity;
 
-            public QueryHandler(ApplicationDbContext db)
+            public QueryHandler(ApplicationDbContext db, IDocumentSecurity documentSecurity)
             {
                 _db = db;
+                _documentSecurity = documentSecurity;
             }
 
             public async Task<Result> Handle(Query message)
             {
                 const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
+
+                if (!await _documentSecurity.HasFilePermissionAsync(message.Id.Value, PermissionTypes.Read))
+                {
+                    throw new UnauthorizedException("Insufficient access permissions.", PermissionTypes.Read);
+                }
 
                 var file = await _db.Files
                     .Where(f => f.Id == message.Id.Value)

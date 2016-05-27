@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Web.Engine.Exceptions;
 using Web.Engine.Extensions;
+using Web.Engine.Helpers;
 using Web.Models;
 using File = System.IO.File;
 
@@ -29,15 +32,25 @@ namespace Web.ViewModels.Api.Files
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
+            private readonly IDocumentSecurity _documentSecurity;
+            private const DataProtectionScope DataProtectionScope = 
+                System.Security.Cryptography.DataProtectionScope.LocalMachine;
 
-            public QueryHandler(ApplicationDbContext db)
+            public QueryHandler(ApplicationDbContext db, 
+                IDocumentSecurity documentSecurity)
             {
                 _db = db;
+                _documentSecurity = documentSecurity;
             }
 
             public async Task<Result> Handle(Query message)
             {
-                const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
+                Debug.Assert(message.Id != null);
+
+                if (!await _documentSecurity.HasFilePermissionAsync(message.Id.Value, PermissionTypes.Read))
+                {
+                    throw new UnauthorizedException("Insufficient access permissions.", PermissionTypes.Read);
+                }
 
                 var file = await _db.Files
                     .Where(f => f.Id == message.Id.Value)
@@ -49,13 +62,13 @@ namespace Web.ViewModels.Api.Files
                 }
 
                 var fileKey = Convert.FromBase64String(file.Key)
-                    .Unprotect(null, dataProtectionScope);
+                    .Unprotect(null, DataProtectionScope);
 
                 var model = new Result
                 {
                     FileContents = File
                         .ReadAllBytes(file.ThumbnailPath)
-                        .Unprotect(fileKey, dataProtectionScope)
+                        .Unprotect(fileKey, DataProtectionScope)
                 };
 
                 return model;

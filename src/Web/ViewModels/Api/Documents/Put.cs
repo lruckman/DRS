@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Web.Engine;
+using Web.Engine.Exceptions;
+using Web.Engine.Helpers;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -40,17 +41,21 @@ namespace Web.ViewModels.Api.Documents
         public class CommandHandler : IAsyncRequestHandler<Command, int>
         {
             private readonly ApplicationDbContext _db;
-            private readonly IUserAccessor _userAccessor;
+            private readonly IDocumentSecurity _documentSecurity;
 
-            public CommandHandler(ApplicationDbContext db,
-                IUserAccessor userAccessor)
+            public CommandHandler(ApplicationDbContext db, IDocumentSecurity documentSecurity)
             {
                 _db = db;
-                _userAccessor = userAccessor;
+                _documentSecurity = documentSecurity;
             }
 
             public async Task<int> Handle(Command message)
             {
+                if (!await _documentSecurity.HasDocumentPermissionAsync(message.Id.Value, PermissionTypes.Modify))
+                {
+                    throw new UnauthorizedException("Insufficient access permissions.", PermissionTypes.Modify);
+                }
+
                 var document = await _db.Documents
                     .Include(d => d.Libraries)
                     .SingleAsync(d => d.Id == message.Id.Value);
@@ -58,15 +63,6 @@ namespace Web.ViewModels.Api.Documents
                 document.ModifiedOn = DateTimeOffset.Now;
                 document.Title = message.Title;
                 document.Abstract = message.Abstract;
-
-                var userId = _userAccessor.UserId;
-
-                // get all the user libraries
-
-                var userLibraryIds = await _db.UserLibraries
-                    .Where(ul => ul.ApplicationUserId == userId)
-                    .Select(ul => ul.LibraryId)
-                    .ToArrayAsync();
 
                 // remove deleted libraries
 
@@ -81,7 +77,7 @@ namespace Web.ViewModels.Api.Documents
 
                 var newLibraryIds = message.LibraryIds
                     .Except(document.Libraries.Select(l => l.LibraryId))
-                    .Intersect(userLibraryIds)
+                    .Intersect(await _documentSecurity.GetUserLibraryIdsAsync(PermissionTypes.Modify))
                     .ToArray();
 
                 document.Libraries.AddRange(newLibraryIds.Select(id => new LibraryDocument {LibraryId = id}));

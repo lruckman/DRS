@@ -7,6 +7,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Web.Engine;
+using Web.Engine.Helpers;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Search
@@ -41,15 +42,15 @@ namespace Web.ViewModels.Api.Search
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _configurationProvider;
-            private readonly IUserAccessor _userAccessor;
+            private readonly IDocumentSecurity _documentSecurity;
 
             public QueryHandler(ApplicationDbContext db,
                 IConfigurationProvider configurationProvider,
-                IUserAccessor userAccessor)
+                IDocumentSecurity documentSecurity)
             {
                 _db = db;
                 _configurationProvider = configurationProvider;
-                _userAccessor = userAccessor;
+                _documentSecurity = documentSecurity;
             }
 
             public async Task<Result> Handle(Query message)
@@ -65,20 +66,16 @@ namespace Web.ViewModels.Api.Search
                             message.Q, (int) StatusTypes.Active);
                 }
 
-                var userId = _userAccessor.UserId;
-
-                // get all the user libraries
-
-                var userLibraryIds = await _db.UserLibraries
-                    .Where(ul => ul.ApplicationUserId == userId && (ul.Permissions & PermissionTypes.Read) != 0)
-                    .Select(ul => (int?) ul.LibraryId)
-                    .ToArrayAsync();
+                var userLibraryIds = await _documentSecurity
+                    .GetUserLibraryIdsAsync(PermissionTypes.Read);
 
                 if (message.LibraryIds.Any())
                 {
                     // out of what was selected what can the user actually search on
 
                     message.LibraryIds = userLibraryIds
+                        .Select(i => (int?) i)
+                        .ToArray()
                         .Intersect(message.LibraryIds)
                         .ToArray();
                 }
@@ -87,7 +84,9 @@ namespace Web.ViewModels.Api.Search
                 {
                     // no libraries so default to all the user libraries
 
-                    message.LibraryIds = userLibraryIds;
+                    message.LibraryIds = userLibraryIds
+                        .Select(i => (int?) i)
+                        .ToArray();
                 }
 
                 // limit based on libraries the user can access
