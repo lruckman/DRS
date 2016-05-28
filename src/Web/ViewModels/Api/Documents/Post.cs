@@ -21,7 +21,7 @@ namespace Web.ViewModels.Api.Documents
 {
     public class Post
     {
-        public class Command : IAsyncRequest<int?>
+        public class Command : IAsyncRequest<Result>
         {
             public IFormFile File { get; set; }
         }
@@ -35,7 +35,7 @@ namespace Web.ViewModels.Api.Documents
             }
         }
 
-        public class CommandHandler : IAsyncRequestHandler<Command, int?>
+        public class CommandHandler : IAsyncRequestHandler<Command, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IOptions<DRSSettings> _settings;
@@ -53,7 +53,7 @@ namespace Web.ViewModels.Api.Documents
                 _userAccessor = userAccessor;
             }
 
-            public async Task<int?> Handle(Command message)
+            public async Task<Result> Handle(Command message)
             {
                 const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
 
@@ -202,7 +202,7 @@ namespace Web.ViewModels.Api.Documents
 
                     // the document that was created
 
-                    return document.Id;
+                    return new Result {DocumentId = document.Id};
                 }
             }
 
@@ -215,6 +215,17 @@ namespace Web.ViewModels.Api.Documents
                 return Path.Combine(rootPath,
                     $@"{subFolder1}\{subFolder2}\{subFolder3}\{Guid.NewGuid():N}.bin");
             }
+        }
+
+        public class Result
+        {
+            public enum StatusTypes
+            {
+                Success
+            }
+
+            public StatusTypes Status { get; set; } = StatusTypes.Success;
+            public int DocumentId { get; set; }
         }
     }
 }

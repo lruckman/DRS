@@ -5,7 +5,6 @@ using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Web.Engine.Exceptions;
 using Web.Engine.Helpers;
 using Web.Models;
 
@@ -46,7 +45,7 @@ namespace Web.ViewModels.Api.Documents
             {
                 if (!await _documentSecurity.HasDocumentPermissionAsync(message.Id.Value, PermissionTypes.Read))
                 {
-                    throw new UnauthorizedException("Insufficient access permissions.", PermissionTypes.Read);
+                    return new Result {Status = Result.StatusTypes.FailureUnauthorized};
                 }
 
                 var userLibraryIds = await _documentSecurity.GetUserLibraryIdsAsync(PermissionTypes.Read);
@@ -69,7 +68,8 @@ namespace Web.ViewModels.Api.Documents
                                 .Single()))
                         .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
                             s.Libraries
-                                .Select(l => l.LibraryId.ToString())));
+                                .Select(l => l.LibraryId.ToString())))
+                        .ForMember(d => d.Status, o => o.MapFrom(s => Result.StatusTypes.Success));
                     CreateMap<File, Result.FileResult>();
                 }
             }
@@ -77,12 +77,20 @@ namespace Web.ViewModels.Api.Documents
 
         public class Result
         {
+            public enum StatusTypes
+            {
+                FailureUnauthorized,
+                Success
+            }
+
+            public StatusTypes Status { get; set; }
+
             public int Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
             public string CreatedOn { get; set; }
             public string ModifiedOn { get; set; }
-            public string[] LibraryIds { get; set; }
+            public string[] LibraryIds { get; set; } = {};
             public FileResult File { get; set; }
 
             public class FileResult

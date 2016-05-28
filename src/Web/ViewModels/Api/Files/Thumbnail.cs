@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Web.Engine.Exceptions;
 using Web.Engine.Extensions;
 using Web.Engine.Helpers;
 using Web.Models;
@@ -49,7 +48,7 @@ namespace Web.ViewModels.Api.Files
 
                 if (!await _documentSecurity.HasFilePermissionAsync(message.Id.Value, PermissionTypes.Read))
                 {
-                    throw new UnauthorizedException("Insufficient access permissions.", PermissionTypes.Read);
+                    return new Result {Status = Result.StatusTypes.FailureUnauthorized};
                 }
 
                 var file = await _db.Files
@@ -77,6 +76,13 @@ namespace Web.ViewModels.Api.Files
 
         public class Result
         {
+            public enum StatusTypes
+            {
+                FailureUnauthorized,
+                Success
+            }
+
+            public StatusTypes Status { get; set; } = StatusTypes.Success;
             public byte[] FileContents { get; set; }
             public string ContentType => "image/png";
         }

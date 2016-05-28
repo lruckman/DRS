@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Web.Engine.Exceptions;
 using Web.Engine.Helpers;
 using Web.Models;
 
@@ -12,7 +11,7 @@ namespace Web.ViewModels.Api.Documents
 {
     public class Put
     {
-        public class Command : IAsyncRequest<int>
+        public class Command : IAsyncRequest<Result>
         {
             public int? Id { get; set; }
             public string Title { get; set; }
@@ -38,7 +37,7 @@ namespace Web.ViewModels.Api.Documents
             }
         }
 
-        public class CommandHandler : IAsyncRequestHandler<Command, int>
+        public class CommandHandler : IAsyncRequestHandler<Command, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IDocumentSecurity _documentSecurity;
@@ -49,11 +48,11 @@ namespace Web.ViewModels.Api.Documents
                 _documentSecurity = documentSecurity;
             }
 
-            public async Task<int> Handle(Command message)
+            public async Task<Result> Handle(Command message)
             {
                 if (!await _documentSecurity.HasDocumentPermissionAsync(message.Id.Value, PermissionTypes.Modify))
                 {
-                    throw new UnauthorizedException("Insufficient access permissions.", PermissionTypes.Modify);
+                    return new Result {Status = Result.StatusTypes.FailureUnauthorized};
                 }
 
                 var document = await _db.Documents
@@ -84,8 +83,20 @@ namespace Web.ViewModels.Api.Documents
 
                 await _db.SaveChangesAsync();
 
-                return document.Id;
+                return new Result { DocumentId = document.Id };
             }
+        }
+
+        public class Result
+        {
+            public enum StatusTypes
+            {
+                FailureUnauthorized,
+                Success
+            }
+
+            public StatusTypes Status { get; set; } = StatusTypes.Success;
+            public int DocumentId { get; set; }
         }
     }
 }

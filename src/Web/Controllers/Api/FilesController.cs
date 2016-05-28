@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Web.Engine.Exceptions;
 using Web.ViewModels.Api.Files;
 
 namespace Web.Controllers.Api
@@ -27,21 +26,19 @@ namespace Web.Controllers.Api
         [HttpGet("{id:int}/view")]
         public async Task<IActionResult> View(View.Query query)
         {
-            try
+            var model = await _mediator.SendAsync(query);
+
+            if (model == null)
             {
-                var model = await _mediator.SendAsync(query);
-
-                if (model == null)
-                {
-                    return NotFound();
-                }
-
-                return File(model.FileContents, model.ContentType);
+                return NotFound();
             }
-            catch (UnauthorizedException)
+
+            if (model.Status == ViewModels.Api.Files.View.Result.StatusTypes.FailureUnauthorized)
             {
                 return Unauthorized();
             }
+
+            return File(model.FileContents, model.ContentType);
         }
 
         //[HttpGet("{id:int}")]
@@ -55,21 +52,19 @@ namespace Web.Controllers.Api
         [HttpGet("{id:int}/thumbnail")]
         public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
         {
-            try
+            var model = await _mediator.SendAsync(query);
+
+            if (model == null)
             {
-                var model = await _mediator.SendAsync(query);
-
-                if (model == null)
-                {
-                    return NotFound();
-                }
-
-                return File(model.FileContents, model.ContentType);
+                return NotFound();
             }
-            catch (UnauthorizedException)
+
+            if (model.Status == ViewModels.Api.Files.Thumbnail.Result.StatusTypes.FailureUnauthorized)
             {
                 return Unauthorized();
             }
+
+            return File(model.FileContents, model.ContentType);
         }
 
         //[HttpPost]

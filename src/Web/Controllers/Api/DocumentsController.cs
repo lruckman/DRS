@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Web.Engine.Exceptions;
 using Web.ViewModels.Api.Documents;
 
 namespace Web.Controllers.Api
@@ -29,45 +27,36 @@ namespace Web.Controllers.Api
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(Get.Query query)
         {
-            try
-            {
-                var model = await _mediator.SendAsync(query);
+            var model = await _mediator.SendAsync(query);
 
-                return Ok(model);
-            }
-            catch (UnauthorizedException)
+            if (model.Status == ViewModels.Api.Documents.Get.Result.StatusTypes.FailureUnauthorized)
             {
                 return Unauthorized();
             }
+
+            return Ok(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Post(Post.Command command)
         {
-            var documentId = await _mediator.SendAsync(command);
-
-            if (documentId == null)
-            {
-                return StatusCode((int) HttpStatusCode.InternalServerError);
-            }
+            var result = await _mediator.SendAsync(command);
 
             return CreatedAtAction(nameof(ViewModels.Api.Documents.Get)
-                , new RouteValueDictionary(new Get.Query {Id = documentId}), null);
+                , new RouteValueDictionary(new Get.Query {Id = result.DocumentId}), null);
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(Put.Command command)
         {
-            try
-            {
-                var documentId = await _mediator.SendAsync(command);
+            var result = await _mediator.SendAsync(command);
 
-                return await Get(new Get.Query {Id = documentId});
-            }
-            catch (UnauthorizedException)
+            if (result.Status == ViewModels.Api.Documents.Put.Result.StatusTypes.FailureUnauthorized)
             {
                 return Unauthorized();
             }
+
+            return await Get(new Get.Query {Id = result.DocumentId});
         }
     }
 }
