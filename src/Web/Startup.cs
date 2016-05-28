@@ -55,7 +55,7 @@ namespace Web
                 .AddMvc(options =>
                 {
                     options.Filters.Add(new ValidateModelStateActionFilter());
-                    options.Filters.Add(new DRSExceptionFilter());
+                    options.Filters.Add(new ApiExceptionFilter());
                 })
                 .AddJsonOptions(options =>
                     {

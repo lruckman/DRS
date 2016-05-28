@@ -1,6 +1,7 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Web.Engine.Extensions;
+using Web.ViewModels.Api;
 
 namespace Web.Engine
 {
@@ -8,21 +9,15 @@ namespace Web.Engine
     {
         public void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var controller = (Controller)filterContext.Controller;
+            var controller = (Controller) filterContext.Controller;
 
             if (controller.ViewData.ModelState.IsValid)
             {
                 return;
             }
 
-            if (filterContext.HttpContext.Request.Method.Equals("GET", StringComparison.InvariantCultureIgnoreCase))
-            {
-                filterContext.Result = controller.BadRequest();
-            }
-            else
-            {
-                filterContext.Result = controller.BadRequest(controller.ModelState);
-            }
+            filterContext.Result =
+                controller.BadRequest(new ApiError {Errors = controller.ModelState.ToSimpleDictionary()});
         }
 
         public void OnActionExecuted(ActionExecutedContext filterContext)
