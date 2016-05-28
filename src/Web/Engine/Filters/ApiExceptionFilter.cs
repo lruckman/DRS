@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Web.Engine.Extensions;
 using Web.ViewModels.Api;
 
-namespace Web.Engine
+namespace Web.Engine.Filters
 {
     public class ApiExceptionFilter : ActionFilterAttribute, IExceptionFilter, IAsyncExceptionFilter
     {

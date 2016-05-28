@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using StructureMap;
 using Web.Engine;
+using Web.Engine.Filters;
 using Web.Models;
 
 namespace Web
@@ -54,7 +55,7 @@ namespace Web
             services
                 .AddMvc(options =>
                 {
-                    options.Filters.Add(new ValidateModelStateActionFilter());
+                    options.Filters.Add(new ValidateModelStateFilter());
                     options.Filters.Add(new ApiExceptionFilter());
                 })
                 .AddJsonOptions(options =>
