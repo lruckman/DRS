@@ -16,6 +16,12 @@ namespace Web.Engine.Filters
                 return;
             }
 
+            if (!filterContext.IsAjaxRequest())
+            {
+                filterContext.Result = controller.BadRequest();
+                return;
+            }
+
             filterContext.Result =
                 controller.BadRequest(new ApiError {Errors = controller.ModelState.ToSimpleDictionary()});
         }
