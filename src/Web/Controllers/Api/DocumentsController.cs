@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,6 +18,11 @@ namespace Web.Controllers.Api
 
         public DocumentsController(IMediator mediator)
         {
+            if (mediator == null)
+            {
+                throw new ArgumentNullException(nameof(mediator));
+            }
+
             _mediator = mediator;
         }
 

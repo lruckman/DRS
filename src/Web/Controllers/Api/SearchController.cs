@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,11 @@ namespace Web.Controllers.Api
 
         public SearchController(IMediator mediator)
         {
+            if (mediator == null)
+            {
+                throw new ArgumentNullException(nameof(mediator));
+            }
+
             _mediator = mediator;
         }
         
