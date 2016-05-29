@@ -1,13 +1,13 @@
 ﻿using System;
 using FluentValidation;
 
-namespace Web.Engine
+namespace Web.Engine.Validation
 {
-    public class MvcMapValidatorFactory : ValidatorFactoryBase
+    public class FluentValidationValidatorFactory : ValidatorFactoryBase
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public MvcMapValidatorFactory(IServiceProvider serviceProvider)
+        public FluentValidationValidatorFactory(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }

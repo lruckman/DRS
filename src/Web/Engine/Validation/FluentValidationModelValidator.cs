@@ -4,18 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace Web.Engine
+namespace Web.Engine.Validation
 {
     //TODO: Need support for CustomizeValidatorAttribute and client-side
 
-    public class FluentValidationObjectModelValidatorProvider : IObjectModelValidator
+    public class FluentValidationObjectModelValidator : IObjectModelValidator
     {
         private readonly IValidatorFactory _validatorFactory;
 
         /// <summary>
-        ///     Initializes a new instance of <see cref="FluentValidationObjectModelValidatorProvider" />.
+        ///     Initializes a new instance of <see cref="FluentValidationObjectModelValidator" />.
         /// </summary>
-        public FluentValidationObjectModelValidatorProvider(IModelMetadataProvider modelMetadataProvider,
+        public FluentValidationObjectModelValidator(IModelMetadataProvider modelMetadataProvider,
             IValidatorFactory validatorFactory)
         {
             if (modelMetadataProvider == null)

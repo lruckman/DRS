@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Web.Engine.Validation
 {
-    public static class Extensions
+    public static class FluentValidationExtensions
     {
         /// <summary>
         ///     Adds Fluent Validation services to the specified
@@ -22,7 +22,7 @@ namespace Web.Engine.Validation
             // add all IValidator to MVC's service provider
 
             var validators =
-                typeof (FluentValidationObjectModelValidatorProvider)
+                typeof (FluentValidationObjectModelValidator)
                     .Assembly
                     .GetTypes()
                     .Where(t => typeof (IValidator).IsAssignableFrom(t));
@@ -35,9 +35,9 @@ namespace Web.Engine.Validation
             // add the fluent validation object model validator
 
             mvcBuilder.Services.Add(ServiceDescriptor.Transient<IObjectModelValidator>(serviceProvider =>
-                new FluentValidationObjectModelValidatorProvider(
+                new FluentValidationObjectModelValidator(
                     serviceProvider.GetRequiredService<IModelMetadataProvider>(),
-                    new MvcMapValidatorFactory(serviceProvider.GetRequiredService<IServiceProvider>()))));
+                    new FluentValidationValidatorFactory(serviceProvider.GetRequiredService<IServiceProvider>()))));
 
             // clear all model validation providers since fluent validation will be handling everything
 
