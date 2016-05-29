@@ -41,15 +41,15 @@ namespace Web.ViewModels.Api.Search
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
-            private readonly IConfigurationProvider _configurationProvider;
+            private readonly IConfigurationProvider _config;
             private readonly IDocumentSecurity _documentSecurity;
 
             public QueryHandler(ApplicationDbContext db,
-                IConfigurationProvider configurationProvider,
+                IConfigurationProvider config,
                 IDocumentSecurity documentSecurity)
             {
                 _db = db;
-                _configurationProvider = configurationProvider;
+                _config = config;
                 _documentSecurity = documentSecurity;
             }
 
@@ -110,7 +110,7 @@ namespace Web.ViewModels.Api.Search
                     //todo: reinstate, broken when uncommented
                     //.Skip(message.MaxResults * message.PageIndex)
                     //.Take(message.MaxResults)
-                    .ProjectTo<Result.Document>(_configurationProvider)
+                    .ProjectTo<Result.Document>(_config)
                     .ToArrayAsync();
 
                 return result;

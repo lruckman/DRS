@@ -29,15 +29,15 @@ namespace Web.ViewModels.Api.Documents
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
-            private readonly IConfigurationProvider _configurationProvider;
+            private readonly IConfigurationProvider _config;
             private readonly IDocumentSecurity _documentSecurity;
 
             public QueryHandler(ApplicationDbContext db,
-                IConfigurationProvider configurationProvider,
+                IConfigurationProvider config,
                 IDocumentSecurity documentSecurity)
             {
                 _db = db;
-                _configurationProvider = configurationProvider;
+                _config = config;
                 _documentSecurity = documentSecurity;
             }
 
@@ -52,7 +52,7 @@ namespace Web.ViewModels.Api.Documents
 
                 return await _db.Documents
                     .Where(d => d.Id == message.Id && d.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId)))
-                    .ProjectTo<Result>(_configurationProvider)
+                    .ProjectTo<Result>(_config)
                     .SingleOrDefaultAsync();
             }
 
