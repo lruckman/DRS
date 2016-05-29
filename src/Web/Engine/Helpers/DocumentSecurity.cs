@@ -16,17 +16,17 @@ namespace Web.Engine.Helpers
     public class DocumentSecurity : IDocumentSecurity
     {
         private readonly ApplicationDbContext _db;
-        private readonly IUserAccessor _userAccessor;
+        private readonly IUserContext _userContext;
 
         /// <summary>
         /// A cache of user library ids for this user, this instance
         /// </summary>
         private int[] _cacheUserLibraryIds = {};
 
-        public DocumentSecurity(ApplicationDbContext db, IUserAccessor userAccessor)
+        public DocumentSecurity(ApplicationDbContext db, IUserContext userContext)
         {
             _db = db;
-            _userAccessor = userAccessor;
+            _userContext = userContext;
         }
 
         public async Task<IEnumerable<int>> GetUserLibraryIdsAsync(PermissionTypes requestedPermission)
@@ -36,7 +36,7 @@ namespace Web.Engine.Helpers
                 return _cacheUserLibraryIds;
             }
 
-            var userId = _userAccessor.UserId;
+            var userId = _userContext.UserId;
 
             return _cacheUserLibraryIds =
                 await _db.UserLibraries

@@ -5,18 +5,18 @@ using Web.Models;
 
 namespace Web.Engine
 {
-    public interface IUserAccessor
+    public interface IUserContext
     {
         ClaimsPrincipal User { get; }
         string UserId { get; }
     }
 
-    public class UserAccessor : IUserAccessor
+    public class UserContext : IUserContext
     {
         private readonly IHttpContextAccessor _accessor;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserAccessor(IHttpContextAccessor accessor, UserManager<ApplicationUser> userManager)
+        public UserContext(IHttpContextAccessor accessor, UserManager<ApplicationUser> userManager)
         {
             _accessor = accessor;
             _userManager = userManager;

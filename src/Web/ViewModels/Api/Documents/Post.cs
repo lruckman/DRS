@@ -39,18 +39,18 @@ namespace Web.ViewModels.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IOptions<DRSSettings> _settings;
-            private readonly IUserAccessor _userAccessor;
+            private readonly IUserContext _userContext;
             private readonly IHostingEnvironment _hostingEnvironment;
             private readonly IDocumentSecurity _documentSecurity;
 
-            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserAccessor userAccessor,
+            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserContext userContext,
                 IHostingEnvironment hostingEnvironment, IDocumentSecurity documentSecurity)
             {
                 _hostingEnvironment = hostingEnvironment;
                 _db = db;
                 _documentSecurity = documentSecurity;
                 _settings = settings;
-                _userAccessor = userAccessor;
+                _userContext = userContext;
             }
 
             public async Task<Result> Handle(Command message)
@@ -66,7 +66,7 @@ namespace Web.ViewModels.Api.Documents
 
                 var document = new Document
                 {
-                    CreatedByUserId = _userAccessor.UserId,
+                    CreatedByUserId = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now,
                     ModifiedOn = DateTimeOffset.Now,
                     Status = StatusTypes.Active,
@@ -79,7 +79,7 @@ namespace Web.ViewModels.Api.Documents
 
                 var file = new File
                 {
-                    CreatedByUserId = _userAccessor.UserId,
+                    CreatedByUserId = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now,
                     Extension = extension,
                     Key = Convert.ToBase64String(fileKey.Protect(null, dataProtectionScope)),

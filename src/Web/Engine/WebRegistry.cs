@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using AutoMapper;
-using FluentValidation;
 using MediatR;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using StructureMap;
 using StructureMap.Graph;
 
@@ -19,7 +17,7 @@ namespace Web.Engine
                 scanner.Assembly(Assembly.GetExecutingAssembly());
                 scanner.TheCallingAssembly();
                 scanner.WithDefaultConventions();
-
+                
                 // AutoMapper
 
                 scanner.AddAllTypesOf<Profile>();
@@ -69,13 +67,6 @@ namespace Web.Engine
                 .Singleton()
                 .Use(ctx => ctx.GetInstance<MapperConfiguration>()
                     .CreateMapper(ctx.GetInstance));
-
-            // Fluent Validation
-
-            For<IObjectModelValidator>()
-                .Use<FluebtValudationObjectValidator>();
-            For<IValidatorFactory>()
-                .Use<StructureMapValidatorFactory>();
         }
     }
 }

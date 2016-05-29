@@ -10,6 +10,7 @@ using Newtonsoft.Json.Serialization;
 using StructureMap;
 using Web.Engine;
 using Web.Engine.Filters;
+using Web.Engine.Validation;
 using Web.Models;
 
 namespace Web
@@ -35,14 +36,13 @@ namespace Web
         }
 
         private static IConfigurationRoot Configuration { get; set; }
-        public static Container IoContainer = null; //todo: remove this
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.Configure<DRSSettings>(Configuration.GetSection("DRS"));
 
@@ -53,15 +53,19 @@ namespace Web
             //services.AddReact();
 
             services
-                .AddMvc(options =>
-                {
-                    options.Filters.Add(new ValidateModelStateFilter());
-                    options.Filters.Add(new ApiExceptionFilter());
-                })
-                .AddJsonOptions(options =>
+                .AddMvc(
+                    options =>
+                    {
+                        options.Filters.Add(new ValidateModelStateFilter());
+                        options.Filters.Add(new ApiExceptionFilter());
+                    })
+                .AddJsonOptions(
+                    options =>
                     {
                         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                    });
+                    })
+                .FluentValidation();
+
 
             var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });
 
@@ -69,11 +73,7 @@ namespace Web
 
             container.Populate(services);
 
-            // save the container for later, easy access
-
-            IoContainer = container;
-
-           return container.GetInstance<IServiceProvider>();
+            return container.GetInstance<IServiceProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
