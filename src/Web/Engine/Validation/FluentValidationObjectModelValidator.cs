@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -34,11 +35,15 @@ namespace Web.Engine.Validation
                 throw new ArgumentNullException(nameof(actionContext));
             }
 
+            // would model ever be null ??
+
             if (model == null)
             {
                 return;
             }
-            
+
+            // get our IValidator
+
             var validator = _validatorFactory.GetValidator(model.GetType());
 
             if (validator == null)
@@ -46,7 +51,20 @@ namespace Web.Engine.Validation
                 return;
             }
 
+            foreach (var value in actionContext.ModelState.Values
+                .Where(v => v.ValidationState == ModelValidationState.Unvalidated))
+            {
+                // Set all unvalidated states to valid. If we end up adding an error below then that properties state
+                // will become ModelValidationState.Invalid and will set ModelState.IsValid to false
+
+                value.ValidationState = ModelValidationState.Valid;
+            }
+
+            // validate the model using Fluent Validation rules
+
             var result = validator.Validate(model);
+
+            // add all our model errors to the modelstate
 
             foreach (var modelError in result.Errors)
             {
