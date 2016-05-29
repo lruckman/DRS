@@ -64,7 +64,7 @@ namespace Web
                     {
                         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     })
-                .FluentValidation();
+                .AddFluentValidation();
 
 
             var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });

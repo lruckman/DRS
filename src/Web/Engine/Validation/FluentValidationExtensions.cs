@@ -17,7 +17,7 @@ namespace Web.Engine.Validation
         ///     An <see cref="T:Microsoft.Extensions.DependencyInjection.IMvcBuilder" /> that can be used to further configure the
         ///     MVC services.
         /// </returns>
-        public static IMvcBuilder FluentValidation(this IMvcBuilder mvcBuilder)
+        public static IMvcBuilder AddFluentValidation(this IMvcBuilder mvcBuilder)
         {
             // add all IValidator to MVC's service provider
 
