@@ -1,6 +1,7 @@
 ﻿var React = require('react');
 var Select = require('react-select');
 var Button = require('react-bootstrap').Button;
+var classNames = require('classnames');
 var Modal = require('react-bootstrap').Modal;
 var ProgressBar = require('react-bootstrap').ProgressBar;
 var FileDrop = require('react-file-drop');
@@ -29,6 +30,7 @@ var DocumentEdit = React.createClass({
                 count: 0
             },
             showModal: false,
+            validationErrors: [],
             document: {
                 abstract: '',
                 file: {
@@ -162,6 +164,24 @@ var DocumentEdit = React.createClass({
 
         xhr.onload = function () {
 
+            if (xhr.status === 400) {
+
+                var data = JSON.parse(xhr.responseText);
+                var validationErrors = [];
+
+                for (var prop in data.errors) {
+                    if (data.errors.hasOwnProperty(prop)) {
+                        for (var error in data.errors[prop]) {
+                            validationErrors.push(data.errors[prop][error]);
+                        }
+                    }
+                }
+
+                this.setState({ validationErrors: validationErrors });
+
+                return;
+            }
+
             if (xhr.status !== 200) {
 
                 alert(xhr.status + 'An error occurred!');
@@ -231,6 +251,16 @@ var DocumentEdit = React.createClass({
         });
     },
     render: function () {
+        var validationResults = this.state.validationErrors.map(function(result, index) {
+            return (
+                <li key={index}>{result}</li>
+                );
+        }, this);
+        var validationSummaryClassName = classNames({
+            'hidden': this.state.validationErrors.length === 0,
+            'alert' : true,
+            'alert-danger': true
+        });
         return (
             <div>
                 <FileDrop 
@@ -283,6 +313,11 @@ var DocumentEdit = React.createClass({
                                     </dl>
                                 </div>
                                 <div className="col-md-8">
+                                    <div className={validationSummaryClassName}>
+                                        <ul>
+                                            {validationResults}
+                                        </ul>
+                                    </div>
                                     <div className="form-group">
                                         <label htmlFor="title" className="col-sm-2 control-label">Title</label>
                                         <div className="col-sm-10">
