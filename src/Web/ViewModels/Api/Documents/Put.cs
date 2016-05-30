@@ -32,7 +32,7 @@ namespace Web.ViewModels.Api.Documents
                     .Length(0, 512);
 
                 RuleFor(m => m.LibraryIds)
-                    .NotEmpty()
+                    .NotEmpty().WithName("Libraries")
                     .HasLibraryPermission(documentSecurity, PermissionTypes.Modify);
 
                 RuleFor(m => m.Title)
