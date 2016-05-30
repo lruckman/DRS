@@ -223,7 +223,7 @@ var DocumentEdit = React.createClass({
         var document = this.state.document;
 
         document.libraryIds = (typeof value === 'string')
-            ? [value]
+            ? ((value === "") ? [] : [value])
             : value;
 
         this.setState({
