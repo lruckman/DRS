@@ -5,6 +5,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Web.Engine.Helpers;
+using Web.Engine.Validation.Custom;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -16,21 +17,24 @@ namespace Web.ViewModels.Api.Documents
             public int? Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
-            public int[] LibraryIds { get; set; }
+            public int[] LibraryIds { get; set; } = {};
         }
 
         public class CommandValidator : AbstractValidator<Command>
         {
-            public CommandValidator(ApplicationDbContext db)
+            public CommandValidator(IDocumentSecurity documentSecurity)
             {
                 RuleFor(m => m.Id)
-                    .NotNull();
+                    .NotNull()
+                    .HasDocumentPermission(documentSecurity, PermissionTypes.Modify);
+
                 RuleFor(m => m.Abstract)
                     .Length(0, 512);
+
                 RuleFor(m => m.LibraryIds)
-                    .NotNull()
-                    .MustAsync((libraryIds, cancellationToken) =>
-                        db.Libraries.AllAsync(l => libraryIds.Contains(l.Id)));
+                    .NotEmpty()
+                    .HasLibraryPermission(documentSecurity, PermissionTypes.Modify);
+
                 RuleFor(m => m.Title)
                     .NotNull()
                     .Length(1, 60);
@@ -50,14 +54,14 @@ namespace Web.ViewModels.Api.Documents
 
             public async Task<Result> Handle(Command message)
             {
-                if (!await _documentSecurity.HasDocumentPermissionAsync(message.Id.Value, PermissionTypes.Modify))
-                {
-                    return new Result {Status = Result.StatusTypes.FailureUnauthorized};
-                }
-
                 var document = await _db.Documents
                     .Include(d => d.Libraries)
-                    .SingleAsync(d => d.Id == message.Id.Value);
+                    .SingleOrDefaultAsync(d => d.Id == message.Id.Value);
+
+                if (document == null)
+                {
+                    return null;
+                }
 
                 document.ModifiedOn = DateTimeOffset.Now;
                 document.Title = message.Title;
@@ -89,13 +93,6 @@ namespace Web.ViewModels.Api.Documents
 
         public class Result
         {
-            public enum StatusTypes
-            {
-                FailureUnauthorized,
-                Success
-            }
-
-            public StatusTypes Status { get; set; } = StatusTypes.Success;
             public int DocumentId { get; set; }
         }
     }

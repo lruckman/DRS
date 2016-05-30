@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Web.Engine;
 using Web.Engine.Helpers;
+using Web.Engine.Validation.Custom;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Search
@@ -16,7 +17,7 @@ namespace Web.ViewModels.Api.Search
     {
         public class Query : IAsyncRequest<Result>
         {
-            public int?[] LibraryIds { get; set; } = {};
+            public int[] LibraryIds { get; set; } = {};
 
             public string Q { get; set; }
 
@@ -29,12 +30,12 @@ namespace Web.ViewModels.Api.Search
 
         public class QueryValidator : AbstractValidator<Query>
         {
-            public QueryValidator()
+            public QueryValidator(IDocumentSecurity documentSecurity)
             {
                 RuleFor(m => m.MaxResults)
-                    .InclusiveBetween(0, 100);
+                    .InclusiveBetween(Constants.SearchResultsPageSize, Constants.SearchResultsMaxPageSize);
                 RuleFor(m => m.LibraryIds)
-                    .Must(li => li.All(item => item != null));
+                    .HasLibraryPermission(documentSecurity, PermissionTypes.Read);
             }
         }
 
@@ -65,27 +66,16 @@ namespace Web.ViewModels.Api.Search
                             $"SELECT d.* FROM [dbo].[{nameof(Document)}s] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key] AND d.Status = @p1 AND EXISTS (SELECT 1 FROM [dbo].[{nameof(File)}s] AS f WHERE f.DocumentId = d.Id AND f.Status = @p1)",
                             message.Q, (int) StatusTypes.Active);
                 }
-
-                var userLibraryIds = await _documentSecurity
-                    .GetUserLibraryIdsAsync(PermissionTypes.Read);
-
-                if (message.LibraryIds.Any())
-                {
-                    // out of what was selected what can the user actually search on
-
-                    message.LibraryIds = userLibraryIds
-                        .Select(i => (int?) i)
-                        .ToArray()
-                        .Intersect(message.LibraryIds)
-                        .ToArray();
-                }
-
+                
                 if (!message.LibraryIds.Any())
                 {
                     // no libraries so default to all the user libraries
 
+                    var userLibraryIds = await _documentSecurity
+                        .GetUserLibraryIdsAsync(PermissionTypes.Read);
+
                     message.LibraryIds = userLibraryIds
-                        .Select(i => (int?) i)
+                        .Select(i => i)
                         .ToArray();
                 }
 

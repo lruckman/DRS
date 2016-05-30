@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Web.Engine.Extensions;
 using Web.Engine.Helpers;
+using Web.Engine.Validation.Custom;
 using Web.Models;
 using File = System.IO.File;
 
@@ -22,34 +23,29 @@ namespace Web.ViewModels.Api.Files
 
         public class QueryValidator : AbstractValidator<Query>
         {
-            public QueryValidator()
+            public QueryValidator(IDocumentSecurity documentSecurity)
             {
-                RuleFor(m => m.Id).NotNull();
+                RuleFor(m => m.Id)
+                    .NotNull()
+                    .HasDocumentFileAccess(documentSecurity, PermissionTypes.Read);
             }
         }
 
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
-            private readonly IDocumentSecurity _documentSecurity;
-            private const DataProtectionScope DataProtectionScope = 
+
+            private const DataProtectionScope DataProtectionScope =
                 System.Security.Cryptography.DataProtectionScope.LocalMachine;
 
-            public QueryHandler(ApplicationDbContext db, 
-                IDocumentSecurity documentSecurity)
+            public QueryHandler(ApplicationDbContext db)
             {
                 _db = db;
-                _documentSecurity = documentSecurity;
             }
 
             public async Task<Result> Handle(Query message)
             {
                 Debug.Assert(message.Id != null);
-
-                if (!await _documentSecurity.HasFilePermissionAsync(message.Id.Value, PermissionTypes.Read))
-                {
-                    return new Result {Status = Result.StatusTypes.FailureUnauthorized};
-                }
 
                 var file = await _db.Files
                     .Where(f => f.Id == message.Id.Value)
@@ -76,13 +72,6 @@ namespace Web.ViewModels.Api.Files
 
         public class Result
         {
-            public enum StatusTypes
-            {
-                FailureUnauthorized,
-                Success
-            }
-
-            public StatusTypes Status { get; set; } = StatusTypes.Success;
             public byte[] FileContents { get; set; }
             public string ContentType => "image/png";
         }

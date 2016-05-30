@@ -33,11 +33,6 @@ namespace Web.Controllers.Api
                 return NotFound();
             }
 
-            if (model.Status == ViewModels.Api.Files.View.Result.StatusTypes.FailureUnauthorized)
-            {
-                return Unauthorized();
-            }
-
             return File(model.FileContents, model.ContentType);
         }
 
@@ -57,11 +52,6 @@ namespace Web.Controllers.Api
             if (model == null)
             {
                 return NotFound();
-            }
-
-            if (model.Status == ViewModels.Api.Files.Thumbnail.Result.StatusTypes.FailureUnauthorized)
-            {
-                return Unauthorized();
             }
 
             return File(model.FileContents, model.ContentType);

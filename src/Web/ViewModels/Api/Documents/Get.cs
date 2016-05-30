@@ -6,6 +6,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Web.Engine.Helpers;
+using Web.Engine.Validation.Custom;
 using Web.Models;
 
 namespace Web.ViewModels.Api.Documents
@@ -19,10 +20,18 @@ namespace Web.ViewModels.Api.Documents
 
         public class QueryValidator : AbstractValidator<Query>
         {
+            private readonly IDocumentSecurity _documentSecurity;
+
+            public QueryValidator(IDocumentSecurity documentSecurity)
+            {
+                _documentSecurity = documentSecurity;
+            }
+
             public QueryValidator()
             {
                 RuleFor(m => m.Id)
-                    .NotNull();
+                    .NotNull()
+                    .HasDocumentPermission(_documentSecurity, PermissionTypes.Read);
             }
         }
 
@@ -30,28 +39,18 @@ namespace Web.ViewModels.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _config;
-            private readonly IDocumentSecurity _documentSecurity;
 
             public QueryHandler(ApplicationDbContext db,
-                IConfigurationProvider config,
-                IDocumentSecurity documentSecurity)
+                IConfigurationProvider config)
             {
                 _db = db;
                 _config = config;
-                _documentSecurity = documentSecurity;
             }
 
             public async Task<Result> Handle(Query message)
             {
-                if (!await _documentSecurity.HasDocumentPermissionAsync(message.Id.Value, PermissionTypes.Read))
-                {
-                    return new Result {Status = Result.StatusTypes.FailureUnauthorized};
-                }
-
-                var userLibraryIds = await _documentSecurity.GetUserLibraryIdsAsync(PermissionTypes.Read);
-
                 return await _db.Documents
-                    .Where(d => d.Id == message.Id && d.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId)))
+                    .Where(d => d.Id == message.Id)
                     .ProjectTo<Result>(_config)
                     .SingleOrDefaultAsync();
             }
@@ -68,8 +67,7 @@ namespace Web.ViewModels.Api.Documents
                                 .Single()))
                         .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
                             s.Libraries
-                                .Select(l => l.LibraryId.ToString())))
-                        .ForMember(d => d.Status, o => o.MapFrom(s => Result.StatusTypes.Success));
+                                .Select(l => l.LibraryId.ToString())));
                     CreateMap<File, Result.FileResult>();
                 }
             }
@@ -77,14 +75,6 @@ namespace Web.ViewModels.Api.Documents
 
         public class Result
         {
-            public enum StatusTypes
-            {
-                FailureUnauthorized,
-                Success
-            }
-
-            public StatusTypes Status { get; set; }
-
             public int Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }

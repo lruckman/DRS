@@ -27,14 +27,14 @@ namespace Web.Controllers.Api
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(Get.Query query)
         {
-            var model = await _mediator.SendAsync(query);
+            var result = await _mediator.SendAsync(query);
 
-            if (model.Status == ViewModels.Api.Documents.Get.Result.StatusTypes.FailureUnauthorized)
+            if (result == null)
             {
-                return Unauthorized();
+                return NotFound();
             }
 
-            return Ok(model);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -51,9 +51,9 @@ namespace Web.Controllers.Api
         {
             var result = await _mediator.SendAsync(command);
 
-            if (result.Status == ViewModels.Api.Documents.Put.Result.StatusTypes.FailureUnauthorized)
+            if (result == null)
             {
-                return Unauthorized();
+                return NotFound();
             }
 
             return await Get(new Get.Query {Id = result.DocumentId});
