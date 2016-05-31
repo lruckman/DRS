@@ -23,6 +23,10 @@
         {
             "name": "SearchBox",
             "path": "./wwwroot/js/SearchBox.js"
+        },
+        {
+            "name": "ValidationSummary",
+            "path":  "./wwwroot/js/ValidationSummary.js"
         }
     ]
 }
