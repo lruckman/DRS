@@ -27,6 +27,11 @@ namespace Web.Controllers.Api
         {
             var results = await _mediator.SendAsync(query);
 
+            if (results == null)
+            {
+                return NotFound();
+            }
+
             return Ok(results);
         }
     }
