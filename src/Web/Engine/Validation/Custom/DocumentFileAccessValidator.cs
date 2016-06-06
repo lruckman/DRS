@@ -21,6 +21,11 @@ namespace Web.Engine.Validation.Custom
         {
             var fileId = context.PropertyValue as int?;
 
+            if (fileId == null)
+            {
+                return true;
+            }
+
             return
                 _documentSecurity.HasFilePermissionAsync(fileId.Value, _permission)
                     .GetAwaiter()

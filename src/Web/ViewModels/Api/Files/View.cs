@@ -27,7 +27,7 @@ namespace Web.ViewModels.Api.Files
             {
                 RuleFor(m => m.Id)
                     .NotNull()
-                    .HasDocumentFileAccess(documentSecurity, PermissionTypes.Read); ;
+                    .HasDocumentFileAccess(documentSecurity, PermissionTypes.Read);
             }
         }
 
