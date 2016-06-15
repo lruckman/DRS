@@ -4,17 +4,17 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Web.Controllers.Api;
-using Web.ViewModels.Api.Search;
+using Web.ViewModels.Api.Documents;
 using Xunit;
 
 namespace WebTests.Controllers.Api
 {
-    public class SearchControllerTests : BaseTest<SearchController>
+    public class DocumentsControllerTests : BaseTest<DocumentsController>
     {
         [Fact]
         public void Controller_MissingArgument_ThrowsException()
         {
-            Assert.Throws<ArgumentNullException>(() => new SearchController(null));
+            Assert.Throws<ArgumentNullException>(() => new DocumentsController(null));
         }
 
         [Fact]
@@ -40,6 +40,30 @@ namespace WebTests.Controllers.Api
             var result = await controller.Get(It.IsAny<Get.Query>());
 
             Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Post_ReturnsCorrectModelType()
+        {
+            var mediator = new Mock<IMediator>();
+
+            mediator
+                .Setup(x => x.SendAsync(It.IsAny<Post.Command>()))
+                .Returns(Task.FromResult(new Post.Result()));
+
+            var controller = CreateController(mediator.Object);
+            var result = await controller.Post(It.IsAny<Post.Command>());
+
+            Assert.IsType<CreatedAtActionResult>(result);
+        }
+
+        [Fact]
+        public async Task Post_NullModel_ReturnsException()
+        {
+            var mediator = new Mock<IMediator>();
+            var controller = CreateController(mediator.Object);
+
+            await Assert.ThrowsAsync<NullReferenceException>(async () => await controller.Post(null));
         }
     }
 }

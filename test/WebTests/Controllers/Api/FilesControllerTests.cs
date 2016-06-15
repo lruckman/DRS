@@ -4,64 +4,66 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Web.Controllers.Api;
-using Web.Engine.Helpers;
-using Web.Models;
 using Web.ViewModels.Api.Files;
 using Xunit;
 
 namespace WebTests.Controllers.Api
 {
-    public class FilesControllerTests : BaseTest
+    public class FilesControllerTests : BaseTest<FilesController>
     {
         [Fact]
-        public void ControllerThrowsExceptionWhenArgumentsAreNull()
+        public void Controller_MissingArgument_ThrowsException()
         {
             Assert.Throws<ArgumentNullException>(() => new FilesController(null));
         }
 
         [Fact]
-        public void ViewModelFailsValidation()
+        public async Task View_NullModel_ReturnsNotFoundResult()
         {
-            var model = new View.Query {Id = null};
-            var documentSecurity = new Mock<IDocumentSecurity>();
-
-            documentSecurity
-                .Setup(x => x.HasFilePermissionAsync(It.IsAny<int>(), It.IsAny<PermissionTypes>()))
-                .Returns(Task.FromResult(It.IsAny<bool>()));
-
-            var validationResults = new View.QueryValidator(documentSecurity.Object)
-                .Validate(model);
-
-            Assert.False(validationResults.IsValid);
-        }
-
-        [Fact]
-        public async Task ViewReturnsNotFoundWhenModelIsNull()
-        {
-            var model = new View.Query {Id = 1};
             var mediator = new Mock<IMediator>();
-
-            mediator
-                .Setup(x => x.SendAsync(model))
-                .Returns(Task.FromResult((View.Result) null));
-
-            var controller = new FilesController(mediator.Object);
+            var controller = CreateController(mediator.Object);
             var result = await controller.View(It.IsAny<View.Query>());
 
             Assert.IsType<NotFoundResult>(result);
         }
 
         [Fact]
-        public async Task ViewReturnsCorrectModelType()
+        public async Task View_ReturnsCorrectModelType()
         {
             var mediator = new Mock<IMediator>();
 
             mediator
                 .Setup(x => x.SendAsync(It.IsAny<View.Query>()))
-                .Returns(Task.FromResult(new View.Result { ContentType = TestFile1ContentType, FileContents = TestFile1Bytes}));
+                .Returns(
+                    Task.FromResult(new View.Result {ContentType = TestFile1ContentType, FileContents = TestFile1Bytes}));
 
             var controller = new FilesController(mediator.Object);
             var result = await controller.View(It.IsAny<View.Query>());
+
+            Assert.IsType<FileContentResult>(result);
+        }
+
+        [Fact]
+        public async Task Thumbnail_NullModel_ReturnsNotFoundResult()
+        {
+            var mediator = new Mock<IMediator>();
+            var controller = CreateController(mediator.Object);
+            var result = await controller.Thumbnail(It.IsAny<Thumbnail.Query>());
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task Thumbnail_ReturnsCorrectModelType()
+        {
+            var mediator = new Mock<IMediator>();
+
+            mediator
+                .Setup(x => x.SendAsync(It.IsAny<Thumbnail.Query>()))
+                .Returns(Task.FromResult(new Thumbnail.Result {FileContents = TestFile1Bytes}));
+
+            var controller = CreateController(mediator.Object);
+            var result = await controller.Thumbnail(It.IsAny<Thumbnail.Query>());
 
             Assert.IsType<FileContentResult>(result);
         }
