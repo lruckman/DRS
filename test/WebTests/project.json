@@ -1,4 +1,4 @@
-﻿{
+{
     "version": "1.0.0-*",
 
     "dependencies": {
@@ -9,7 +9,13 @@
         "xunit.runner.visualstudio": "2.2.0-beta1-build1144",
         "MediatR": "2.0.2",
         "Moq": "4.5.8",
-        "dotnet-test-xunit": "1.0.0-*"
+        "dotnet-test-xunit": "1.0.0-*",
+        "Microsoft.EntityFrameworkCore.InMemory": "1.0.0-rc2-final",
+        "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0-rc2-final",
+        "Microsoft.EntityFrameworkCore.Tools": {
+            "version": "1.0.0-preview1-final",
+            "type": "build"
+        }
     },
     "testRunner": "xunit",
 
