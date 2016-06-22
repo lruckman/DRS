@@ -9,7 +9,7 @@ using Xunit;
 
 namespace WebTests.Controllers.Api
 {
-    public class SearchControllerTests : BaseTest<SearchController>
+    public class SearchControllerControllerTests : BaseControllerTest<SearchController>
     {
         [Fact]
         public void Controller_MissingArgument_ThrowsException()

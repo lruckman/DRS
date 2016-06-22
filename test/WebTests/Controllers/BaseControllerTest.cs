@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebTests.Controllers
 {
-    public class BaseTest<TController> where TController : Controller
+    public class BaseControllerTest<TController> where TController : Controller
     {
         protected static readonly byte[] TestFile1Bytes =
         {

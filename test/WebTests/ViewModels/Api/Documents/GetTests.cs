@@ -1,24 +1,16 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Web.Models;
 using Web.ViewModels.Api.Documents;
 using Xunit;
 
 namespace WebTests.ViewModels.Api.Documents
 {
-    public class GetTests
+    public class GetTests : BaseViewModelTest
     {
         [Fact]
         public async Task QueryHandler_ReturnsCorrectModelType()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-
-            optionsBuilder.UseInMemoryDatabase();
-            optionsBuilder.EnableSensitiveDataLogging();
-
-            var db = new ApplicationDbContext(optionsBuilder.Options);
-
+            var db = CreateDbContext();
             var config = new MapperConfiguration(cfg => cfg.AddProfile<Get.QueryHandler.MappingProfile>());
             var queryHandler = new Get.QueryHandler(db, config);
             var query = new Get.Query {Id = 1};

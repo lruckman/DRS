@@ -9,7 +9,7 @@ using Xunit;
 
 namespace WebTests.Controllers.Api
 {
-    public class FilesControllerTests : BaseTest<FilesController>
+    public class FilesControllerControllerTests : BaseControllerTest<FilesController>
     {
         [Fact]
         public void Controller_MissingArgument_ThrowsException()
