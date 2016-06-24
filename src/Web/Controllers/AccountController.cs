@@ -29,9 +29,8 @@ namespace Web.Controllers
         // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login()
         {
-            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
@@ -40,9 +39,8 @@ namespace Web.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            ViewData["ReturnUrl"] = returnUrl;
 
             if (!ModelState.IsValid)
             {
@@ -54,7 +52,7 @@ namespace Web.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation(1, "User logged in.");
-                return RedirectToLocal(returnUrl);
+                return RedirectToAction(nameof(DocumentsController.Index), "Documents");
             }
 
             // todo: disabled for now
