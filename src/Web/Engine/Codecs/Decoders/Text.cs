@@ -24,8 +24,8 @@ namespace Web.Engine.Codecs.Decoders
 
         public static readonly string[] SupportedFileTypes = {".txt"};
 
-        public Text(byte[] buffer, IHostingEnvironment hostingEnvironment)
-            : base(buffer, hostingEnvironment)
+        public Text(byte[] buffer, string baseDirectory)
+            : base(buffer, baseDirectory)
         {
         }
     }

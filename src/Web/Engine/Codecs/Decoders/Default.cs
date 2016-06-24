@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Web.Engine.Codecs.Decoders
 {
@@ -23,8 +22,8 @@ namespace Web.Engine.Codecs.Decoders
 
         public static readonly string[] SupportedFileTypes = {".*"};
 
-        public Default(byte[] buffer, IHostingEnvironment hostingEnvironment)
-            : base(buffer, hostingEnvironment)
+        public Default(byte[] buffer, string baseDirectory)
+            : base(buffer, baseDirectory)
         {
         }
     }

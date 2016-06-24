@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using Microsoft.AspNetCore.Hosting;
 using Tesseract;
 using Web.Engine.Extensions;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
@@ -16,16 +15,21 @@ namespace Web.Engine.Codecs.Decoders
             ".png", ".bmp", ".tiff", ".tif"
         };
 
-        public Image(byte[] buffer, IHostingEnvironment hostingEnvironment)
-            : base(buffer, hostingEnvironment)
+        public Image(byte[] buffer, string baseDirectory)
+            : base(buffer, baseDirectory)
         {
         }
 
         protected override string ExtractContent(int? pageNumber)
         {
-            using (
-                var engine = new TesseractEngine(HostingEnvironment.WebRootPath + "\\app_data\\tessdata",
-                    "eng", EngineMode.Default))
+            var dataPath = Path.Combine(BaseDirectory, "\\app_data\\tessdata");
+
+            if (!System.IO.File.Exists(dataPath))
+            {
+                throw new ArgumentException("Path does not exist or access is denied.", nameof(dataPath));
+            }
+
+            using (var engine = new TesseractEngine(dataPath, "eng", EngineMode.Default))
             {
                 using (var memoryStream = new MemoryStream(Buffer))
                 {

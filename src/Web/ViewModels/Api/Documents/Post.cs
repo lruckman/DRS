@@ -13,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Web.Engine;
 using Web.Engine.Extensions;
-using Web.Engine.Helpers;
 using Web.Models;
 using File = Web.Models.File;
 
@@ -41,14 +40,12 @@ namespace Web.ViewModels.Api.Documents
             private readonly IOptions<DRSSettings> _settings;
             private readonly IUserContext _userContext;
             private readonly IHostingEnvironment _hostingEnvironment;
-            private readonly IDocumentSecurity _documentSecurity;
 
             public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserContext userContext,
-                IHostingEnvironment hostingEnvironment, IDocumentSecurity documentSecurity)
+                IHostingEnvironment hostingEnvironment)
             {
                 _hostingEnvironment = hostingEnvironment;
                 _db = db;
-                _documentSecurity = documentSecurity;
                 _settings = settings;
                 _userContext = userContext;
             }
@@ -129,7 +126,7 @@ namespace Web.ViewModels.Api.Documents
                     // get a parser
 
                     var parser = Engine.Codecs.Decoders.File
-                        .Get(extension, buffer, _hostingEnvironment);
+                        .Get(extension, buffer, _hostingEnvironment.WebRootPath);
 
                     // index in lucene
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Web.Engine.Codecs.Decoders
 {
@@ -10,21 +9,26 @@ namespace Web.Engine.Codecs.Decoders
     {
         private static IDictionary<string, Type> _registeredFileDecoders;
         internal readonly byte[] Buffer;
-        internal readonly IHostingEnvironment HostingEnvironment;
+        internal readonly string BaseDirectory;
 
         static File()
         {
             RegisterFileDecoders();
         }
 
-        protected File(byte[] buffer, IHostingEnvironment hostingEnvironment)
+        protected File(byte[] buffer, string baseDirectory)
         {
             if (buffer == null || buffer.LongLength == 0)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            HostingEnvironment = hostingEnvironment;
+            if (!System.IO.File.Exists(baseDirectory))
+            {
+                throw new ArgumentException("Path does not exist or access is denied.", nameof(baseDirectory));
+            }
+
+            BaseDirectory = baseDirectory;
             Buffer = buffer;
             FileLength = buffer.LongLength;
         }
@@ -96,7 +100,7 @@ namespace Web.Engine.Codecs.Decoders
         /// <param name="fileExtension"></param>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        public static IFile Get(string fileExtension, byte[] buffer, IHostingEnvironment hostingEnvironment)
+        public static IFile Get(string fileExtension, byte[] buffer, string baseDirectory)
         {
             if (fileExtension == null)
             {
@@ -109,7 +113,7 @@ namespace Web.Engine.Codecs.Decoders
                 ? _registeredFileDecoders[fileExtension]
                 : _registeredFileDecoders[".*"];
 
-            return (IFile) Activator.CreateInstance(parserType, buffer, hostingEnvironment);
+            return (IFile) Activator.CreateInstance(parserType, buffer, baseDirectory);
         }
     }
 }

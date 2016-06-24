@@ -67,8 +67,8 @@ namespace Web.Engine.Codecs.Decoders
 
         public static readonly string[] SupportedFileTypes = {".pdf"};
 
-        public Pdf(byte[] buffer, IHostingEnvironment hostingEnvironment)
-            : base(buffer, hostingEnvironment)
+        public Pdf(byte[] buffer, string baseDirectory)
+            : base(buffer, baseDirectory)
         {
         }
     }
