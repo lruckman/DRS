@@ -24,7 +24,7 @@ namespace Web.Engine.Codecs.Decoders
         {
             var dataPath = Config.TessDataPath;
 
-            if (!System.IO.File.Exists(dataPath))
+            if (!Directory.Exists(dataPath))
             {
                 throw new ArgumentException("Path does not exist or access is denied.", nameof(dataPath));
             }
