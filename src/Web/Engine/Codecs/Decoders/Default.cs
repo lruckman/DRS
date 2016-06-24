@@ -22,8 +22,8 @@ namespace Web.Engine.Codecs.Decoders
 
         public static readonly string[] SupportedFileTypes = {".*"};
 
-        public Default(byte[] buffer, string baseDirectory)
-            : base(buffer, baseDirectory)
+        public Default(byte[] buffer, DRSConfig config)
+            : base(buffer, config)
         {
         }
     }

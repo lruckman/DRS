@@ -15,14 +15,14 @@ namespace Web.Engine.Codecs.Decoders
             ".png", ".bmp", ".tiff", ".tif"
         };
 
-        public Image(byte[] buffer, string baseDirectory)
-            : base(buffer, baseDirectory)
+        public Image(byte[] buffer, DRSConfig config)
+            : base(buffer, config)
         {
         }
 
         protected override string ExtractContent(int? pageNumber)
         {
-            var dataPath = Path.Combine(BaseDirectory, "\\app_data\\tessdata");
+            var dataPath = Config.TessDataDirectory;
 
             if (!System.IO.File.Exists(dataPath))
             {

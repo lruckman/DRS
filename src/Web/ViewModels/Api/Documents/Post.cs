@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -37,16 +36,13 @@ namespace Web.ViewModels.Api.Documents
         public class CommandHandler : IAsyncRequestHandler<Command, Result>
         {
             private readonly ApplicationDbContext _db;
-            private readonly IOptions<DRSSettings> _settings;
+            private readonly DRSConfig _config;
             private readonly IUserContext _userContext;
-            private readonly IHostingEnvironment _hostingEnvironment;
 
-            public CommandHandler(ApplicationDbContext db, IOptions<DRSSettings> settings, IUserContext userContext,
-                IHostingEnvironment hostingEnvironment)
+            public CommandHandler(ApplicationDbContext db, IOptions<DRSConfig> config, IUserContext userContext)
             {
-                _hostingEnvironment = hostingEnvironment;
                 _db = db;
-                _settings = settings;
+                _config = config.Value;
                 _userContext = userContext;
             }
 
@@ -109,7 +105,7 @@ namespace Web.ViewModels.Api.Documents
 
                     // generate the document paths
 
-                    var destPath = GetNewFileName(_settings.Value.DocumentDirectory, file.Id);
+                    var destPath = GetNewFileName(_config.DocumentDirectory, file.Id);
 
                     Debug.Assert(destPath != null);
 
@@ -126,7 +122,7 @@ namespace Web.ViewModels.Api.Documents
                     // get a parser
 
                     var parser = Engine.Codecs.Decoders.File
-                        .Get(extension, buffer, _hostingEnvironment.WebRootPath);
+                        .Get(extension, buffer, _config);
 
                     // index in lucene
 

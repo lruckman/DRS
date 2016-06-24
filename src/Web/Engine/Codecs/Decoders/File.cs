@@ -9,26 +9,26 @@ namespace Web.Engine.Codecs.Decoders
     {
         private static IDictionary<string, Type> _registeredFileDecoders;
         internal readonly byte[] Buffer;
-        internal readonly string BaseDirectory;
+        internal readonly DRSConfig Config;
 
         static File()
         {
             RegisterFileDecoders();
         }
 
-        protected File(byte[] buffer, string baseDirectory)
+        protected File(byte[] buffer, DRSConfig config)
         {
             if (buffer == null || buffer.LongLength == 0)
             {
                 throw new ArgumentNullException(nameof(buffer));
             }
 
-            if (!System.IO.File.Exists(baseDirectory))
+            if (config == null)
             {
-                throw new ArgumentException("Path does not exist or access is denied.", nameof(baseDirectory));
+                throw new ArgumentNullException(nameof(config));
             }
 
-            BaseDirectory = baseDirectory;
+            Config = config;
             Buffer = buffer;
             FileLength = buffer.LongLength;
         }
@@ -100,7 +100,7 @@ namespace Web.Engine.Codecs.Decoders
         /// <param name="fileExtension"></param>
         /// <param name="buffer"></param>
         /// <returns></returns>
-        public static IFile Get(string fileExtension, byte[] buffer, string baseDirectory)
+        public static IFile Get(string fileExtension, byte[] buffer, DRSConfig config)
         {
             if (fileExtension == null)
             {
@@ -113,7 +113,7 @@ namespace Web.Engine.Codecs.Decoders
                 ? _registeredFileDecoders[fileExtension]
                 : _registeredFileDecoders[".*"];
 
-            return (IFile) Activator.CreateInstance(parserType, buffer, baseDirectory);
+            return (IFile) Activator.CreateInstance(parserType, buffer, config);
         }
     }
 }
