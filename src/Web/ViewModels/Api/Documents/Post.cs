@@ -105,7 +105,7 @@ namespace Web.ViewModels.Api.Documents
 
                     // generate the document paths
 
-                    var destPath = GetNewFileName(_config.DocumentDirectory, file.Id);
+                    var destPath = GetNewFileName(_config.DocumentPath, file.Id);
 
                     Debug.Assert(destPath != null);
 

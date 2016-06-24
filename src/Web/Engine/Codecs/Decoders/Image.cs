@@ -22,7 +22,7 @@ namespace Web.Engine.Codecs.Decoders
 
         protected override string ExtractContent(int? pageNumber)
         {
-            var dataPath = Config.TessDataDirectory;
+            var dataPath = Config.TessDataPath;
 
             if (!System.IO.File.Exists(dataPath))
             {
