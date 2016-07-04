@@ -26,9 +26,8 @@ namespace Web.Engine.Validation
 
             _validatorFactory = validatorFactory;
         }
-
-        public void Validate(ActionContext actionContext, IModelValidatorProvider validatorProvider,
-            ValidationStateDictionary validationState, string prefix, object model)
+        
+        public void Validate(ActionContext actionContext, ValidationStateDictionary validationState, string prefix, object model)
         {
             if (actionContext == null)
             {

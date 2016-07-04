@@ -22,14 +22,14 @@ namespace Web.Engine.Validation
             // add all IValidator to MVC's service provider
 
             var validators =
-                typeof (FluentValidationObjectModelValidator)
+                typeof(FluentValidationObjectModelValidator)
                     .Assembly
                     .GetTypes()
-                    .Where(t => typeof (IValidator).IsAssignableFrom(t));
+                    .Where(t => typeof(IValidator).IsAssignableFrom(t));
 
             foreach (var validator in validators)
             {
-                mvcBuilder.Services.AddTransient(validator);
+                mvcBuilder.Services.AddSingleton(validator);
             }
 
             // add the fluent validation object model validator
