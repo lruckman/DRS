@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -10,7 +11,6 @@ using Newtonsoft.Json.Serialization;
 using StructureMap;
 using Web.Engine;
 using Web.Engine.Filters;
-using Web.Engine.Validation;
 using Web.Models;
 
 namespace Web
@@ -36,7 +36,7 @@ namespace Web
         }
 
         private static IConfigurationRoot Configuration { get; set; }
-
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
@@ -64,7 +64,7 @@ namespace Web
                     {
                         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     })
-                .AddFluentValidation();
+                .AddFluentValidation(cfg => { cfg.RegisterValidatorsFromAssemblyContaining<Startup>(); });
 
 
             var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });

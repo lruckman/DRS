@@ -45,7 +45,8 @@
         "iTextSharp": "5.5.9",
         "itextsharp.pdfa": "5.5.9",
         "itextsharp.xtra": "5.5.9",
-        "Microsoft.Extensions.Configuration.Binder": "1.0.0"   },
+        "Microsoft.Extensions.Configuration.Binder": "1.0.0",
+        "FluentValidation.MVC6": "6.4.0-beta3"   },
 
     "commands": {"ef": "Microsoft.EntityFrameworkCore.Commands"},
 
