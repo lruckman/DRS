@@ -57,7 +57,7 @@ namespace Web.ViewModels.Api.Documents
 
             public class MappingProfile : Profile
             {
-                protected override void Configure()
+                public MappingProfile()
                 {
                     CreateMap<Document, Result>()
                         .ForMember(d => d.File, o => o.MapFrom(s =>

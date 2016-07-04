@@ -37,7 +37,7 @@ namespace Web.Engine
 
         public class MappingProfile : Profile
         {
-            protected override void Configure()
+            public MappingProfile()
             {
                 CreateMap<Library, SelectListItem>()
                     .ForMember(d => d.Text, o => o.MapFrom(s => s.Name))

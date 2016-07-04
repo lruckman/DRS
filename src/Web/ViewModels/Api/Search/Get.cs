@@ -108,7 +108,7 @@ namespace Web.ViewModels.Api.Search
 
             public class MappingProfile : Profile
             {
-                protected override void Configure()
+                public MappingProfile()
                 {
                     CreateMap<Document, Result.Document>()
                         .ForMember(d => d.File, o => o.MapFrom(s =>
