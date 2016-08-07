@@ -6,6 +6,9 @@ namespace Web.Engine.Extensions
 {
     public static class ModelStateDictionaryExtensions
     {
+        /// <summary>
+        /// Returns the errors contained in the ModelState as a Dictionary object.
+        /// </summary>
         public static IDictionary<string, IEnumerable<string>> ToSimpleDictionary(
             this ModelStateDictionary modelStateDictionary)
         {
