@@ -1,16 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MimeTypes;
-using Web.Engine.Extensions;
 using Web.Engine.Helpers;
+using Web.Engine.Services;
 using Web.Engine.Validation.Custom;
 using Web.Models;
-using File = System.IO.File;
 
 namespace Web.ViewModels.Api.Files
 {
@@ -34,16 +31,16 @@ namespace Web.ViewModels.Api.Files
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
+            private readonly IFileEncryptor _encryptor;
 
-            public QueryHandler(ApplicationDbContext db)
+            public QueryHandler(ApplicationDbContext db, IFileEncryptor encryptor)
             {
                 _db = db;
+                _encryptor = encryptor;
             }
 
             public async Task<Result> Handle(Query message)
             {
-                const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
-
                 var file = await _db.Files
                     .Where(f => f.Id == message.Id.Value)
                     .SingleOrDefaultAsync();
@@ -53,13 +50,13 @@ namespace Web.ViewModels.Api.Files
                     return null;
                 }
 
-                var fileKey = Convert.FromBase64String(file.Key)
-                    .Unprotect(null, dataProtectionScope);
+                var fileKey = _encryptor
+                    .DecryptBase64(file.Key);
 
                 var model = new Result
                 {
-                    FileContents = File.ReadAllBytes(file.Path)
-                        .Unprotect(fileKey, dataProtectionScope),
+                    FileContents = _encryptor
+                        .DecryptFile(file.Path, fileKey),
                     ContentType = MimeTypeMap.GetMimeType(file.Extension)
                 };
 

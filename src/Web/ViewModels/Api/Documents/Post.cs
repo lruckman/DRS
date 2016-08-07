@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Web.Engine;
 using Web.Engine.Extensions;
+using Web.Engine.Services;
 using Web.Models;
 using File = Web.Models.File;
 
@@ -36,24 +35,25 @@ namespace Web.ViewModels.Api.Documents
         public class CommandHandler : IAsyncRequestHandler<Command, Result>
         {
             private readonly ApplicationDbContext _db;
-            private readonly DRSConfig _config;
             private readonly IUserContext _userContext;
+            private readonly IFileMover _mover;
+            private readonly IFileDecoder _decoder;
+            private readonly IFileEncryptor _encryptor;
 
-            public CommandHandler(ApplicationDbContext db, IOptions<DRSConfig> config, IUserContext userContext)
+            public CommandHandler(ApplicationDbContext db, IUserContext userContext,
+                IFileMover mover, IFileDecoder decoder, IFileEncryptor fileEncryptor)
             {
                 _db = db;
-                _config = config.Value;
                 _userContext = userContext;
+                _decoder = decoder;
+                _encryptor = fileEncryptor;
+                _mover = mover;
             }
 
             public async Task<Result> Handle(Command message)
             {
-                const DataProtectionScope dataProtectionScope = DataProtectionScope.LocalMachine;
-
-                var extension = Path.GetExtension(message.File.FileName() ?? "")
-                    .ToLowerInvariant();
-
-                var fileKey = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N"));
+                var fileKey = Encoding.UTF8
+                    .GetBytes(Guid.NewGuid().ToString("N"));
 
                 // create and add the document
 
@@ -63,7 +63,7 @@ namespace Web.ViewModels.Api.Documents
                     CreatedOn = DateTimeOffset.Now,
                     ModifiedOn = DateTimeOffset.Now,
                     Status = StatusTypes.Active,
-                    Title = message.File.FileName()
+                    Title = message.File.FileName
                 };
 
                 _db.Documents.Add(document);
@@ -74,8 +74,11 @@ namespace Web.ViewModels.Api.Documents
                 {
                     CreatedByUserId = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now,
-                    Extension = extension,
-                    Key = Convert.ToBase64String(fileKey.Protect(null, dataProtectionScope)),
+                    Extension = Path.GetExtension(message.File.FileName ?? "")
+                        .ToLowerInvariant(),
+                    Key = _encryptor
+                        .Encrypt(fileKey, null)
+                        .ToBase64String(),
                     ModifiedOn = DateTimeOffset.Now,
                     PageCount = 0,
                     Path = "",
@@ -97,116 +100,55 @@ namespace Web.ViewModels.Api.Documents
                     })
                     .FirstAsync());
 
-                using (var trans = await _db.Database.BeginTransactionAsync())
+                // get a parser
+
+                var fileInfo = _decoder.Decode(message.File.FileName, message.File
+                    .OpenReadStream()
+                    .ToByteArray());
+
+                document.Abstract = fileInfo.Abstract;
+
+                document.Content = new DocumentContent
                 {
-                    // commit what we have now so we can use the file id to proceed with the rest
+                    Content = fileInfo.Content
+                };
+
+                try
+                {
+                    var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
+
+                    file.ThumbnailPath = await _mover.Move(thumbnail, fileKey);
+                    file.PageCount = fileInfo.PageCount;
+                    file.Path = await _mover.Move(fileInfo.Buffer, fileKey);
+
+                    // save and commit
 
                     await _db.SaveChangesAsync();
-
-                    // generate the document paths
-
-                    var destPath = GetNewFileName(_config.DocumentPath, file.Id);
-
-                    Debug.Assert(destPath != null);
-
-                    if (!Directory.Exists(Path.GetDirectoryName(destPath)))
-                    {
-                        Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-                    }
-
-                    // write the file to the drive
-
-                    var buffer = message.File.OpenReadStream()
-                        .ToByteArray();
-
-                    // get a parser
-
-                    var parser = Engine.Codecs.Decoders.File
-                        .Get(extension, buffer, _config);
-
-                    // index in lucene
-
-                    var fileContents = await parser.ContentAsync();
-
-                    document.Abstract = fileContents
-                        ?.NormalizeLineEndings()
-                        ?.Truncate(512);
-
-                    document.Content = new DocumentContent
-                    {
-                        Content = fileContents
-                    };
-
-                    // update the paths on the record
-
-                    file.Path = destPath;
-                    file.ThumbnailPath = $"{destPath}{Constants.ThumbnailExtension}";
-
-                    try
-                    {
-                        // thumbnail
-
-                        using (var stream = new MemoryStream())
-                        {
-                            // save the thumbnail to the stream
-
-                            await parser.ThumbnailAsync(stream, 600);
-
-                            // encrypt the stream and save it
-
-                            await stream.ToArray()
-                                .SaveProtectedAsAsync(file.ThumbnailPath, fileKey, dataProtectionScope);
-                        }
-
-                        file.PageCount = await parser.PageCountAsync();
-
-                        // encrypt and save the uploaded file
-
-                        await buffer.SaveProtectedAsAsync(file.Path, fileKey, dataProtectionScope);
-
-                        // save and commit
-
-                        await _db.SaveChangesAsync();
-                    }
-                    catch
-                    {
-                        // some clean ups
-
-                        // thumbnail
-
-                        if (System.IO.File.Exists(file.ThumbnailPath))
-                        {
-                            System.IO.File.Delete(file.ThumbnailPath);
-                        }
-
-                        // document
-
-                        if (System.IO.File.Exists(file.Path))
-                        {
-                            System.IO.File.Delete(file.Path);
-                        }
-
-                        trans.Rollback();
-
-                        throw;
-                    }
-
-                    trans.Commit();
-
-                    // the document that was created
-
-                    return new Result {DocumentId = document.Id};
                 }
-            }
+                catch
+                {
+                    // some clean ups
 
-            private static string GetNewFileName(string rootPath, int seed)
-            {
-                var subFolder1 = Math.Ceiling(seed / 1024m / 1024m / 1024m);
-                var subFolder2 = Math.Ceiling(subFolder1 / 1024m / 1024m);
-                var subFolder3 = Math.Ceiling(subFolder2 / 1024m);
+                    // thumbnail
 
-                return Path.Combine(rootPath,
-                    $@"{subFolder1}\{subFolder2}\{subFolder3}\{Guid.NewGuid():N}.bin");
+                    if (System.IO.File.Exists(file.ThumbnailPath))
+                    {
+                        System.IO.File.Delete(file.ThumbnailPath);
+                    }
+
+                    // document
+
+                    if (System.IO.File.Exists(file.Path))
+                    {
+                        System.IO.File.Delete(file.Path);
+                    }
+
+                    throw;
+                }
+
+                // the document that was created
+
+                return new Result {DocumentId = document.Id};
             }
         }
 

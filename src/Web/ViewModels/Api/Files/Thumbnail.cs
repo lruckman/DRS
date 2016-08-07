@@ -1,16 +1,13 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Web.Engine.Extensions;
 using Web.Engine.Helpers;
+using Web.Engine.Services;
 using Web.Engine.Validation.Custom;
 using Web.Models;
-using File = System.IO.File;
 
 namespace Web.ViewModels.Api.Files
 {
@@ -34,13 +31,12 @@ namespace Web.ViewModels.Api.Files
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
+            private readonly IFileEncryptor _encryptor;
 
-            private const DataProtectionScope DataProtectionScope =
-                System.Security.Cryptography.DataProtectionScope.LocalMachine;
-
-            public QueryHandler(ApplicationDbContext db)
+            public QueryHandler(ApplicationDbContext db, IFileEncryptor encryptor)
             {
                 _db = db;
+                _encryptor = encryptor;
             }
 
             public async Task<Result> Handle(Query message)
@@ -56,14 +52,13 @@ namespace Web.ViewModels.Api.Files
                     return null;
                 }
 
-                var fileKey = Convert.FromBase64String(file.Key)
-                    .Unprotect(null, DataProtectionScope);
+                var fileKey = _encryptor
+                    .DecryptBase64(file.Key);
 
                 var model = new Result
                 {
-                    FileContents = File
-                        .ReadAllBytes(file.ThumbnailPath)
-                        .Unprotect(fileKey, DataProtectionScope)
+                    FileContents = _encryptor
+                        .DecryptFile(file.ThumbnailPath, fileKey)
                 };
 
                 return model;
