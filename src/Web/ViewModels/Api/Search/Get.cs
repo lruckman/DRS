@@ -97,9 +97,8 @@ namespace Web.ViewModels.Api.Search
                 }
 
                 result.Documents = await documentQuery
-                    //todo: reinstate, broken when uncommented
-                    //.Skip(message.MaxResults * message.PageIndex)
-                    //.Take(message.MaxResults)
+                    .Skip(message.MaxResults * message.PageIndex)
+                    .Take(message.MaxResults)
                     .ProjectTo<Result.Document>(_config)
                     .ToArrayAsync();
 
