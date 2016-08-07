@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Moq;
 using Web.Engine;
+using Web.Engine.Services;
 using Web.Models;
 using Web.ViewModels.Api.Documents;
 using Xunit;
@@ -37,8 +38,14 @@ namespace WebTests.ViewModels.Api.Documents
                     TessDataPath = "" //todo: fill
                 });
 
-            var commandHandler = new Post.CommandHandler(db, settings.Object, userContext.Object);
-            var command = new Post.Command {File = null};  //todo: fill
+            var fileMover = new Mock<IFileMover>(); // todo: setup
+            var fileEncryptor = new Mock<IFileEncryptor>(); // todo: setup
+            var fileDecoder = new Mock<IFileDecoder>(); // todo: setup
+
+            var commandHandler = new Post.CommandHandler(db, userContext.Object, fileMover.Object,
+                fileDecoder.Object, fileEncryptor.Object);
+
+            var command = new Post.Command {File = null}; //todo: fill
 
             var result = await commandHandler.Handle(command);
 
