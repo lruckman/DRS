@@ -39,14 +39,15 @@
         "Ghostscript.NET": "1.2.0",
         "Tesseract": "3.0.2",
         "FluentValidation": "6.4.0-beta3",
-        "AutoMapper": "5.0.0",
-        "StructureMap.Dnx": "0.5.1-rc2-final",
+        "AutoMapper": "5.0.2",
+        "StructureMap.Microsoft.DependencyInjection": "1.0.1",
         "MediaTypeMap": "2.1.0",
         "iTextSharp": "5.5.9",
         "itextsharp.pdfa": "5.5.9",
         "itextsharp.xtra": "5.5.9",
         "Microsoft.Extensions.Configuration.Binder": "1.0.0",
-        "FluentValidation.MVC6": "6.4.0-beta3"   },
+        "FluentValidation.MVC6": "6.4.0-beta3"
+    },
 
     "commands": {"ef": "Microsoft.EntityFrameworkCore.Commands"},
 
