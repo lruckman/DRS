@@ -20,7 +20,7 @@ namespace Web.Engine.Codecs.Decoders
         {
         }
 
-        protected override string ExtractContent(int? pageNumber)
+        public override string ExtractContent(int? pageNumber)
         {
             var dataPath = Config.TessDataPath;
 
@@ -48,23 +48,23 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        protected override int ExtractPageCount()
+        public override int ExtractPageCount()
         {
             return 1;
         }
 
-        protected override void ExtractThumbnail(Stream outputStream, int width, int? height, int pageNumber)
+        public override byte[] ExtractThumbnail(int width, int? height, int pageNumber)
         {
-            if (outputStream == null)
-            {
-                throw new ArgumentNullException(nameof(outputStream));
-            }
-
             using (var memoryStream = new MemoryStream(Buffer))
             {
                 using (var image = new Bitmap(memoryStream).ToFixedSize(width, height))
                 {
-                    image.Save(outputStream, ImageFormat.Png);
+                    using (var ms = new MemoryStream())
+                    {
+                        image.Save(ms, ImageFormat.Png);
+
+                        return ms.ToArray();
+                    }
                 }
             }
         }

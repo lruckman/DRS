@@ -1,23 +1,21 @@
 ﻿using System;
-using System.IO;
 using System.Text;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Web.Engine.Codecs.Decoders
 {
     public class Text : File
     {
-        protected override string ExtractContent(int? pageNumber)
+        public override string ExtractContent(int? pageNumber)
         {
             return Encoding.UTF8.GetString(Buffer);
         }
 
-        protected override int ExtractPageCount()
+        public override int ExtractPageCount()
         {
             return 1;
         }
 
-        protected override void ExtractThumbnail(Stream outputStream, int width, int? height, int pageNumber)
+        public override byte[] ExtractThumbnail(int width, int? height, int pageNumber)
         {
             throw new NotImplementedException();
         }

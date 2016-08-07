@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.IO;
 using Ghostscript.NET.Rasterizer;
 using iTextSharp.text.pdf;
@@ -10,7 +9,7 @@ namespace Web.Engine.Codecs.Decoders
 {
     public class Pdf : File
     {
-        protected override string ExtractContent(int? pageNumber)
+        public override string ExtractContent(int? pageNumber)
         {
             using (var reader = new PdfReader(Buffer))
             {
@@ -33,7 +32,7 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        protected override int ExtractPageCount()
+        public override int ExtractPageCount()
         {
             using (var reader = new PdfReader(Buffer))
             {
@@ -41,13 +40,8 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        protected override void ExtractThumbnail(Stream outputStream, int width, int? height, int pageNumber)
+        public override byte[] ExtractThumbnail(int width, int? height, int pageNumber)
         {
-            if (outputStream == null)
-            {
-                throw new ArgumentNullException(nameof(outputStream));
-            }
-
             using (var rasterizer = new GhostscriptRasterizer())
             {
                 using (var stream = new MemoryStream(Buffer))
@@ -58,7 +52,12 @@ namespace Web.Engine.Codecs.Decoders
                         .GetPage(200, 200, pageNumber)
                         .ToFixedSize(width, height))
                     {
-                        thumbnail.Save(outputStream, ImageFormat.Png);
+                        using (var ms = new MemoryStream())
+                        {
+                            thumbnail.Save(ms, ImageFormat.Png);
+
+                            return ms.ToArray();
+                        }
                     }
                 }
             }
