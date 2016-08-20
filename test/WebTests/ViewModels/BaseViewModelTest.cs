@@ -1,17 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 using Web.Models;
 
 namespace WebTests.ViewModels
 {
     public class BaseViewModelTest
     {
-        public ApplicationDbContext CreateDbContext()
+        protected ApplicationDbContext CreateDbContext()
         {
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
             optionsBuilder.UseInMemoryDatabase();
 
-            return new ApplicationDbContext(optionsBuilder.Options);
+            var db = new ApplicationDbContext(optionsBuilder.Options);
+
+            db.Libraries.Add(new Library
+            {
+                CreatedByUserId = "dbo",
+                CreatedOn = DateTimeOffset.Now,
+                ModifiedOn = DateTimeOffset.Now,
+                Name = "Test Library",
+                Status = StatusTypes.Active
+            });
+
+            db.SaveChanges();
+
+            return db;
         }
     }
 }
