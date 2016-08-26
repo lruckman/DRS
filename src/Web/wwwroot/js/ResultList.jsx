@@ -28,12 +28,20 @@ var ResultList = React.createClass({
     },
     getInitialState: function() {
         return {
-            activeIndex: 0
+            activeIndex: []
         };
     },
     resultHandleClick: function(index, e) {
         e.preventDefault();
-        this.setState({ activeIndex: index });
+
+        var activeIndex = e.shiftKey
+            ? this.state.activeIndex
+            : [];
+
+        activeIndex.push(index);
+
+        this.setState({ activeIndex: activeIndex });
+        
         this.clickStatus = 1;
         this.clickTimer = setTimeout(function() {
             if (this.clickStatus === 1) {
@@ -50,12 +58,13 @@ var ResultList = React.createClass({
     render: function() {
         var resultNodes = this.props.data.map(function(result, index) {
             var resultClass = classNames({
-                'active': index === this.state.activeIndex
+                'active':  this.state.activeIndex.indexOf(index) !== -1,
+                'card pulse': true
             });
             var boundClick = this.resultHandleClick.bind(this, index);
             var boundDblClick = this.resultHandleDblClick.bind(this, index);
             return (
-                <div key={result.id} className="card pulse">
+                <div key={result.id} className={resultClass}>
                     <a href="#" target="_blank" className="thumbnail-link" onClick={boundClick} onDoubleClick={boundDblClick}>
                         <div className="thumbnail" style={{ backgroundImage: 'url(' + result.file.thumbnailLink + ')' }}>
                         </div>
