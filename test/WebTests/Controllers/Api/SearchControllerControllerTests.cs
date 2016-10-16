@@ -3,8 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Web.Controllers.Api;
-using Web.ViewModels.Api.Search;
+using Web.Features.Api.Search;
 using Xunit;
 
 namespace WebTests.Controllers.Api

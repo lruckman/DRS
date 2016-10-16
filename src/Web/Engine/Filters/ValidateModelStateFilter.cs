@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Web.Engine.Extensions;
-using Web.ViewModels.Api;
 
 namespace Web.Engine.Filters
 {

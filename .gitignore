@@ -225,3 +225,4 @@ ModelManifest.xml
 /src/Web/wwwroot/js/DocumentEdit.js
 /src/Web/wwwroot/css/site.min.css
 /src/Web/wwwroot/js/ValidationSummary.js
+/src/Web/wwwroot/js/dist/serverBundle.js

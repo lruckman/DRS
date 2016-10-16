@@ -3,8 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Web.Controllers.Api;
-using Web.ViewModels.Api.Files;
+using Web.Features.Api.Files;
 using Xunit;
 
 namespace WebTests.Controllers.Api

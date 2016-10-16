@@ -11,6 +11,7 @@ using Newtonsoft.Json.Serialization;
 using StructureMap;
 using Web.Engine;
 using Web.Engine.Filters;
+using Web.Engine.ViewEngine;
 using Web.Models;
 
 namespace Web
@@ -56,9 +57,29 @@ namespace Web
                 .AddMvc(
                     options =>
                     {
+                        options.Conventions.Add(new FeatureConvention());
                         options.Filters.Add(new ValidateModelStateFilter());
                         options.Filters.Add(new ApiExceptionFilter());
                     })
+                .AddRazorOptions(options =>
+                {
+                    // {0} - Action Name
+                    // {1} - Controller Name
+                    // {2} - Area Name
+                    // {3} - Feature Name
+                    //options.AreaViewLocationFormats.Clear();
+                    options.AreaViewLocationFormats.Add("/Areas/{2}/Features/{3}/{1}/{0}.cshtml");
+                    options.AreaViewLocationFormats.Add("/Areas/{2}/Features/{3}/{0}.cshtml");
+                    options.AreaViewLocationFormats.Add("/Areas/{2}/Features/Shared/{0}.cshtml");
+                    options.AreaViewLocationFormats.Add("/Areas/Shared/{0}.cshtml");
+                    // replace normal view location entirely
+                    //options.ViewLocationFormats.Clear();
+                    options.ViewLocationFormats.Add("/Features/{3}/{1}/{0}.cshtml");
+                    options.ViewLocationFormats.Add("/Features/{3}/{0}.cshtml");
+                    options.ViewLocationFormats.Add("/Features/Shared/{0}.cshtml");
+
+                    options.ViewLocationExpanders.Add(new FeatureViewLocationExpander());
+                })
                 .AddJsonOptions(
                     options =>
                     {

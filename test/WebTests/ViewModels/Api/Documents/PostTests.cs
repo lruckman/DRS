@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Web.Engine;
 using Web.Engine.Services;
+using Web.Features.Api.Documents;
 using Web.Models;
-using Web.ViewModels.Api.Documents;
 using Xunit;
 
 namespace WebTests.ViewModels.Api.Documents
