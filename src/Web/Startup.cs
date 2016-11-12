@@ -1,4 +1,5 @@
 ﻿using System;
+using AutoMapper;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,7 @@ using Web.Engine;
 using Web.Engine.Filters;
 using Web.Engine.ViewEngine;
 using Web.Models;
+using MediatR;
 
 namespace Web
 {
@@ -87,6 +89,11 @@ namespace Web
                     })
                 .AddFluentValidation(cfg => { cfg.RegisterValidatorsFromAssemblyContaining<Startup>(); });
 
+            services.AddAutoMapper(typeof(Startup));
+
+            Mapper.AssertConfigurationIsValid();
+
+            services.AddMediatR(typeof(Startup));
 
             var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });
 
