@@ -18,7 +18,7 @@ namespace Web.Data.Migrations
                     Id = table.Column<string>(nullable: false),
                     ConcurrencyStamp = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    NormalizedName = table.Column<string>(nullable: true)
+                    NormalizedName = table.Column<string>(nullable: true, maxLength: 256)
                 },
                 constraints: table =>
                 {
@@ -50,8 +50,8 @@ namespace Web.Data.Migrations
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
-                    NormalizedEmail = table.Column<string>(nullable: true),
-                    NormalizedUserName = table.Column<string>(nullable: true),
+                    NormalizedEmail = table.Column<string>(nullable: true, maxLength: 256),
+                    NormalizedUserName = table.Column<string>(nullable: true, maxLength: 256),
                     PasswordHash = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(nullable: false),
