@@ -43,8 +43,6 @@
         "StructureMap.Microsoft.DependencyInjection": "1.0.1",
         "MediaTypeMap": "2.1.0",
         "iTextSharp": "5.5.9",
-        "itextsharp.pdfa": "5.5.9",
-        "itextsharp.xtra": "5.5.9",
         "Microsoft.Extensions.Configuration.Binder": "1.0.0",
         "FluentValidation.MVC6": "6.4.0-beta3",
         "MediatR.Extensions.Microsoft.DependencyInjection": "1.0.1",
