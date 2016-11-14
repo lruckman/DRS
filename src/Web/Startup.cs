@@ -47,7 +47,7 @@ namespace Web
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.Configure<DRSConfig>(Configuration.GetSection("DRS"));
+            services.Configure<DRSConfig>(_ => Configuration.GetSection("DRS"));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
