@@ -45,7 +45,7 @@ namespace Web
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), o => o.EnableRetryOnFailure()));
 
             services.Configure<DRSConfig>(Configuration.GetSection("DRS"));
 
