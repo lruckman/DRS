@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0-*",
+    "version": "0.0.1-*",
 
     "dependencies": {
         "Web": {
@@ -14,8 +14,8 @@
         "Moq": "4.6.25-alpha",
         "xunit": "2.2.0-beta2-build3300",
         "xunit.runner.visualstudio": "2.2.0-beta2-build1149",
-        "Microsoft.EntityFrameworkCore.InMemory": "1.0.1",
-        "Microsoft.EntityFrameworkCore.SqlServer": "1.0.1"
+        "Microsoft.EntityFrameworkCore.InMemory": "1.1.0",
+        "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0"
     },
     "testRunner": "xunit",
 
