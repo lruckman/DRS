@@ -219,8 +219,7 @@ ModelManifest.xml
 /src/Web/wwwroot/js/EditDocument.js
 /src/Web/wwwroot/js/dist/clientBundle.js
 /src/Web/wwwroot/js/ResultList.js
-/src/Web/wwwroot/lib/bootstrap
-/src/Web/wwwroot/lib/font-awesome
+/src/Web/wwwroot/lib/
 /src/Web/wwwroot/js/DocumentProperties.js
 /src/Web/wwwroot/js/DocumentEdit.js
 /src/Web/wwwroot/css/site.min.css
