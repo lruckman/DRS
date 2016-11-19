@@ -16,12 +16,7 @@ namespace Web.Features.Api.Documents
 
         public DocumentsController(IMediator mediator)
         {
-            if (mediator == null)
-            {
-                throw new ArgumentNullException(nameof(mediator));
-            }
-
-            _mediator = mediator;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpGet("{id:int}")]

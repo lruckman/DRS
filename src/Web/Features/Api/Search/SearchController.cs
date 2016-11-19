@@ -15,12 +15,7 @@ namespace Web.Features.Api.Search
 
         public SearchController(IMediator mediator)
         {
-            if (mediator == null)
-            {
-                throw new ArgumentNullException(nameof(mediator));
-            }
-
-            _mediator = mediator;
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
         
         public async Task<IActionResult> Get(Get.Query query)
