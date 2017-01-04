@@ -259,9 +259,8 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
-/src/Web/ClientApp/dist/
-/src/Web/wwwroot/dist/
 /src/Web/typings/
-/src/Web/wwwroot/App_Data/documents/1/1/1
-/src/Web/wwwroot/dist
-/src/Web/ClientApp/dist
+/src/Web/wwwroot/App_Data/
+/src/Web/wwwroot/dist/
+/src/Web/wwwroot/lib/
+/src/Web/ClientApp/dist/
