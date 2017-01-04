@@ -3,10 +3,17 @@
 @inject ISelectListProvider SelectListProvider
 @inject IUserContext UserAccessor
 
-<div id="content"></div>
+<div id="my-spa" asp-prerender-module="ClientApp/dist/boot-server"
+                 asp-prerender-data="new {
+                    searchUrl=@Url.Action("get","search"),
+                    addDocumentUrl=@Url.Action("get","documents"),
+                    libraries=@Html.Raw(JsonConvert.SerializeObject(await SelectListProvider.GetLibraries(UserAccessor.UserId)))
+                 }">Loading...</div>
 
 @section scripts {
-    <script>
+<script src="~/dist/vendor.bundle.js" asp-append-version="true"></script>
+<script src="~/dist/main.js" asp-append-version="true"></script>
+    @*<script>
         var SearchBox = React.createFactory(require('SearchBox'));
         ReactDOM.render(
             SearchBox({
@@ -16,5 +23,5 @@
             }),
             document.getElementById('content')
         );
-    </script>
+    </script>*@
 }

@@ -1,20 +1,21 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using StructureMap;
+using System;
 using Web.Engine;
 using Web.Engine.Filters;
 using Web.Engine.ViewEngine;
 using Web.Models;
-using MediatR;
 
 namespace Web
 {
@@ -139,13 +140,14 @@ namespace Web
                 //}
             }
 
-            //app.UseReact(config =>
-            //{
-            //    config
-            //        .SetReuseJavaScriptEngines(true)
-            //        .SetLoadBabel(false)
-            //        .AddScriptWithoutTransform("~/js/dist/serverBundle.js");
-            //});
+            if (env.IsDevelopment())
+            {
+                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                {
+                    HotModuleReplacement = true,
+                    ReactHotModuleReplacement = true
+                });
+            }
 
             app.UseStaticFiles();
 

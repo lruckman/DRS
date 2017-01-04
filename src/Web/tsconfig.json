@@ -1,0 +1,14 @@
+﻿{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es6",
+    "jsx": "preserve",
+    "sourceMap": true,
+    "lib": [ "es6", "dom" ],
+    "experimentalDecorators": true
+  },
+  "exclude": [
+    "bin",
+    "node_modules"
+  ]
+}
