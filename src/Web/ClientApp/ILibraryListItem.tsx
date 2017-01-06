@@ -1,4 +1,4 @@
 ﻿export interface ILibraryListItem {
-    Text: string;
-    Value: string;
+    text: string;
+    value: string;
 }
