@@ -5,8 +5,15 @@ import App from './app';
 
 export default createServerRenderer(params => {
     return new Promise((resolve, reject) => {
-        const app = <App />;
+        const app = <App libraries={params.data.libraries} searchUrl={params.data.searchUrl}/>;
         const html = renderToString(app);
-        resolve({ html });
+        resolve({
+            html: html,
+            globals: {
+                addDocumentUrl: params.data.addDocumentUrl,
+                libraries: params.data.libraries,
+                searchUrl: params.data.searchUrl
+            }
+        });
     });
 });
