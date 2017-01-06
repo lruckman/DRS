@@ -71,8 +71,8 @@ export default class SearchForm extends React.Component<ISearchFormProp, ISearch
                     <Select
                         multi
                         value={this.state.libraryIds}
-                        valueKey="Value"
-                        labelKey="Text"
+                        valueKey="value"
+                        labelKey="text"
                         simpleValue
                         options={this.props.libraries}
                         placeholder="All libraries"

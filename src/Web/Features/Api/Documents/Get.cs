@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Web.Engine.Helpers;
 using Web.Engine.Validation.Custom;
 using Web.Models;
+using System;
 
 namespace Web.Features.Api.Documents
 {
@@ -78,8 +79,8 @@ namespace Web.Features.Api.Documents
             public int Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
-            public string CreatedOn { get; set; }
-            public string ModifiedOn { get; set; }
+            public DateTimeOffset CreatedOn { get; set; }
+            public DateTimeOffset ModifiedOn { get; set; }
             public string[] LibraryIds { get; set; } = {};
             public FileResult File { get; set; }
 
@@ -89,8 +90,8 @@ namespace Web.Features.Api.Documents
                 public long Size { get; set; }
                 public int PageCount { get; set; }
                 public string ThumbnailLink => $"/api/files/{Id}/thumbnail";
-                public string CreatedOn { get; set; }
-                public string ModifiedOn { get; set; }
+                public DateTimeOffset CreatedOn { get; set; }
+                public DateTimeOffset ModifiedOn { get; set; }
                 public int VersionNum { get; set; }
             }
         }
