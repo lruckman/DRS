@@ -13,6 +13,7 @@ interface ISearchResponse {
 }
 
 interface IAppProp {
+    addDocumentUrl?: string,
     libraries?: ILibraryListItem[];
     searchUrl?: string;
 }
@@ -124,6 +125,7 @@ export default class App extends React.Component<IAppProp, IAppState> {
 }
 
 App.defaultProps = {
+    addDocumentUrl: '',
     libraries: [],
     searchUrl: ''
 }
