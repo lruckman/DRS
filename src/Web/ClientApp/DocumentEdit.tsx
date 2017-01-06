@@ -36,6 +36,9 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
         super();
 
         this.state = this.getDefaultState();
+        this.close = this.close.bind(this);
+        this.handleFileDrop = this.handleFileDrop.bind(this);
+        this.handleLibraryChange = this.handleLibraryChange.bind(this);
     }
 
     refs: {
