@@ -36,18 +36,18 @@ namespace Web.Features.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IUserContext _userContext;
-            private readonly IFileMover _mover;
+            private readonly IFileStorage _fileStorage;
             private readonly IFileDecoder _decoder;
             private readonly IFileEncryptor _encryptor;
 
             public CommandHandler(ApplicationDbContext db, IUserContext userContext,
-                IFileMover mover, IFileDecoder decoder, IFileEncryptor fileEncryptor)
+                IFileStorage fileStorage, IFileDecoder decoder, IFileEncryptor fileEncryptor)
             {
                 _db = db;
                 _userContext = userContext;
                 _decoder = decoder;
                 _encryptor = fileEncryptor;
-                _mover = mover;
+                _fileStorage = fileStorage;
             }
 
             public async Task<Result> Handle(Command message)
@@ -118,9 +118,9 @@ namespace Web.Features.Api.Documents
                 {
                     var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
 
-                    file.ThumbnailPath = await _mover.Move(thumbnail, fileKey);
+                    file.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey);
                     file.PageCount = fileInfo.PageCount;
-                    file.Path = await _mover.Move(fileInfo.Buffer, fileKey);
+                    file.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey);
 
                     // save and commit
 
@@ -132,17 +132,11 @@ namespace Web.Features.Api.Documents
 
                     // thumbnail
 
-                    if (System.IO.File.Exists(file.ThumbnailPath))
-                    {
-                        System.IO.File.Delete(file.ThumbnailPath);
-                    }
+                    _fileStorage.TryDelete(file.ThumbnailPath);
 
                     // document
 
-                    if (System.IO.File.Exists(file.Path))
-                    {
-                        System.IO.File.Delete(file.Path);
-                    }
+                    _fileStorage.TryDelete(file.Path);
 
                     throw;
                 }

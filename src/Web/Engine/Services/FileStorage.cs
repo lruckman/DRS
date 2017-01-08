@@ -8,25 +8,27 @@ using File = System.IO.File;
 
 namespace Web.Engine.Services
 {
-    public interface IFileMover
+    public interface IFileStorage
     {
-        Task<string> Move(byte[] buffer, byte[] fileKey);
+        Task<string> Save(byte[] buffer, byte[] fileKey);
+        Task Delete(string filePath);
+        Task TryDelete(string filePath);
     }
 
-    public class FileMover : IFileMover
+    public class FileStorage : IFileStorage
     {
         private readonly DRSConfig _config;
         private readonly ApplicationDbContext _db;
         private readonly IFileEncryptor _encryptor;
 
-        public FileMover(IOptions<DRSConfig> config, ApplicationDbContext db, IFileEncryptor encryptor)
+        public FileStorage(IOptions<DRSConfig> config, ApplicationDbContext db, IFileEncryptor encryptor)
         {
             _config = config.Value;
             _encryptor = encryptor;
             _db = db;
         }
 
-        public async Task<string> Move(byte[] buffer, byte[] fileKey)
+        public async Task<string> Save(byte[] buffer, byte[] fileKey)
         {
             var path = await GetNewFileName(_config.DocumentPath);
 
@@ -38,6 +40,28 @@ namespace Web.Engine.Services
             }
 
             return path;
+        }
+
+        public async Task TryDelete(string filePath)
+        {
+            try
+            {
+                await Delete(filePath);
+            }
+            catch
+            {
+
+            }
+        }
+
+        public async Task Delete(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                return;
+            }
+
+            await Task.Factory.StartNew(() => File.Delete(filePath));
         }
 
         private async Task<string> GetNewFileName(string rootPath)
