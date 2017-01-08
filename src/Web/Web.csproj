@@ -1,5 +1,12 @@
 ﻿<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" />
+  <PropertyGroup Label="Configuration">
+    <PostBuildEvent>xcopy /Y "C:\Development\DRS\src\Web\tessdata\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\tessdata\"
+xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x86\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\x86\"
+xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\x64\"</PostBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net451</TargetFramework>
@@ -141,6 +148,19 @@
     <None Include="ClientApp\ResultList.tsx" />
     <None Include="ClientApp\SearchForm.tsx" />
     <None Include="ClientApp\ValidationSummary.tsx" />
+    <None Include="tessdata\eng.cube.bigrams" />
+    <None Include="tessdata\eng.cube.fold" />
+    <None Include="tessdata\eng.cube.lm" />
+    <None Include="tessdata\eng.cube.nn" />
+    <None Include="tessdata\eng.cube.params" />
+    <None Include="tessdata\eng.cube.size" />
+    <None Include="tessdata\eng.cube.word-freq" />
+    <None Include="tessdata\eng.tesseract_cube.nn" />
+    <None Include="tessdata\eng.traineddata" />
+    <None Include="tessdata\x64\liblept172.dll" />
+    <None Include="tessdata\x64\libtesseract304.dll" />
+    <None Include="tessdata\x86\liblept172.dll" />
+    <None Include="tessdata\x86\libtesseract304.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -150,6 +170,9 @@
     <Content Remove="wwwroot\dist\**" />
     <EmbeddedResource Remove="wwwroot\App_Data\documents\**" />
     <EmbeddedResource Remove="wwwroot\dist\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\App_Data\" />
   </ItemGroup>
   <!--
    <Target Name="BeforePublish">
