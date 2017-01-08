@@ -2,6 +2,8 @@ import * as React from 'react';
 import Select from 'react-select';
 import { ILibraryListItem } from './ILibraryListItem';
 
+import 'react-select/dist/react-select.css';
+
 interface ISearchFormProp {
     onSearchSubmit?: (q: string, libraryIds: Array<number>) => void,
     libraries?: ILibraryListItem[]
