@@ -51,7 +51,8 @@ var serverBundleConfig = {
     },
     module: {
         loaders: [
-            { test: /\.tsx$/, include: /ClientApp/, loader: 'babel-loader' }
+            { test: /\.tsx$/, include: /ClientApp/, loader: 'babel-loader' },
+            { test: /\.css$/, loader: 'ignore-loader' },
         ]
     },
     entry: {
