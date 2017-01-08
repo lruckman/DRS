@@ -143,6 +143,14 @@
     <None Include="ClientApp\ValidationSummary.tsx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Remove="wwwroot\App_Data\documents\**" />
+    <Compile Remove="wwwroot\dist\**" />
+    <Content Remove="wwwroot\App_Data\documents\**" />
+    <Content Remove="wwwroot\dist\**" />
+    <EmbeddedResource Remove="wwwroot\App_Data\documents\**" />
+    <EmbeddedResource Remove="wwwroot\dist\**" />
+  </ItemGroup>
   <!--
    <Target Name="BeforePublish">
     <Exec Command="bower install" />
