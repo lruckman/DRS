@@ -1,20 +1,20 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Web.Engine.Helpers;
 using Web.Engine.Validation.Custom;
 using Web.Models;
-using System;
 
 namespace Web.Features.Api.Documents
 {
     public class Get
     {
-        public class Query : IAsyncRequest<Result>
+        public class Query : IRequest<Result>
         {
             public int? Id { get; set; }
         }

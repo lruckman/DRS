@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using Web.Engine.Helpers;
 using Web.Engine.Services;
 using Web.Engine.Validation.Custom;
@@ -13,7 +13,7 @@ namespace Web.Features.Api.Files
 {
     public class Thumbnail
     {
-        public class Query : IAsyncRequest<Result>
+        public class Query : IRequest<Result>
         {
             public int? Id { get; set; }
         }

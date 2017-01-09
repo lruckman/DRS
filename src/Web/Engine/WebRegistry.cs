@@ -1,5 +1,4 @@
 ﻿using StructureMap;
-using StructureMap.Graph;
 
 namespace Web.Engine
 {

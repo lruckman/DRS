@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Web.Engine.Helpers;
 using Web.Engine.Validation.Custom;
 using Web.Models;
@@ -12,7 +12,7 @@ namespace Web.Features.Api.Documents
 {
     public class Put
     {
-        public class Command : IAsyncRequest<Result>
+        public class Command : IRequest<Result>
         {
             public int? Id { get; set; }
             public string Title { get; set; }

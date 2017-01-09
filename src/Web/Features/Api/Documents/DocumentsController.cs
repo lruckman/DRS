@@ -1,9 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using System;
+using System.Threading.Tasks;
 using Web.Controllers;
 
 namespace Web.Features.Api.Documents
@@ -22,7 +22,7 @@ namespace Web.Features.Api.Documents
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(Get.Query query)
         {
-            var result = await _mediator.SendAsync(query);
+            var result = await _mediator.Send(query);
 
             if (result == null)
             {
@@ -35,7 +35,7 @@ namespace Web.Features.Api.Documents
         [HttpPost]
         public async Task<IActionResult> Post(Post.Command command)
         {
-            var result = await _mediator.SendAsync(command);
+            var result = await _mediator.Send(command);
 
             return CreatedAtAction(nameof(Documents.Get)
                 , new RouteValueDictionary(new Get.Query {Id = result.DocumentId}), null);
@@ -44,7 +44,7 @@ namespace Web.Features.Api.Documents
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(Put.Command command)
         {
-            var result = await _mediator.SendAsync(command);
+            var result = await _mediator.Send(command);
 
             if (result == null)
             {

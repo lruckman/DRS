@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Web.Engine;
 using Web.Engine.Helpers;
 using Web.Engine.Validation.Custom;
@@ -15,7 +15,7 @@ namespace Web.Features.Api.Search
 {
     public class Get
     {
-        public class Query : IAsyncRequest<Result>
+        public class Query : IRequest<Result>
         {
             public int[] LibraryIds { get; set; } = {};
 

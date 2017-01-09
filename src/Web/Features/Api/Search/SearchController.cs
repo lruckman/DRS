@@ -20,7 +20,7 @@ namespace Web.Features.Api.Search
         
         public async Task<IActionResult> Get(Get.Query query)
         {
-            var results = await _mediator.SendAsync(query);
+            var results = await _mediator.Send(query);
 
             if (results == null)
             {

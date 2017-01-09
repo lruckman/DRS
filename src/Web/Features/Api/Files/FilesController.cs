@@ -1,8 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 using Web.Controllers;
 
 namespace Web.Features.Api.Files
@@ -21,7 +21,7 @@ namespace Web.Features.Api.Files
         [HttpGet("{id:int}/view")]
         public async Task<IActionResult> View(View.Query query)
         {
-            var model = await _mediator.SendAsync(query);
+            var model = await _mediator.Send(query);
 
             if (model == null)
             {
@@ -42,7 +42,7 @@ namespace Web.Features.Api.Files
         [HttpGet("{id:int}/thumbnail")]
         public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
         {
-            var model = await _mediator.SendAsync(query);
+            var model = await _mediator.Send(query);
 
             if (model == null)
             {
