@@ -10,8 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
+using Serilog;
 using StructureMap;
 using System;
+using System.IO;
 using Web.Engine;
 using Web.Engine.Filters;
 using Web.Engine.ViewEngine;
@@ -23,6 +25,12 @@ namespace Web
     {
         public Startup(IHostingEnvironment env)
         {
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.LiterateConsole()
+                .WriteTo.Async(a => a.RollingFile(Path.Combine(env.ContentRootPath, "logs/log-{Date}.txt")))
+                .CreateLogger();
+
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -40,7 +48,7 @@ namespace Web
         }
 
         private static IConfigurationRoot Configuration { get; set; }
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
@@ -96,7 +104,9 @@ namespace Web
 
             services.AddMediatR(typeof(Startup));
 
-            var container = new Container(cfg => { cfg.AddRegistry<WebRegistry>(); });
+            var container = new Container(cfg => {
+                cfg.AddRegistry<WebRegistry>();
+            });
 
             // populates structuremap with .NET services
 
@@ -106,10 +116,11 @@ namespace Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IApplicationLifetime appLifetime)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            loggerFactory.AddSerilog();
+            // Ensure any buffered events are sent at shutdown
+            appLifetime.ApplicationStopped.Register(Log.CloseAndFlush);
 
             if (env.IsDevelopment())
             {

@@ -264,3 +264,4 @@ __pycache__/
 /src/Web/wwwroot/dist/
 /src/Web/wwwroot/lib/
 /src/Web/ClientApp/dist/
+/src/Web/logs/
