@@ -9,7 +9,7 @@ namespace Web.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
-        [Required]
+        [Required, MaxLength(56)]
         public string Name { get; set; }
     }
 }

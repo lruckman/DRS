@@ -23,6 +23,7 @@ namespace Web.Models
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ModifiedOn { get; set; }
 
+        public virtual List<DocumentDistribution> Distributions { get; set; } = new List<DocumentDistribution>();
         public virtual List<LibraryDocument> Libraries { get; set; } = new List<LibraryDocument>();
         public virtual List<File> Files { get; set; } = new List<File>();
 

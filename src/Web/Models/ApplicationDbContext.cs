@@ -12,7 +12,7 @@ namespace Web.Models
         public DbSet<PermissionType> PermissionTypes { get; set; }
 
         public DbSet<UserLibrary> UserLibraries { get; set; }
-
+        
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -21,10 +21,25 @@ namespace Web.Models
         {
             base.OnModelCreating(builder);
 
+            // document distribution: one-to-many
+
+            builder.Entity<DocumentDistribution>()
+                .HasKey(dd => new { dd.DistributionGroupId, dd.DocumentId });
+
+            builder.Entity<DocumentDistribution>()
+                .HasOne(dd => dd.DistributionGroup)
+                .WithMany(dg => dg.DocumentDistributions)
+                .HasForeignKey(dd => dd.DistributionGroupId);
+
+            builder.Entity<DocumentDistribution>()
+                .HasOne(dd => dd.Document)
+                .WithMany(d => d.Distributions)
+                .HasForeignKey(dd => dd.DocumentId);
+
             // library document: one-to-many
 
             builder.Entity<LibraryDocument>()
-                .HasKey(ld => new {ld.LibraryId, ld.DocumentId});
+                .HasKey(ld => new { ld.LibraryId, ld.DocumentId });
 
             builder.Entity<LibraryDocument>()
                 .HasOne(ld => ld.Library)
