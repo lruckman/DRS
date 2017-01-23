@@ -39,7 +39,8 @@ namespace Web.Models
                     CreatedByUserId = userManager.GetUserIdAsync(defaultUser).Result,
                     CreatedOn = DateTimeOffset.Now,
                     ModifiedOn = DateTimeOffset.Now,
-                    Name = "Private"
+                    Name = "Private",
+                    Status = StatusTypes.Active
                 };
 
                 context.DistributionGroups.Add(personalLibrary);
