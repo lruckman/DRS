@@ -370,8 +370,8 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
                                             placeholder="Libraries"
                                             simpleValue
                                             value={this.state.document.libraryIds}
-                                            valueKey="Value"
-                                            labelKey="Text"
+                                            valueKey="value"
+                                            labelKey="text"
                                             options={this.props.libraries}
                                             onChange={this.handleLibraryChange}
                                             />
