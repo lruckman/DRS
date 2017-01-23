@@ -93,10 +93,10 @@ namespace Web.Features.Api.Documents
                 //todo: add to indexers private library (hardcoded for now)
                 // add document to the default library
 
-                document.Libraries.Add(await _db.Libraries
-                    .Select(l => new LibraryDocument
+                document.Distributions.Add(await _db.DistributionGroups
+                    .Select(l => new DistributionDocument
                     {
-                        Library = l
+                        DistributionGroup = l
                     })
                     .FirstAsync());
 

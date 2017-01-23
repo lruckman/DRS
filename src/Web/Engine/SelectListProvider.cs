@@ -27,9 +27,9 @@ namespace Web.Engine
 
         public async Task<IEnumerable<SelectListItem>> GetLibraries(string userId)
         {
-            return await _db.UserLibraries
+            return await _db.DistributionRecipients
                 .Where(ul => ul.ApplicationUserId == userId)
-                .Select(ul => ul.Library)
+                .Select(ul => ul.DistributionGroup)
                 .OrderBy(l => l.Name)
                 .ProjectTo<SelectListItem>(_configurationProvider)
                 .ToArrayAsync();
@@ -39,7 +39,7 @@ namespace Web.Engine
         {
             public MappingProfile()
             {
-                CreateMap<Library, SelectListItem>()
+                CreateMap<DistributionGroup, SelectListItem>()
                     .ForMember(d => d.Text, o => o.MapFrom(s => s.Name))
                     .ForMember(d => d.Value, o => o.MapFrom(s => s.Id))
                     .ForMember(d => d.Disabled, o => o.Ignore())

@@ -72,7 +72,7 @@ namespace Web.Features.Api.Search
                     // no libraries so default to all the user libraries
 
                     var userLibraryIds = await _documentSecurity
-                        .GetUserLibraryIdsAsync(PermissionTypes.Read);
+                        .GetUserDistributionGroupIdsAsync(PermissionTypes.Read);
 
                     message.LibraryIds = userLibraryIds
                         .Select(i => i)
@@ -82,7 +82,7 @@ namespace Web.Features.Api.Search
                 // limit based on libraries the user can access
 
                 documentQuery = documentQuery
-                    .Where(dq => dq.Libraries.Any(l => message.LibraryIds.Contains(l.LibraryId)));
+                    .Where(dq => dq.Distributions.Any(l => message.LibraryIds.Contains(l.DistributionGroupId)));
 
                 var result = new Result
                 {

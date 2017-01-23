@@ -2,11 +2,11 @@
 
 namespace Web.Models
 {
-    [Table("UserLibraries")]
-    public class UserLibrary
+    [Table("DistributionRecipients")]
+    public class DistributionRecipient
     {
-        public Library Library { get; set; }
-        public int LibraryId { get; set; }
+        public DistributionGroup DistributionGroup { get; set; }
+        public int DistributionGroupId { get; set; }
 
         public ApplicationUser ApplicationUser { get; set; }
         public string ApplicationUserId { get; set; }

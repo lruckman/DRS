@@ -7,11 +7,11 @@ namespace Web.Models
     {
         public DbSet<Document> Documents { get; set; }
         public DbSet<File> Files { get; set; }
-        public DbSet<Library> Libraries { get; set; }
+        public DbSet<DistributionGroup> DistributionGroups { get; set; }
         public DbSet<StatusType> StatusTypes { get; set; }
         public DbSet<PermissionType> PermissionTypes { get; set; }
 
-        public DbSet<UserLibrary> UserLibraries { get; set; }
+        public DbSet<DistributionRecipient> DistributionRecipients { get; set; }
         
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -21,50 +21,35 @@ namespace Web.Models
         {
             base.OnModelCreating(builder);
 
-            // document distribution: one-to-many
-
-            builder.Entity<DocumentDistribution>()
-                .HasKey(dd => new { dd.DistributionGroupId, dd.DocumentId });
-
-            builder.Entity<DocumentDistribution>()
-                .HasOne(dd => dd.DistributionGroup)
-                .WithMany(dg => dg.DocumentDistributions)
-                .HasForeignKey(dd => dd.DistributionGroupId);
-
-            builder.Entity<DocumentDistribution>()
-                .HasOne(dd => dd.Document)
-                .WithMany(d => d.Distributions)
-                .HasForeignKey(dd => dd.DocumentId);
-
             // library document: one-to-many
 
-            builder.Entity<LibraryDocument>()
-                .HasKey(ld => new { ld.LibraryId, ld.DocumentId });
+            builder.Entity<DistributionDocument>()
+                .HasKey(dd => new { dd.DistributionGroupId, dd.DocumentId });
 
-            builder.Entity<LibraryDocument>()
-                .HasOne(ld => ld.Library)
-                .WithMany(l => l.Documents)
-                .HasForeignKey(ld => ld.LibraryId);
+            builder.Entity<DistributionDocument>()
+                .HasOne(dd => dd.DistributionGroup)
+                .WithMany(dg => dg.DistributionDocuments)
+                .HasForeignKey(dd => dd.DistributionGroupId);
 
-            builder.Entity<LibraryDocument>()
+            builder.Entity<DistributionDocument>()
                 .HasOne(ld => ld.Document)
-                .WithMany(d => d.Libraries)
+                .WithMany(d => d.Distributions)
                 .HasForeignKey(ld => ld.DocumentId);
 
             // user library permissions: one-to-many
 
-            builder.Entity<UserLibrary>()
-                .HasKey(ulp => new { ulp.LibraryId, ulp.ApplicationUserId });
+            builder.Entity<DistributionRecipient>()
+                .HasKey(dr => new { dr.DistributionGroupId, dr.ApplicationUserId });
 
-            builder.Entity<UserLibrary>()
-                .HasOne(ulp => ulp.ApplicationUser)
+            builder.Entity<DistributionRecipient>()
+                .HasOne(dr => dr.ApplicationUser)
                 .WithMany(au => au.LibraryAccessList)
-                .HasForeignKey(ulp => ulp.ApplicationUserId);
+                .HasForeignKey(dr => dr.ApplicationUserId);
 
-            builder.Entity<UserLibrary>()
-                .HasOne(ulp => ulp.Library)
-                .WithMany(l => l.UserPermissions)
-                .HasForeignKey(ulp => ulp.LibraryId);
+            builder.Entity<DistributionRecipient>()
+                .HasOne(dr => dr.DistributionGroup)
+                .WithMany(dg => dg.Recipients)
+                .HasForeignKey(dr => dr.DistributionGroupId);
 
             // lookups
 

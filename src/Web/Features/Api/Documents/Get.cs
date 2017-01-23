@@ -67,8 +67,8 @@ namespace Web.Features.Api.Documents
                                 .OrderByDescending(f => f.VersionNum)
                                 .Single()))
                         .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
-                            s.Libraries
-                                .Select(l => l.LibraryId.ToString())));
+                            s.Distributions
+                                .Select(l => l.DistributionGroupId.ToString())));
                     CreateMap<File, Result.FileResult>();
                 }
             }

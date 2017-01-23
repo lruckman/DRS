@@ -22,6 +22,7 @@ namespace Web.Models
 
         public StatusTypes Status { get; set; }
 
-        public virtual List<DocumentDistribution> DocumentDistributions { get; set; } = new List<DocumentDistribution>();
+        public virtual List<DistributionDocument> DistributionDocuments { get; set; } = new List<DistributionDocument>();
+        public virtual List<DistributionRecipient> Recipients { get; set; } = new List<DistributionRecipient>();
     }
 }

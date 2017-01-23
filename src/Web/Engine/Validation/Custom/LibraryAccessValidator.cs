@@ -27,7 +27,7 @@ namespace Web.Engine.Validation.Custom
                 return true;
             }
 
-            var allowed = _documentSecurity.GetUserLibraryIdsAsync(_permission)
+            var allowed = _documentSecurity.GetUserDistributionGroupIdsAsync(_permission)
                 .GetAwaiter()
                 .GetResult();
 

@@ -10,7 +10,7 @@ namespace Web.Engine.Helpers
     {
         Task<bool> HasDocumentPermissionAsync(int documentId, PermissionTypes requestedPermission);
         Task<bool> HasFilePermissionAsync(int fileId, PermissionTypes requestedPermission);
-        Task<IEnumerable<int>> GetUserLibraryIdsAsync(PermissionTypes requestedPermission);
+        Task<IEnumerable<int>> GetUserDistributionGroupIdsAsync(PermissionTypes requestedPermission);
     }
 
     public class DocumentSecurity : IDocumentSecurity
@@ -21,7 +21,7 @@ namespace Web.Engine.Helpers
         /// <summary>
         /// A cache of user library ids for this user, this instance
         /// </summary>
-        private int[] _cacheUserLibraryIds = {};
+        private int[] _cachedDistributionGroupIds = { };
 
         public DocumentSecurity(ApplicationDbContext db, IUserContext userContext)
         {
@@ -29,30 +29,30 @@ namespace Web.Engine.Helpers
             _userContext = userContext;
         }
 
-        public async Task<IEnumerable<int>> GetUserLibraryIdsAsync(PermissionTypes requestedPermission)
+        public async Task<IEnumerable<int>> GetUserDistributionGroupIdsAsync(PermissionTypes requestedPermission)
         {
-            if (_cacheUserLibraryIds.Any())
+            if (_cachedDistributionGroupIds.Any())
             {
-                return _cacheUserLibraryIds;
+                return _cachedDistributionGroupIds;
             }
 
             var userId = _userContext.UserId;
 
-            return _cacheUserLibraryIds =
-                await _db.UserLibraries
+            return _cachedDistributionGroupIds =
+                await _db.DistributionRecipients
                     .Where(ul => ul.ApplicationUserId == userId &&
                                  (ul.Permissions & requestedPermission) != 0)
-                    .Select(ul => ul.LibraryId)
+                    .Select(ul => ul.DistributionGroupId)
                     .ToArrayAsync();
         }
 
         public async Task<bool> HasDocumentPermissionAsync(int documentId, PermissionTypes requestedPermission)
         {
-            var libraryIds = await GetUserLibraryIdsAsync(requestedPermission);
+            var libraryIds = await GetUserDistributionGroupIdsAsync(requestedPermission);
 
             var docLibraryIds = await _db.Documents
                 .Where(d => d.Id == documentId)
-                .SelectMany(d => d.Libraries.Select(l=>l.LibraryId))
+                .SelectMany(d => d.Distributions.Select(l => l.DistributionGroupId))
                 .ToArrayAsync();
 
             return docLibraryIds.Any(outer => libraryIds.Any(inner => inner == outer));
@@ -60,11 +60,11 @@ namespace Web.Engine.Helpers
 
         public async Task<bool> HasFilePermissionAsync(int fileId, PermissionTypes requestedPermission)
         {
-            var libraryIds = await GetUserLibraryIdsAsync(requestedPermission);
+            var libraryIds = await GetUserDistributionGroupIdsAsync(requestedPermission);
 
             var fileIds = await _db.Files
                 .Where(f => f.Id == fileId)
-                .SelectMany(f => f.Document.Libraries.Select(l=>l.LibraryId))
+                .SelectMany(f => f.Document.Distributions.Select(l => l.DistributionGroupId))
                 .ToArrayAsync();
 
             return fileIds.Any(outer => libraryIds.Any(inner => inner == outer));

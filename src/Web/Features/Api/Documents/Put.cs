@@ -17,7 +17,7 @@ namespace Web.Features.Api.Documents
             public int? Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
-            public int[] LibraryIds { get; set; } = {};
+            public int[] LibraryIds { get; set; } = { };
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -55,7 +55,7 @@ namespace Web.Features.Api.Documents
             public async Task<Result> Handle(Command message)
             {
                 var document = await _db.Documents
-                    .Include(d => d.Libraries)
+                    .Include(d => d.Distributions)
                     .SingleOrDefaultAsync(d => d.Id == message.Id.Value);
 
                 if (document == null)
@@ -69,21 +69,21 @@ namespace Web.Features.Api.Documents
 
                 // remove deleted libraries
 
-                var deletedLibraryIds = document.Libraries
-                    .Select(l => l.LibraryId)
+                var deletedLibraryIds = document.Distributions
+                    .Select(l => l.DistributionGroupId)
                     .Except(message.LibraryIds)
                     .ToArray();
 
-                document.Libraries.RemoveAll(ld => deletedLibraryIds.Contains(ld.LibraryId));
+                document.Distributions.RemoveAll(ld => deletedLibraryIds.Contains(ld.DistributionGroupId));
 
                 // add new libraries
 
                 var newLibraryIds = message.LibraryIds
-                    .Except(document.Libraries.Select(l => l.LibraryId))
-                    .Intersect(await _documentSecurity.GetUserLibraryIdsAsync(PermissionTypes.Modify))
+                    .Except(document.Distributions.Select(l => l.DistributionGroupId))
+                    .Intersect(await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify))
                     .ToArray();
 
-                document.Libraries.AddRange(newLibraryIds.Select(id => new LibraryDocument {LibraryId = id}));
+                document.Distributions.AddRange(newLibraryIds.Select(id => new DistributionDocument { DistributionGroupId = id }));
 
                 await _db.SaveChangesAsync();
 

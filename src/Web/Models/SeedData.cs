@@ -32,9 +32,9 @@ namespace Web.Models
 
             // add a library
 
-            if (!context.Libraries.Any())
+            if (!context.DistributionGroups.Any())
             {
-                var personalLibrary = new Library
+                var personalLibrary = new DistributionGroup
                 {
                     CreatedByUserId = userManager.GetUserIdAsync(defaultUser).Result,
                     CreatedOn = DateTimeOffset.Now,
@@ -42,14 +42,14 @@ namespace Web.Models
                     Name = "Private"
                 };
 
-                context.Libraries.Add(personalLibrary);
+                context.DistributionGroups.Add(personalLibrary);
                 context.SaveChanges();
 
                 // give the default user full access to their private cabinet
 
-                defaultUser.LibraryAccessList.Add(new UserLibrary
+                defaultUser.LibraryAccessList.Add(new DistributionRecipient
                 {
-                    LibraryId = personalLibrary.Id,
+                    DistributionGroupId = personalLibrary.Id,
                     Permissions = PermissionTypes.Full
                 });
             }
