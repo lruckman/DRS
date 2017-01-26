@@ -2,8 +2,8 @@
 
 namespace Web.Models
 {
-    [Table("DistributionDocuments")]
-    public class DistributionDocument
+    [Table("Distributions")]
+    public class Distribution
     {
         public int DistributionGroupId { get; set; }
         public int DocumentId { get; set; }

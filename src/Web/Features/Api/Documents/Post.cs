@@ -94,7 +94,7 @@ namespace Web.Features.Api.Documents
                 // add document to the default library
 
                 document.Distributions.Add(await _db.DistributionGroups
-                    .Select(l => new DistributionDocument
+                    .Select(l => new Distribution
                     {
                         DistributionGroup = l
                     })

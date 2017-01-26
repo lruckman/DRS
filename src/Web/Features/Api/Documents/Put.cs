@@ -83,7 +83,7 @@ namespace Web.Features.Api.Documents
                     .Intersect(await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify))
                     .ToArray();
 
-                document.Distributions.AddRange(newLibraryIds.Select(id => new DistributionDocument { DistributionGroupId = id }));
+                document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
 
                 await _db.SaveChangesAsync();
 

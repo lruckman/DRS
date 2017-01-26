@@ -23,15 +23,15 @@ namespace Web.Models
 
             // library document: one-to-many
 
-            builder.Entity<DistributionDocument>()
+            builder.Entity<Distribution>()
                 .HasKey(dd => new { dd.DistributionGroupId, dd.DocumentId });
 
-            builder.Entity<DistributionDocument>()
+            builder.Entity<Distribution>()
                 .HasOne(dd => dd.DistributionGroup)
-                .WithMany(dg => dg.DistributionDocuments)
+                .WithMany(dg => dg.Distributions)
                 .HasForeignKey(dd => dd.DistributionGroupId);
 
-            builder.Entity<DistributionDocument>()
+            builder.Entity<Distribution>()
                 .HasOne(ld => ld.Document)
                 .WithMany(d => d.Distributions)
                 .HasForeignKey(ld => ld.DocumentId);
