@@ -21,6 +21,7 @@ namespace Web.Models
         public DateTimeOffset ModifiedOn { get; set; }
 
         public StatusTypes Status { get; set; }
+        public DistributionGroupTypes Type { get; set; }
 
         public virtual List<Distribution> Distributions { get; set; } = new List<Distribution>();
         public virtual List<DistributionRecipient> Recipients { get; set; } = new List<DistributionRecipient>();

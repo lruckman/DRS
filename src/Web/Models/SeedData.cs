@@ -9,11 +9,11 @@ namespace Web.Models
     {
         public static void EnsureSampleData(this IApplicationBuilder app)
         {
-            var context = (ApplicationDbContext) app.ApplicationServices
-                .GetService(typeof (ApplicationDbContext));
+            var context = (ApplicationDbContext)app.ApplicationServices
+                .GetService(typeof(ApplicationDbContext));
 
-            var userManager = (UserManager<ApplicationUser>) app.ApplicationServices
-                .GetService(typeof (UserManager<ApplicationUser>));
+            var userManager = (UserManager<ApplicationUser>)app.ApplicationServices
+                .GetService(typeof(UserManager<ApplicationUser>));
 
             // add a test user
 
@@ -55,6 +55,21 @@ namespace Web.Models
                 });
             }
 
+            // Distribution Group Types
+
+            if (!context.DistributionGroupTypes.Any())
+            {
+                foreach (DistributionGroupTypes val in Enum.GetValues(typeof(DistributionGroupTypes)))
+                {
+                    context.DistributionGroupTypes.Add(new DistributionGroupType
+                    {
+                        Id = (int)val,
+                        Name = val.ToString()
+                    });
+                }
+                context.SaveChanges();
+            }
+
             // Permission Types
 
             if (!context.PermissionTypes.Any())
@@ -65,7 +80,7 @@ namespace Web.Models
                     {
                         context.PermissionTypes.Add(new PermissionType
                         {
-                            Id = (int) val,
+                            Id = (int)val,
                             Name = val.ToString()
                         });
                     }

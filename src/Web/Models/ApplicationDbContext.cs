@@ -8,6 +8,7 @@ namespace Web.Models
         public DbSet<Document> Documents { get; set; }
         public DbSet<File> Files { get; set; }
         public DbSet<DistributionGroup> DistributionGroups { get; set; }
+        public DbSet<DistributionGroupType> DistributionGroupTypes { get; set; }
         public DbSet<StatusType> StatusTypes { get; set; }
         public DbSet<PermissionType> PermissionTypes { get; set; }
 
@@ -52,6 +53,10 @@ namespace Web.Models
                 .HasForeignKey(dr => dr.DistributionGroupId);
 
             // lookups
+
+            builder.Entity<DistributionGroupType>()
+                .Property(pt => pt.Id)
+                .ValueGeneratedNever();
 
             builder.Entity<PermissionType>()
                 .Property(pt => pt.Id)
