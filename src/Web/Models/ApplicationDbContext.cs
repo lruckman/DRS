@@ -9,11 +9,11 @@ namespace Web.Models
         public DbSet<File> Files { get; set; }
         public DbSet<DistributionGroup> DistributionGroups { get; set; }
         public DbSet<DistributionGroupType> DistributionGroupTypes { get; set; }
+        public DbSet<NamedDistribution> NamedDistributions { get; set; }
         public DbSet<StatusType> StatusTypes { get; set; }
+        public DbSet<UnnamedDistribution> UnnamedDistributions { get; set; }
         public DbSet<PermissionType> PermissionTypes { get; set; }
 
-        public DbSet<DistributionRecipient> DistributionRecipients { get; set; }
-        
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -22,7 +22,15 @@ namespace Web.Models
         {
             base.OnModelCreating(builder);
 
-            // library document: one-to-many
+            builder.Entity<NamedDistribution>()
+                .HasKey(nd => new { nd.DistributionGroupId, nd.ApplicationUserId });
+
+            builder.Entity<UnnamedDistribution>()
+                .HasOne(ud => ud.DistributionGroup)
+                .WithMany()
+                .HasForeignKey(ud => ud.DistributionGroupId);
+
+            // distribution
 
             builder.Entity<Distribution>()
                 .HasKey(dd => new { dd.DistributionGroupId, dd.DocumentId });
@@ -37,25 +45,10 @@ namespace Web.Models
                 .WithMany(d => d.Distributions)
                 .HasForeignKey(ld => ld.DocumentId);
 
-            // user library permissions: one-to-many
-
-            builder.Entity<DistributionRecipient>()
-                .HasKey(dr => new { dr.DistributionGroupId, dr.ApplicationUserId });
-
-            builder.Entity<DistributionRecipient>()
-                .HasOne(dr => dr.ApplicationUser)
-                .WithMany(au => au.LibraryAccessList)
-                .HasForeignKey(dr => dr.ApplicationUserId);
-
-            builder.Entity<DistributionRecipient>()
-                .HasOne(dr => dr.DistributionGroup)
-                .WithMany(dg => dg.Recipients)
-                .HasForeignKey(dr => dr.DistributionGroupId);
-
             // lookups
 
             builder.Entity<DistributionGroupType>()
-                .Property(pt => pt.Id)
+                .Property(dgt => dgt.Id)
                 .ValueGeneratedNever();
 
             builder.Entity<PermissionType>()

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Web.Models;
 
-namespace Web.Data.Migrations
+namespace Web.data.migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -225,21 +225,6 @@ namespace Web.Data.Migrations
                     b.ToTable("DistributionGroupTypes","Lookup");
                 });
 
-            modelBuilder.Entity("Web.Models.DistributionRecipient", b =>
-                {
-                    b.Property<int>("DistributionGroupId");
-
-                    b.Property<string>("ApplicationUserId");
-
-                    b.Property<int>("Permissions");
-
-                    b.HasKey("DistributionGroupId", "ApplicationUserId");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.ToTable("DistributionRecipients");
-                });
-
             modelBuilder.Entity("Web.Models.Document", b =>
                 {
                     b.Property<int>("Id")
@@ -329,6 +314,21 @@ namespace Web.Data.Migrations
                     b.ToTable("Files");
                 });
 
+            modelBuilder.Entity("Web.Models.NamedDistribution", b =>
+                {
+                    b.Property<int>("DistributionGroupId");
+
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<int>("Permissions");
+
+                    b.HasKey("DistributionGroupId", "ApplicationUserId");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("NamedDistributions");
+                });
+
             modelBuilder.Entity("Web.Models.PermissionType", b =>
                 {
                     b.Property<int>("Id");
@@ -353,6 +353,21 @@ namespace Web.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("StatusTypes","Lookup");
+                });
+
+            modelBuilder.Entity("Web.Models.UnnamedDistribution", b =>
+                {
+                    b.Property<int>("DistributionGroupId");
+
+                    b.Property<Guid>("AccessKey");
+
+                    b.Property<DateTimeOffset>("ExpiryDate");
+
+                    b.Property<int>("Permissions");
+
+                    b.HasKey("DistributionGroupId");
+
+                    b.ToTable("UnnamedDistributions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
@@ -405,19 +420,6 @@ namespace Web.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Web.Models.DistributionRecipient", b =>
-                {
-                    b.HasOne("Web.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("LibraryAccessList")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Web.Models.DistributionGroup", "DistributionGroup")
-                        .WithMany("Recipients")
-                        .HasForeignKey("DistributionGroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("Web.Models.DocumentContent", b =>
                 {
                     b.HasOne("Web.Models.Document", "Document")
@@ -431,6 +433,27 @@ namespace Web.Data.Migrations
                     b.HasOne("Web.Models.Document", "Document")
                         .WithMany("Files")
                         .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Web.Models.NamedDistribution", b =>
+                {
+                    b.HasOne("Web.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany("LibraryAccessList")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Web.Models.DistributionGroup", "DistributionGroup")
+                        .WithMany("Recipients")
+                        .HasForeignKey("DistributionGroupId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Web.Models.UnnamedDistribution", b =>
+                {
+                    b.HasOne("Web.Models.DistributionGroup", "DistributionGroup")
+                        .WithMany()
+                        .HasForeignKey("DistributionGroupId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
         }

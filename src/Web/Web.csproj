@@ -177,6 +177,7 @@ xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS
     <EmbeddedResource Remove="wwwroot\dist\**" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\Migrations\" />
     <Folder Include="wwwroot\App_Data\" />
   </ItemGroup>
   <!--

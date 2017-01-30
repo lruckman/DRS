@@ -39,7 +39,7 @@ namespace Web.Engine.Helpers
             var userId = _userContext.UserId;
 
             return _cachedDistributionGroupIds =
-                await _db.DistributionRecipients
+                await _db.NamedDistributions
                     .Where(ul => ul.ApplicationUserId == userId &&
                                  (ul.Permissions & requestedPermission) != 0)
                     .Select(ul => ul.DistributionGroupId)

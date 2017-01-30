@@ -24,6 +24,6 @@ namespace Web.Models
         public DistributionGroupTypes Type { get; set; }
 
         public virtual List<Distribution> Distributions { get; set; } = new List<Distribution>();
-        public virtual List<DistributionRecipient> Recipients { get; set; } = new List<DistributionRecipient>();
+        public virtual List<NamedDistribution> Recipients { get; set; } = new List<NamedDistribution>();
     }
 }

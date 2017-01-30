@@ -2,14 +2,14 @@
 
 namespace Web.Models
 {
-    [Table("DistributionRecipients")]
-    public class DistributionRecipient
+    [Table("NamedDistributions")]
+    public class NamedDistribution
     {
-        public DistributionGroup DistributionGroup { get; set; }
         public int DistributionGroupId { get; set; }
-
-        public ApplicationUser ApplicationUser { get; set; }
+        public DistributionGroup DistributionGroup { get; set; }
+        
         public string ApplicationUserId { get; set; }
+        public ApplicationUser ApplicationUser { get; set; }
 
         public PermissionTypes Permissions { get; set; }
     }

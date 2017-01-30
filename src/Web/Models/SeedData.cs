@@ -48,7 +48,7 @@ namespace Web.Models
 
                 // give the default user full access to their private cabinet
 
-                defaultUser.LibraryAccessList.Add(new DistributionRecipient
+                defaultUser.LibraryAccessList.Add(new NamedDistribution
                 {
                     DistributionGroupId = personalLibrary.Id,
                     Permissions = PermissionTypes.Full

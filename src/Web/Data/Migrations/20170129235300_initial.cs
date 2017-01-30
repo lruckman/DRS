@@ -1,10 +1,11 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Web.Data.Migrations
+namespace Web.data.migrations
 {
-    public partial class InitialDatabase : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -17,8 +18,8 @@ namespace Web.Data.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     ConcurrencyStamp = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    NormalizedName = table.Column<string>(nullable: true, maxLength: 256)
+                    Name = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -46,22 +47,53 @@ namespace Web.Data.Migrations
                     Id = table.Column<string>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
                     ConcurrencyStamp = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
                     LockoutEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
-                    NormalizedEmail = table.Column<string>(nullable: true, maxLength: 256),
-                    NormalizedUserName = table.Column<string>(nullable: true, maxLength: 256),
+                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
                     PasswordHash = table.Column<string>(nullable: true),
                     PhoneNumber = table.Column<string>(nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(nullable: false),
                     SecurityStamp = table.Column<string>(nullable: true),
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
-                    UserName = table.Column<string>(nullable: true)
+                    UserName = table.Column<string>(maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DistributionGroups",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    CreatedByUserId = table.Column<string>(maxLength: 450, nullable: false),
+                    CreatedOn = table.Column<DateTimeOffset>(nullable: false),
+                    ModifiedOn = table.Column<DateTimeOffset>(nullable: false),
+                    Name = table.Column<string>(maxLength: 56, nullable: false),
+                    Status = table.Column<int>(nullable: false),
+                    Type = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DistributionGroups", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DistributionGroupTypes",
+                schema: "Lookup",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(maxLength: 56, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DistributionGroupTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -70,33 +102,16 @@ namespace Web.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Abstract = table.Column<string>(nullable: true),
-                    CreatedByUserId = table.Column<string>(nullable: false),
+                    Abstract = table.Column<string>(maxLength: 512, nullable: true),
+                    CreatedByUserId = table.Column<string>(maxLength: 450, nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(nullable: false),
                     ModifiedOn = table.Column<DateTimeOffset>(nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: false)
+                    Title = table.Column<string>(maxLength: 60, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Documents", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Libraries",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    CreatedByUserId = table.Column<string>(nullable: false),
-                    CreatedOn = table.Column<DateTimeOffset>(nullable: false),
-                    ModifiedOn = table.Column<DateTimeOffset>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Status = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Libraries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -105,7 +120,7 @@ namespace Web.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(maxLength: 56, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -118,7 +133,7 @@ namespace Web.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    Name = table.Column<string>(maxLength: 56, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -212,6 +227,75 @@ namespace Web.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "NamedDistributions",
+                columns: table => new
+                {
+                    DistributionGroupId = table.Column<int>(nullable: false),
+                    ApplicationUserId = table.Column<string>(nullable: false),
+                    Permissions = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NamedDistributions", x => new { x.DistributionGroupId, x.ApplicationUserId });
+                    table.ForeignKey(
+                        name: "FK_NamedDistributions_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_NamedDistributions_DistributionGroups_DistributionGroupId",
+                        column: x => x.DistributionGroupId,
+                        principalTable: "DistributionGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UnnamedDistributions",
+                columns: table => new
+                {
+                    DistributionGroupId = table.Column<int>(nullable: false),
+                    AccessKey = table.Column<Guid>(nullable: false),
+                    ExpiryDate = table.Column<DateTimeOffset>(nullable: false),
+                    Permissions = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UnnamedDistributions", x => x.DistributionGroupId);
+                    table.ForeignKey(
+                        name: "FK_UnnamedDistributions_DistributionGroups_DistributionGroupId",
+                        column: x => x.DistributionGroupId,
+                        principalTable: "DistributionGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Distributions",
+                columns: table => new
+                {
+                    DistributionGroupId = table.Column<int>(nullable: false),
+                    DocumentId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Distributions", x => new { x.DistributionGroupId, x.DocumentId });
+                    table.ForeignKey(
+                        name: "FK_Distributions_DistributionGroups_DistributionGroupId",
+                        column: x => x.DistributionGroupId,
+                        principalTable: "DistributionGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Distributions_Documents_DocumentId",
+                        column: x => x.DocumentId,
+                        principalTable: "Documents",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DocumentContents",
                 columns: table => new
                 {
@@ -237,17 +321,17 @@ namespace Web.Data.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    CreatedByUserId = table.Column<string>(nullable: false),
+                    CreatedByUserId = table.Column<string>(maxLength: 450, nullable: false),
                     CreatedOn = table.Column<DateTimeOffset>(nullable: false),
                     DocumentId = table.Column<int>(nullable: false),
-                    Extension = table.Column<string>(nullable: false),
-                    Key = table.Column<string>(nullable: true),
+                    Extension = table.Column<string>(maxLength: 16, nullable: false),
+                    Key = table.Column<string>(maxLength: 1024, nullable: true),
                     ModifiedOn = table.Column<DateTimeOffset>(nullable: false),
                     PageCount = table.Column<int>(nullable: false),
-                    Path = table.Column<string>(nullable: false),
+                    Path = table.Column<string>(maxLength: 256, nullable: false),
                     Size = table.Column<long>(nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    ThumbnailPath = table.Column<string>(nullable: false),
+                    ThumbnailPath = table.Column<string>(maxLength: 256, nullable: false),
                     VersionNum = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -261,84 +345,11 @@ namespace Web.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "UserDocuments",
-                columns: table => new
-                {
-                    DocumentId = table.Column<int>(nullable: false),
-                    ApplicationUserId = table.Column<string>(nullable: false),
-                    Permissions = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserDocuments", x => new { x.DocumentId, x.ApplicationUserId });
-                    table.ForeignKey(
-                        name: "FK_UserDocuments_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserDocuments_Documents_DocumentId",
-                        column: x => x.DocumentId,
-                        principalTable: "Documents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "LibraryDocuments",
-                columns: table => new
-                {
-                    LibraryId = table.Column<int>(nullable: false),
-                    DocumentId = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LibraryDocuments", x => new { x.LibraryId, x.DocumentId });
-                    table.ForeignKey(
-                        name: "FK_LibraryDocuments_Documents_DocumentId",
-                        column: x => x.DocumentId,
-                        principalTable: "Documents",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LibraryDocuments_Libraries_LibraryId",
-                        column: x => x.LibraryId,
-                        principalTable: "Libraries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserLibraries",
-                columns: table => new
-                {
-                    LibraryId = table.Column<int>(nullable: false),
-                    ApplicationUserId = table.Column<string>(nullable: false),
-                    Permissions = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserLibraries", x => new { x.LibraryId, x.ApplicationUserId });
-                    table.ForeignKey(
-                        name: "FK_UserLibraries_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UserLibraries_Libraries_LibraryId",
-                        column: x => x.LibraryId,
-                        principalTable: "Libraries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
-                column: "NormalizedName");
+                column: "NormalizedName",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -361,11 +372,6 @@ namespace Web.Data.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_UserId",
-                table: "AspNetUserRoles",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
@@ -373,12 +379,19 @@ namespace Web.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
-                column: "NormalizedUserName");
+                column: "NormalizedUserName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Distributions_DocumentId",
+                table: "Distributions",
+                column: "DocumentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DocumentContents_DocumentId",
                 table: "DocumentContents",
-                column: "DocumentId");
+                column: "DocumentId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Files_DocumentId",
@@ -386,34 +399,9 @@ namespace Web.Data.Migrations
                 column: "DocumentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryDocuments_DocumentId",
-                table: "LibraryDocuments",
-                column: "DocumentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LibraryDocuments_LibraryId",
-                table: "LibraryDocuments",
-                column: "LibraryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserDocuments_ApplicationUserId",
-                table: "UserDocuments",
+                name: "IX_NamedDistributions_ApplicationUserId",
+                table: "NamedDistributions",
                 column: "ApplicationUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserDocuments_DocumentId",
-                table: "UserDocuments",
-                column: "DocumentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserLibraries_ApplicationUserId",
-                table: "UserLibraries",
-                column: "ApplicationUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserLibraries_LibraryId",
-                table: "UserLibraries",
-                column: "LibraryId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -434,13 +422,20 @@ namespace Web.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Distributions");
+
+            migrationBuilder.DropTable(
+                name: "DistributionGroupTypes",
+                schema: "Lookup");
+
+            migrationBuilder.DropTable(
                 name: "DocumentContents");
 
             migrationBuilder.DropTable(
                 name: "Files");
 
             migrationBuilder.DropTable(
-                name: "LibraryDocuments");
+                name: "NamedDistributions");
 
             migrationBuilder.DropTable(
                 name: "PermissionTypes",
@@ -451,10 +446,7 @@ namespace Web.Data.Migrations
                 schema: "Lookup");
 
             migrationBuilder.DropTable(
-                name: "UserDocuments");
-
-            migrationBuilder.DropTable(
-                name: "UserLibraries");
+                name: "UnnamedDistributions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -466,7 +458,7 @@ namespace Web.Data.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Libraries");
+                name: "DistributionGroups");
         }
     }
 }
