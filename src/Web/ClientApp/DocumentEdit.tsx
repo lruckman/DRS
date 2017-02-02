@@ -242,7 +242,7 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
                 return;
             }
 
-            this.setState(this.getInitialState());
+            this.setState(this.getDefaultState());
 
         }.bind(this);
 
