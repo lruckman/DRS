@@ -28,9 +28,21 @@ namespace Web.Engine.Services
             _db = db;
         }
 
+        private void CreateDirectory(string dirPath)
+        {
+            if (Directory.Exists(dirPath))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(dirPath);
+        }
+
         public async Task<string> Save(byte[] buffer, byte[] fileKey)
         {
             var path = await GetNewFileName(_config.DocumentPath);
+
+            CreateDirectory(Path.GetDirectoryName(path));
 
             buffer = _encryptor.Encrypt(buffer, fileKey);
 
