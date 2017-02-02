@@ -31,7 +31,7 @@ namespace Web.Engine.Helpers
 
         public async Task<IEnumerable<int>> GetUserDistributionGroupIdsAsync(PermissionTypes requestedPermission)
         {
-            if (_cachedDistributionGroupIds.Any())
+            if (_cachedDistributionGroupIds.Length > 0)
             {
                 return _cachedDistributionGroupIds;
             }
@@ -40,32 +40,35 @@ namespace Web.Engine.Helpers
 
             return _cachedDistributionGroupIds =
                 await _db.NamedDistributions
-                    .Where(ul => ul.ApplicationUserId == userId &&
-                                 (ul.Permissions & requestedPermission) != 0)
+                    .Where(ul => ul.ApplicationUserId == userId
+                                    && (ul.Permissions & requestedPermission) != 0)
                     .Select(ul => ul.DistributionGroupId)
-                    .ToArrayAsync();
+                    .ToArrayAsync()
+                    .ConfigureAwait(false);
         }
 
         public async Task<bool> HasDocumentPermissionAsync(int documentId, PermissionTypes requestedPermission)
         {
-            var libraryIds = await GetUserDistributionGroupIdsAsync(requestedPermission);
+            var libraryIds = await GetUserDistributionGroupIdsAsync(requestedPermission).ConfigureAwait(false);
 
             var docLibraryIds = await _db.Documents
                 .Where(d => d.Id == documentId)
                 .SelectMany(d => d.Distributions.Select(l => l.DistributionGroupId))
-                .ToArrayAsync();
+                .ToArrayAsync()
+                .ConfigureAwait(false);
 
             return docLibraryIds.Any(outer => libraryIds.Any(inner => inner == outer));
         }
 
         public async Task<bool> HasFilePermissionAsync(int fileId, PermissionTypes requestedPermission)
         {
-            var libraryIds = await GetUserDistributionGroupIdsAsync(requestedPermission);
+            var libraryIds = await GetUserDistributionGroupIdsAsync(requestedPermission).ConfigureAwait(false);
 
             var fileIds = await _db.Files
                 .Where(f => f.Id == fileId)
                 .SelectMany(f => f.Document.Distributions.Select(l => l.DistributionGroupId))
-                .ToArrayAsync();
+                .ToArrayAsync()
+                .ConfigureAwait(false);
 
             return fileIds.Any(outer => libraryIds.Any(inner => inner == outer));
         }

@@ -53,7 +53,8 @@ namespace Web.Features.Api.Documents
                 return await _db.Documents
                     .Where(d => d.Id == message.Id)
                     .ProjectTo<Result>(_config)
-                    .SingleOrDefaultAsync();
+                    .SingleOrDefaultAsync()
+                    .ConfigureAwait(false);
             }
 
             public class MappingProfile : Profile

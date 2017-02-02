@@ -65,7 +65,7 @@ namespace Web.Engine.Services
             _registeredFileDecoders = new Dictionary<string, Type>();
 
             Action<string, Type> register =
-                (ext, type) => { _registeredFileDecoders.Add(ext.ToLower(), type); };
+                (ext, type) => _registeredFileDecoders.Add(ext.ToLower(), type);
 
             Array.ForEach(Image.SupportedFileTypes, ext => register(ext, typeof (Image)));
             Array.ForEach(Pdf.SupportedFileTypes, ext => register(ext, typeof (Pdf)));
@@ -77,6 +77,7 @@ namespace Web.Engine.Services
         ///     Returns a file parser for the file type passed in.
         /// </summary>
         /// <returns></returns>
+        /// <exception cref="ArgumentException">Throws if filename == null</exception>
         private IFile Get(string filename, byte[] buffer)
         {
             var fileExtension = Path.GetExtension(filename)?.ToLower();

@@ -28,27 +28,27 @@ namespace Web.Engine.Services
             _db = db;
         }
 
-        private void CreateDirectory(string dirPath)
+        private async Task CreateDirectory(string dirPath)
         {
             if (Directory.Exists(dirPath))
             {
                 return;
             }
 
-            Directory.CreateDirectory(dirPath);
+            await Task.Factory.StartNew(() => Directory.CreateDirectory(dirPath)).ConfigureAwait(false);
         }
 
         public async Task<string> Save(byte[] buffer, byte[] fileKey)
         {
-            var path = await GetNewFileName(_config.DocumentPath);
+            var path = await GetNewFileName(_config.DocumentPath).ConfigureAwait(false);
 
-            CreateDirectory(Path.GetDirectoryName(path));
+            await CreateDirectory(Path.GetDirectoryName(path)).ConfigureAwait(false);
 
             buffer = _encryptor.Encrypt(buffer, fileKey);
 
             using (var fileStream = File.Create(path))
             {
-                await fileStream.WriteAsync(buffer, 0, buffer.Length);
+                await fileStream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
             }
 
             return path;
@@ -58,11 +58,10 @@ namespace Web.Engine.Services
         {
             try
             {
-                await Delete(filePath);
+                await Delete(filePath).ConfigureAwait(false);
             }
             catch
             {
-
             }
         }
 
@@ -73,12 +72,12 @@ namespace Web.Engine.Services
                 return;
             }
 
-            await Task.Factory.StartNew(() => File.Delete(filePath));
+            await Task.Factory.StartNew(() => File.Delete(filePath)).ConfigureAwait(false);
         }
 
         private async Task<string> GetNewFileName(string rootPath)
         {
-            var seed = await _db.Documents.MaxAsync(d => d.Id);
+            var seed = await _db.Documents.MaxAsync(d => d.Id).ConfigureAwait(false);
 
             var subFolder1 = Math.Ceiling((seed + 1) / 1024m / 1024m / 1024m);
             var subFolder2 = Math.Ceiling(subFolder1 / 1024m / 1024m);

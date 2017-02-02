@@ -22,14 +22,12 @@ namespace Web.Engine.ViewEngine
                 return "";
             }
 
-            var featureName = tokens
+            return tokens
                 .SkipWhile(t => !t.Equals("features",
                     StringComparison.CurrentCultureIgnoreCase))
                 .Skip(1)
                 .Take(1)
                 .FirstOrDefault();
-
-            return featureName;
         }
     }
 }

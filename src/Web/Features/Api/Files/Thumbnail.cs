@@ -45,7 +45,8 @@ namespace Web.Features.Api.Files
 
                 var file = await _db.Files
                     .Where(f => f.Id == message.Id.Value)
-                    .SingleOrDefaultAsync();
+                    .SingleOrDefaultAsync()
+                    .ConfigureAwait(false);
 
                 if (file == null)
                 {
@@ -55,13 +56,11 @@ namespace Web.Features.Api.Files
                 var fileKey = _encryptor
                     .DecryptBase64(file.Key);
 
-                var model = new Result
+                return new Result
                 {
                     FileContents = _encryptor
                         .DecryptFile(file.ThumbnailPath, fileKey)
                 };
-
-                return model;
             }
         }
 

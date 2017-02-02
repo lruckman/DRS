@@ -21,7 +21,7 @@ namespace Web.Features.Api.Files
         [HttpGet("{id:int}/view")]
         public async Task<IActionResult> View(View.Query query)
         {
-            var model = await _mediator.Send(query);
+            var model = await _mediator.Send(query).ConfigureAwait(false);
 
             if (model == null)
             {
@@ -42,7 +42,7 @@ namespace Web.Features.Api.Files
         [HttpGet("{id:int}/thumbnail")]
         public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
         {
-            var model = await _mediator.Send(query);
+            var model = await _mediator.Send(query).ConfigureAwait(false);
 
             if (model == null)
             {

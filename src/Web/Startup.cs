@@ -91,12 +91,8 @@ namespace Web
 
                     options.ViewLocationExpanders.Add(new FeatureViewLocationExpander());
                 })
-                .AddJsonOptions(
-                    options =>
-                    {
-                        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                    })
-                .AddFluentValidation(cfg => { cfg.RegisterValidatorsFromAssemblyContaining<Startup>(); });
+                .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver())
+                .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Startup>());
 
             services.AddAutoMapper(typeof(Startup));
 
@@ -104,9 +100,7 @@ namespace Web
 
             services.AddMediatR(typeof(Startup));
 
-            var container = new Container(cfg => {
-                cfg.AddRegistry<WebRegistry>();
-            });
+            var container = new Container(cfg => cfg.AddRegistry<WebRegistry>());
 
             // populates structuremap with .NET services
 

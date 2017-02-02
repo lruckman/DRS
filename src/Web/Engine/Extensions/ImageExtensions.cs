@@ -20,14 +20,14 @@ namespace Web.Engine.Extensions
             if (nPercentH < nPercentW)
             {
                 nPercent = nPercentH;
-                destX = Convert.ToInt16((maxWidth -
-                                         (currentDimensions.Width * nPercent)) / 2);
+                destX = Convert.ToInt16((maxWidth
+                    - (currentDimensions.Width * nPercent)) / 2);
             }
             else
             {
                 nPercent = nPercentW;
-                destY = Convert.ToInt16((maxHeight -
-                                         (currentDimensions.Height * nPercent)) / 2);
+                destY = Convert.ToInt16((maxHeight
+                    - (currentDimensions.Height * nPercent)) / 2);
             }
 
             var destWidth = (int) (currentDimensions.Width * nPercent);
@@ -110,8 +110,7 @@ namespace Web.Engine.Extensions
                 return ImageCodecInfo.GetImageEncoders()
                     .First(x => x.FormatID == format.Guid)
                     .FilenameExtension
-                    .Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries)
-                    .First()
+                    .Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries)[0]
                     .Trim('*')
                     .ToLower();
             }

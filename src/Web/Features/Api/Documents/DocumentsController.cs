@@ -22,7 +22,7 @@ namespace Web.Features.Api.Documents
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(Get.Query query)
         {
-            var result = await _mediator.Send(query);
+            var result = await _mediator.Send(query).ConfigureAwait(false);
 
             if (result == null)
             {
@@ -35,7 +35,7 @@ namespace Web.Features.Api.Documents
         [HttpPost]
         public async Task<IActionResult> Post(Post.Command command)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command).ConfigureAwait(false);
 
             return CreatedAtAction(nameof(Documents.Get)
                 , new RouteValueDictionary(new Get.Query {Id = result.DocumentId}), null);
@@ -44,14 +44,14 @@ namespace Web.Features.Api.Documents
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(Put.Command command)
         {
-            var result = await _mediator.Send(command);
+            var result = await _mediator.Send(command).ConfigureAwait(false);
 
             if (result == null)
             {
                 return NotFound();
             }
 
-            return await Get(new Get.Query {Id = result.DocumentId});
+            return await Get(new Get.Query {Id = result.DocumentId}).ConfigureAwait(false);
         }
     }
 }

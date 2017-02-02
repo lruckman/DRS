@@ -17,10 +17,10 @@ namespace Web.Features.Api.Search
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
-        
+
         public async Task<IActionResult> Get(Get.Query query)
         {
-            var results = await _mediator.Send(query);
+            var results = await _mediator.Send(query).ConfigureAwait(false);
 
             if (results == null)
             {

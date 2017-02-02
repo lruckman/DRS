@@ -98,7 +98,8 @@ namespace Web.Features.Api.Documents
                     {
                         DistributionGroup = l
                     })
-                    .FirstAsync());
+                    .FirstAsync()
+                    .ConfigureAwait(false));
 
                 // get a parser
 
@@ -118,13 +119,13 @@ namespace Web.Features.Api.Documents
                 {
                     var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
 
-                    file.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey);
+                    file.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey).ConfigureAwait(false);
                     file.PageCount = fileInfo.PageCount;
-                    file.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey);
+                    file.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey).ConfigureAwait(false);
 
                     // save and commit
 
-                    await _db.SaveChangesAsync();
+                    await _db.SaveChangesAsync().ConfigureAwait(false);
                 }
                 catch
                 {

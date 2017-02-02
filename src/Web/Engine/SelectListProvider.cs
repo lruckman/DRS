@@ -32,7 +32,8 @@ namespace Web.Engine
                 .Select(ul => ul.DistributionGroup)
                 .OrderBy(l => l.Name)
                 .ProjectTo<SelectListItem>(_configurationProvider)
-                .ToArrayAsync();
+                .ToArrayAsync()
+                .ConfigureAwait(false);
         }
 
         public class MappingProfile : Profile

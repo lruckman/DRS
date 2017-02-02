@@ -25,6 +25,7 @@ namespace Web.Engine.Services
         ///     Encrypts the provided byte[]. The byte[] passed in will have its reference updated.
         /// </summary>
         /// <returns>Returns the encrypted byte[]</returns>
+        /// <exception cref="ArgumentNullException">Throws if buffer == null</exception>
         public byte[] Encrypt(byte[] buffer, byte[] key)
         {
             if (buffer == null)

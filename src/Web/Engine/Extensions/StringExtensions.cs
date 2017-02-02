@@ -11,8 +11,8 @@ namespace Web.Engine.Extensions
         /// <returns>The normalized string with line endings converted to \r\n</returns>
         public static string NormalizeLineEndings(this string s)
         {
-            return s == null 
-                ? null 
+            return s == null
+                ? null
                 : Regex.Replace(s, @"\r\n|\n\r|\n|\r", "\r\n");
         }
 

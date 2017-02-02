@@ -56,7 +56,8 @@ namespace Web.Features.Api.Documents
             {
                 var document = await _db.Documents
                     .Include(d => d.Distributions)
-                    .SingleOrDefaultAsync(d => d.Id == message.Id.Value);
+                    .SingleOrDefaultAsync(d => d.Id == message.Id.Value)
+                    .ConfigureAwait(false);
 
                 if (document == null)
                 {
@@ -80,12 +81,12 @@ namespace Web.Features.Api.Documents
 
                 var newLibraryIds = message.LibraryIds
                     .Except(document.Distributions.Select(l => l.DistributionGroupId))
-                    .Intersect(await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify))
+                    .Intersect(await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify).ConfigureAwait(false))
                     .ToArray();
 
                 document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
 
-                await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync().ConfigureAwait(false);
 
                 return new Result { DocumentId = document.Id };
             }

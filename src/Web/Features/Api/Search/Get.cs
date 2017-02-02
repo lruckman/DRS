@@ -66,13 +66,14 @@ namespace Web.Features.Api.Search
                             $"SELECT d.* FROM [dbo].[{nameof(Document)}s] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key] AND d.Status = @p1 AND EXISTS (SELECT 1 FROM [dbo].[{nameof(File)}s] AS f WHERE f.DocumentId = d.Id AND f.Status = @p1)",
                             message.Q, (int) StatusTypes.Active);
                 }
-                
-                if (!message.LibraryIds.Any())
+
+                if (message.LibraryIds.Length == 0)
                 {
                     // no libraries so default to all the user libraries
 
                     var userLibraryIds = await _documentSecurity
-                        .GetUserDistributionGroupIdsAsync(PermissionTypes.Read);
+                        .GetUserDistributionGroupIdsAsync(PermissionTypes.Read)
+                        .ConfigureAwait(false);
 
                     message.LibraryIds = userLibraryIds
                         .Select(i => i)
@@ -88,6 +89,7 @@ namespace Web.Features.Api.Search
                 {
                     TotalCount = await documentQuery
                         .CountAsync()
+                        .ConfigureAwait(false)
                 };
 
                 if (result.TotalCount > message.MaxResults * (message.PageIndex + 1))
@@ -100,7 +102,8 @@ namespace Web.Features.Api.Search
                     .Skip(message.MaxResults * message.PageIndex)
                     .Take(message.MaxResults)
                     .ProjectTo<Result.Document>(_config)
-                    .ToArrayAsync();
+                    .ToArrayAsync()
+                    .ConfigureAwait(false);
 
                 return result;
             }
