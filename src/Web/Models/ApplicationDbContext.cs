@@ -22,14 +22,6 @@ namespace Web.Models
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<NamedDistribution>()
-                .HasKey(nd => new { nd.DistributionGroupId, nd.ApplicationUserId });
-
-            builder.Entity<UnnamedDistribution>()
-                .HasOne(ud => ud.DistributionGroup)
-                .WithMany()
-                .HasForeignKey(ud => ud.DistributionGroupId);
-
             // distribution
 
             builder.Entity<Distribution>()
@@ -44,6 +36,23 @@ namespace Web.Models
                 .HasOne(ld => ld.Document)
                 .WithMany(d => d.Distributions)
                 .HasForeignKey(ld => ld.DocumentId);
+
+            // file
+
+            builder.Entity<File>()
+                .HasKey(f => new { f.DocumentId, f.VersionNum });
+
+            // nameddistribution
+
+            builder.Entity<NamedDistribution>()
+                .HasKey(nd => new { nd.DistributionGroupId, nd.ApplicationUserId });
+
+            // unnameddistribution
+
+            builder.Entity<UnnamedDistribution>()
+                .HasOne(ud => ud.DistributionGroup)
+                .WithMany()
+                .HasForeignKey(ud => ud.DistributionGroupId);
 
             // lookups
 

@@ -9,13 +9,14 @@ using Web.Engine.Services;
 using Web.Engine.Validation.Custom;
 using Web.Models;
 
-namespace Web.Features.Api.Files
+namespace Web.Features.Api.Documents
 {
     public class View
     {
         public class Query : IRequest<Result>
         {
             public int? Id { get; set; }
+            public int? V { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -24,7 +25,7 @@ namespace Web.Features.Api.Files
             {
                 RuleFor(m => m.Id)
                     .NotNull()
-                    .HasDocumentFileAccess(documentSecurity, PermissionTypes.Read);
+                    .HasDocumentPermission(documentSecurity, PermissionTypes.Read);
             }
         }
 
@@ -42,7 +43,9 @@ namespace Web.Features.Api.Files
             public async Task<Result> Handle(Query message)
             {
                 var file = await _db.Files
-                    .Where(f => f.Id == message.Id.Value)
+                    .Where(f => f.DocumentId == message.Id.Value
+                            && ((message.V == null && f.EndDate == null) || f.VersionNum == message.V.Value)
+                            && f.Status != StatusTypes.Deleted)
                     .SingleOrDefaultAsync()
                     .ConfigureAwait(false);
 
@@ -52,7 +55,7 @@ namespace Web.Features.Api.Files
                 }
 
                 var fileKey = _encryptor
-                    .DecryptBase64(file.Key);
+                    .DecryptBase64(file.AccessKey);
 
                 return new Result
                 {

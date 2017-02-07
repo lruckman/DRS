@@ -61,9 +61,10 @@ namespace Web.Features.Api.Search
 
                 if (!string.IsNullOrWhiteSpace(message.Q))
                 {
+                    //todo: fix
                     documentQuery = documentQuery
                         .FromSql(
-                            $"SELECT d.* FROM [dbo].[{nameof(Document)}s] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key] AND d.Status = @p1 AND EXISTS (SELECT 1 FROM [dbo].[{nameof(File)}s] AS f WHERE f.DocumentId = d.Id AND f.Status = @p1)",
+                            $"SELECT d.* FROM [dbo].[{nameof(Document)}s] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key] AND d.Status = @p1 AND EXISTS (SELECT 1 FROM [dbo].[{nameof(Document)}s] AS f WHERE f.DocumentId = d.Id AND f.Status = @p1)",
                             message.Q, (int) StatusTypes.Active);
                 }
 
@@ -101,7 +102,7 @@ namespace Web.Features.Api.Search
                 result.Documents = await documentQuery
                     .Skip(message.MaxResults * message.PageIndex)
                     .Take(message.MaxResults)
-                    .ProjectTo<Result.Document>(_config)
+                    .ProjectTo<Result.DocumentResult>(_config)
                     .ToArrayAsync()
                     .ConfigureAwait(false);
 
@@ -112,13 +113,10 @@ namespace Web.Features.Api.Search
             {
                 public MappingProfile()
                 {
-                    CreateMap<Document, Result.Document>()
-                        .ForMember(d => d.File, o => o.MapFrom(s =>
-                            s.Files
-                                .Where(f => f.Status == StatusTypes.Active)
-                                .OrderByDescending(f => f.VersionNum)
-                                .Single()));
-                    CreateMap<File, Result.Document.FileResult>();
+                    CreateMap<File, Result.DocumentResult>()
+                        .ForMember(d => d.Meta, o => o.MapFrom(s =>
+                            s.Metadata.Single(m => m.EndDate == null)));
+                    CreateMap<Metadata, Result.DocumentResult.MetadataResult>();
                 }
             }
         }
@@ -128,24 +126,25 @@ namespace Web.Features.Api.Search
             public string NextLink { get; set; }
             public int TotalCount { get; set; }
 
-            public IEnumerable<Document> Documents { get; set; }
+            public IEnumerable<DocumentResult> Documents { get; set; }
 
-            public class Document
+            public class DocumentResult
             {
-                public int Id { get; set; }
-                public string Title { get; set; }
-                public string SelfLink => $"/api/documents/{Id}";
-                public string Abstract { get; set; }
+                public int DocumentId { get; set; }
+                public long Size { get; set; }
+                public int PageCount { get; set; }
 
-                public FileResult File { get; set; }
+                //todo: array all the things?
+                public string SelfLink => $"/api/documents/{DocumentId}";
+                public string ThumbnailLink => $"/api/files/{DocumentId}/thumbnail";
+                public string ViewLink => $"/api/files/{DocumentId}/view";
 
-                public class FileResult
+                public MetadataResult Meta { get; set; }
+
+                public class MetadataResult
                 {
-                    public int Id { get; set; }
-                    public long Size { get; set; }
-                    public int PageCount { get; set; }
-                    public string ThumbnailLink => $"/api/files/{Id}/thumbnail";
-                    public string ViewLink => $"/api/files/{Id}/view";
+                    public string Abstract { get; set; }
+                    public string Title { get; set; }
                 }
             }
         }

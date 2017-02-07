@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Web.Models
 {
     [Table("Files")]
-    public class File
+    public class File : AuditMetadata
     {
-        [Key]
-        public int Id { get; set; }
+        public int DocumentId { get; set; }
+        public virtual Document Document { get; set; }
+
+        public int VersionNum { get; set; }
 
         [Required, MaxLength(256)]
         public string Path { get; set; }
@@ -26,20 +29,12 @@ namespace Web.Models
         public int PageCount { get; set; }
 
         [MaxLength(1024)]
-        public string Key { get; set; }
-
-        public int DocumentId { get; set; }
-        public Document Document { get; set; }
+        public string AccessKey { get; set; }
 
         public StatusTypes Status { get; set; }
 
-        [Required, MaxLength(450)]
-        public string CreatedByUserId { get; set; }
+        public DateTimeOffset? EndDate { get; set; }
 
-        public DateTimeOffset CreatedOn { get; set; }
-        public DateTimeOffset ModifiedOn { get; set; }
-
-        [Required]
-        public int VersionNum { get; set; }
+        public virtual List<Metadata> Metadata { get; set; } = new List<Metadata>();
     }
 }

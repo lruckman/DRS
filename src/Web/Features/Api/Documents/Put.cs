@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Web.Engine;
 using Web.Engine.Helpers;
 using Web.Engine.Validation.Custom;
 using Web.Models;
@@ -17,7 +18,7 @@ namespace Web.Features.Api.Documents
             public int? Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
-            public int[] LibraryIds { get; set; } = { };
+            public int[] LibraryIds { get; set; } = { }; //todo: rename
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -45,50 +46,67 @@ namespace Web.Features.Api.Documents
         {
             private readonly ApplicationDbContext _db;
             private readonly IDocumentSecurity _documentSecurity;
+            private readonly IUserContext _userContext;
 
-            public CommandHandler(ApplicationDbContext db, IDocumentSecurity documentSecurity)
+            public CommandHandler(ApplicationDbContext db, IDocumentSecurity documentSecurity, IUserContext userContext)
             {
                 _db = db;
                 _documentSecurity = documentSecurity;
+                _userContext = userContext;
             }
 
             public async Task<Result> Handle(Command message)
             {
-                var document = await _db.Documents
-                    .Include(d => d.Distributions)
-                    .SingleOrDefaultAsync(d => d.Id == message.Id.Value)
+                var file = await _db.Files
+                    .Include(f => f.Document)
+                    .Include(f => f.Document.Distributions)
+                    .Include(f => f.Metadata)
+                    .SingleOrDefaultAsync(f => f.DocumentId == message.Id.Value && f.EndDate == null)
                     .ConfigureAwait(false);
 
-                if (document == null)
+                if (file == null)
                 {
                     return null;
                 }
 
-                document.ModifiedOn = DateTimeOffset.Now;
-                document.Title = message.Title;
-                document.Abstract = message.Abstract;
+                var currentMetadata = file.Metadata
+                    .Single(m => m.EndDate == null);
+
+                if (currentMetadata.Title != message.Title
+                    || currentMetadata.Abstract != message.Abstract)
+                {
+                    currentMetadata.EndDate = DateTimeOffset.Now;
+                    file.Metadata.Add(new Metadata
+                    {
+                        Abstract = message.Abstract,
+                        CreatedBy = _userContext.UserId,
+                        CreatedOn = DateTimeOffset.Now,
+                        Title = message.Title,
+                        VersionNum = ++currentMetadata.VersionNum
+                    });
+                }
 
                 // remove deleted libraries
 
-                var deletedLibraryIds = document.Distributions
+                var deletedLibraryIds = file.Document.Distributions
                     .Select(l => l.DistributionGroupId)
                     .Except(message.LibraryIds)
                     .ToArray();
 
-                document.Distributions.RemoveAll(ld => deletedLibraryIds.Contains(ld.DistributionGroupId));
+                file.Document.Distributions.RemoveAll(ld => deletedLibraryIds.Contains(ld.DistributionGroupId));
 
                 // add new libraries
 
                 var newLibraryIds = message.LibraryIds
-                    .Except(document.Distributions.Select(l => l.DistributionGroupId))
+                    .Except(file.Document.Distributions.Select(l => l.DistributionGroupId))
                     .Intersect(await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify).ConfigureAwait(false))
                     .ToArray();
 
-                document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
+                file.Document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
 
                 await _db.SaveChangesAsync().ConfigureAwait(false);
 
-                return new Result { DocumentId = document.Id };
+                return new Result { DocumentId = file.DocumentId };
             }
         }
 

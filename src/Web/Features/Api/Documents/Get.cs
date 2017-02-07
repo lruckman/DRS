@@ -17,6 +17,7 @@ namespace Web.Features.Api.Documents
         public class Query : IRequest<Result>
         {
             public int? Id { get; set; }
+            public int? V { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -50,8 +51,10 @@ namespace Web.Features.Api.Documents
 
             public async Task<Result> Handle(Query message)
             {
-                return await _db.Documents
-                    .Where(d => d.Id == message.Id)
+                return await _db.Files
+                    .Where(d => d.DocumentId == message.Id
+                            && ((message.V == null && d.EndDate == null) || d.VersionNum == message.V.Value)
+                            && d.Status != StatusTypes.Deleted)
                     .ProjectTo<Result>(_config)
                     .SingleOrDefaultAsync()
                     .ConfigureAwait(false);
@@ -61,39 +64,34 @@ namespace Web.Features.Api.Documents
             {
                 public MappingProfile()
                 {
-                    CreateMap<Document, Result>()
-                        .ForMember(d => d.File, o => o.MapFrom(s =>
-                            s.Files
-                                .Where(f => f.Status == StatusTypes.Active)
-                                .OrderByDescending(f => f.VersionNum)
-                                .Single()))
+                    CreateMap<File, Result>()
+                        .ForMember(d => d.Meta, o => o.MapFrom(s =>
+                            s.Metadata.Single(m => m.EndDate == null)))
                         .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
-                            s.Distributions
-                                .Select(l => l.DistributionGroupId.ToString())));
-                    CreateMap<File, Result.FileResult>();
+                            s.Document.Distributions.Select(d => d.DistributionGroupId.ToString())));
+                    CreateMap<Metadata, Result.MetadataResult>();
                 }
             }
         }
 
         public class Result
         {
-            public int Id { get; set; }
-            public string Title { get; set; }
-            public string Abstract { get; set; }
-            public DateTimeOffset CreatedOn { get; set; }
-            public DateTimeOffset ModifiedOn { get; set; }
-            public string[] LibraryIds { get; set; } = {};
-            public FileResult File { get; set; }
+            public int DocumentId { get; set; }
 
-            public class FileResult
+            public DateTimeOffset CreatedOn { get; set; }
+            public string[] LibraryIds { get; set; } = {}; // todo: rename
+            public int PageCount { get; set; }
+            public long Size { get; set; }
+            public string ThumbnailLink => $"/api/documents/{DocumentId}/thumbnail?v={VersionNum}"; // todo: array?
+            public int VersionNum { get; set; }
+
+            public MetadataResult Meta { get; set; }
+
+            public class MetadataResult
             {
-                public int Id { get; set; }
-                public long Size { get; set; }
-                public int PageCount { get; set; }
-                public string ThumbnailLink => $"/api/files/{Id}/thumbnail";
+                public string Abstract { get; set; }
+                public string Title { get; set; }
                 public DateTimeOffset CreatedOn { get; set; }
-                public DateTimeOffset ModifiedOn { get; set; }
-                public int VersionNum { get; set; }
             }
         }
     }

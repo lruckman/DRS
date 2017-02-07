@@ -53,5 +53,31 @@ namespace Web.Features.Api.Documents
 
             return await Get(new Get.Query {Id = result.DocumentId}).ConfigureAwait(false);
         }
+
+        [HttpGet("{id:int}/thumbnail")]
+        public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
+        {
+            var model = await _mediator.Send(query).ConfigureAwait(false);
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return File(model.FileContents, model.ContentType);
+        }
+
+        [HttpGet("{id:int}/view")]
+        public async Task<IActionResult> View(View.Query query)
+        {
+            var model = await _mediator.Send(query).ConfigureAwait(false);
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return File(model.FileContents, model.ContentType);
+        }
     }
 }

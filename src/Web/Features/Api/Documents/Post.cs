@@ -59,27 +59,19 @@ namespace Web.Features.Api.Documents
 
                 var document = new Document
                 {
-                    CreatedByUserId = _userContext.UserId,
-                    CreatedOn = DateTimeOffset.Now,
-                    ModifiedOn = DateTimeOffset.Now,
-                    Status = StatusTypes.Active,
-                    Title = message.File.FileName
+                    CreatedBy = _userContext.UserId,
+                    CreatedOn = DateTimeOffset.Now
                 };
-
-                _db.Documents.Add(document);
-
-                // create and add the file
 
                 var file = new File
                 {
-                    CreatedByUserId = _userContext.UserId,
+                    CreatedBy = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now,
                     Extension = Path.GetExtension(message.File.FileName ?? "")
                         .ToLowerInvariant(),
-                    Key = _encryptor
+                    AccessKey = _encryptor
                         .Encrypt(fileKey, null)
                         .ToBase64String(),
-                    ModifiedOn = DateTimeOffset.Now,
                     PageCount = 0,
                     Path = "",
                     Size = message.File.Length,
@@ -90,13 +82,15 @@ namespace Web.Features.Api.Documents
 
                 document.Files.Add(file);
 
+                _db.Documents.Add(document);
+
                 //todo: add to indexers private library (hardcoded for now)
                 // add document to the default library
 
                 document.Distributions.Add(await _db.DistributionGroups
-                    .Select(l => new Distribution
+                    .Select(d => new Distribution
                     {
-                        DistributionGroup = l
+                        DistributionGroup = d
                     })
                     .FirstAsync()
                     .ConfigureAwait(false));
@@ -108,7 +102,16 @@ namespace Web.Features.Api.Documents
                     .OpenReadStream()
                     .ToByteArray());
 
-                document.Abstract = fileInfo.Abstract;
+                // metadata
+
+                file.Metadata.Add(new Metadata
+                {
+                    Abstract = fileInfo.Abstract,
+                    CreatedBy = _userContext.UserId,
+                    CreatedOn = DateTimeOffset.Now,
+                    Title = message.File.FileName,
+                    VersionNum = 1
+                });
 
                 document.Content = new DocumentContent
                 {
@@ -119,9 +122,13 @@ namespace Web.Features.Api.Documents
                 {
                     var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
 
-                    file.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey).ConfigureAwait(false);
+                    file.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey)
+                        .ConfigureAwait(false);
+
                     file.PageCount = fileInfo.PageCount;
-                    file.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey).ConfigureAwait(false);
+
+                    file.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey)
+                        .ConfigureAwait(false);
 
                     // save and commit
 
