@@ -59,19 +59,15 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
             validationErrors: [],
             document: {
                 abstract: '',
-                file: {
-                    createdOn: null,
-                    modifiedOn: null,
-                    pageCount: 0,
-                    size: 0,
-                    thumbnailLink: '',
-                    versionNum: 0
-                },
-                libraryIds: [],
-                location: '',
                 title: '',
+                libraryIds: [],
                 createdOn: null,
-                modifiedOn: null
+                modifiedOn: null,
+                pageCount: 0,
+                size: 0,
+                thumbnailLink: '',
+                versionNum: 0,
+                resourceUri: ''
             }
         };
     }
@@ -164,11 +160,10 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
         xhr.onload = function () {
 
             if (xhr.status === 200) {
+                
+                var document = JSON.parse(xhr.responseText); // as IDocumentDetails;
 
-                var data = JSON.parse(xhr.responseText);
-                var document = data;
-
-                document.location = location;
+                document.resourceUri = location;
 
                 this.setState({
                     showModal: true,
@@ -195,7 +190,7 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
         var libraryIds = this.state.document.libraryIds;
 
         var xhr = new XMLHttpRequest();
-        xhr.open('put', this.state.document.location, true);
+        xhr.open('put', this.state.document.resourceUri, true);
         xhr.setRequestHeader('Accept', 'application/json');
 
         xhr.onload = function () {
@@ -326,12 +321,12 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
                     <form className="form-horizontal">
                         <div className="row">
                             <div className="col-md-4">
-                                <img src={this.state.document.file.thumbnailLink} className="img-responsive thumbnail" />
+                                <img src={this.state.document.thumbnailLink} className="img-responsive thumbnail" />
                                 <dl className="text-muted dl-horizontal">
                                     <dt>Pages:</dt>
-                                    <dd>{this.state.document.file.pageCount}</dd>
+                                    <dd>{this.state.document.pageCount}</dd>
                                     <dt>File Size:</dt>
-                                    <dd>{(this.state.document.file.size / 1024).toFixed(2)} KB</dd>
+                                    <dd>{(this.state.document.size / 1024).toFixed(2)} KB</dd>
                                 </dl>
                             </div>
                             <div className="col-md-8">

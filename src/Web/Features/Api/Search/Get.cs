@@ -17,7 +17,7 @@ namespace Web.Features.Api.Search
     {
         public class Query : IRequest<Result>
         {
-            public int[] LibraryIds { get; set; } = {};
+            public int[] LibraryIds { get; set; } = { };
 
             public string Q { get; set; }
 
@@ -56,7 +56,7 @@ namespace Web.Features.Api.Search
 
             public async Task<Result> Handle(Query message)
             {
-                var documentQuery = _db.Documents
+                var documentQuery = _db.Files
                     .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(message.Q))
@@ -64,8 +64,8 @@ namespace Web.Features.Api.Search
                     //todo: fix
                     documentQuery = documentQuery
                         .FromSql(
-                            $"SELECT d.* FROM [dbo].[{nameof(Document)}s] AS d JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON d.Id = s.[Key] AND d.Status = @p1 AND EXISTS (SELECT 1 FROM [dbo].[{nameof(Document)}s] AS f WHERE f.DocumentId = d.Id AND f.Status = @p1)",
-                            message.Q, (int) StatusTypes.Active);
+                            $"SELECT f.* FROM [dbo].[{nameof(File)}s] AS f JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON f.DocumentId = s.[Key] AND f.Status = @p1 AND f.EndDate IS NULL",
+                            message.Q, (int)StatusTypes.Active);
                 }
 
                 if (message.LibraryIds.Length == 0)
@@ -84,7 +84,7 @@ namespace Web.Features.Api.Search
                 // limit based on libraries the user can access
 
                 documentQuery = documentQuery
-                    .Where(dq => dq.Distributions.Any(l => message.LibraryIds.Contains(l.DistributionGroupId)));
+                    .Where(dq => dq.Document.Distributions.Any(l => message.LibraryIds.Contains(l.DistributionGroupId)));
 
                 var result = new Result
                 {
@@ -114,9 +114,10 @@ namespace Web.Features.Api.Search
                 public MappingProfile()
                 {
                     CreateMap<File, Result.DocumentResult>()
-                        .ForMember(d => d.Meta, o => o.MapFrom(s =>
-                            s.Metadata.Single(m => m.EndDate == null)));
-                    CreateMap<Metadata, Result.DocumentResult.MetadataResult>();
+                        .ForMember(d => d.Abstract, o => o.MapFrom(s =>
+                            s.Metadata.Single(m => m.EndDate == null).Abstract))
+                        .ForMember(d => d.Title, o => o.MapFrom(s =>
+                            s.Metadata.Single(m => m.EndDate == null).Title));
                 }
             }
         }
@@ -139,13 +140,8 @@ namespace Web.Features.Api.Search
                 public string ThumbnailLink => $"/api/files/{DocumentId}/thumbnail";
                 public string ViewLink => $"/api/files/{DocumentId}/view";
 
-                public MetadataResult Meta { get; set; }
-
-                public class MetadataResult
-                {
-                    public string Abstract { get; set; }
-                    public string Title { get; set; }
-                }
+                public string Abstract { get; set; }
+                public string Title { get; set; }
             }
         }
     }

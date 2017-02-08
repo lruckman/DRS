@@ -2,16 +2,12 @@
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classNames from 'classnames';
 
-interface IResultFile {
-    thumbnailLink: string;
-    viewLink: string;
-}
-
 export interface IResult {
     abstract: string;
-    file: IResultFile;
     id: number;
     selfLink: string;
+    viewLink: string;
+    thumbnailLink: string;
     title: string;
 }
 
@@ -66,7 +62,7 @@ export default class ResultList extends React.Component<IResultListProp, IResult
         e.preventDefault();
         clearTimeout(this.clickTimer);
         this.clickStatus = 0;
-        window.open(this.props.data[index].file.viewLink, '_blank');
+        window.open(this.props.data[index].viewLink, '_blank');
     }
 
     render() {
@@ -82,7 +78,7 @@ export default class ResultList extends React.Component<IResultListProp, IResult
 
             return <div key={result.id} className={resultClass}>
                     <a href="#" target="_blank" className="thumbnail-link" onClick={boundClick} onDoubleClick={boundDblClick}>
-                        <div className="thumbnail" style={{ backgroundImage: 'url(' + result.file.thumbnailLink + ')' }}>
+                        <div className="thumbnail" style={{ backgroundImage: 'url(' + result.thumbnailLink + ')' }}>
                         </div>
                     </a>
                     <div className="title-container">

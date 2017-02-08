@@ -65,11 +65,14 @@ namespace Web.Features.Api.Documents
                 public MappingProfile()
                 {
                     CreateMap<File, Result>()
-                        .ForMember(d => d.Meta, o => o.MapFrom(s =>
-                            s.Metadata.Single(m => m.EndDate == null)))
+                        .ForMember(d => d.Abstract, o => o.MapFrom(s =>
+                            s.Metadata.Single(m => m.EndDate == null).Abstract))
+                        .ForMember(d => d.Title, o => o.MapFrom(s =>
+                            s.Metadata.Single(m => m.EndDate == null).Title))
+                        .ForMember(d => d.ModifiedOn, o => o.MapFrom(s =>
+                            s.Metadata.Single(m => m.EndDate == null).CreatedOn))
                         .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
                             s.Document.Distributions.Select(d => d.DistributionGroupId.ToString())));
-                    CreateMap<Metadata, Result.MetadataResult>();
                 }
             }
         }
@@ -79,20 +82,16 @@ namespace Web.Features.Api.Documents
             public int DocumentId { get; set; }
 
             public DateTimeOffset CreatedOn { get; set; }
+            public DateTimeOffset ModifiedOn { get; set; }
+
             public string[] LibraryIds { get; set; } = {}; // todo: rename
             public int PageCount { get; set; }
             public long Size { get; set; }
             public string ThumbnailLink => $"/api/documents/{DocumentId}/thumbnail?v={VersionNum}"; // todo: array?
             public int VersionNum { get; set; }
 
-            public MetadataResult Meta { get; set; }
-
-            public class MetadataResult
-            {
-                public string Abstract { get; set; }
-                public string Title { get; set; }
-                public DateTimeOffset CreatedOn { get; set; }
-            }
+            public string Abstract { get; set; }
+            public string Title { get; set; }
         }
     }
 }

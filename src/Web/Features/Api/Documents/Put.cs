@@ -97,9 +97,12 @@ namespace Web.Features.Api.Documents
 
                 // add new libraries
 
+                var second = await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify)
+                    .ConfigureAwait(false);
+
                 var newLibraryIds = message.LibraryIds
                     .Except(file.Document.Distributions.Select(l => l.DistributionGroupId))
-                    .Intersect(await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify).ConfigureAwait(false))
+                    .Intersect(second)
                     .ToArray();
 
                 file.Document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
