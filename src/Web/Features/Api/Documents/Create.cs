@@ -12,11 +12,11 @@ using Web.Engine;
 using Web.Engine.Extensions;
 using Web.Engine.Services;
 using Web.Models;
-using File = Web.Models.File;
+using Revision = Web.Models.Revision;
 
 namespace Web.Features.Api.Documents
 {
-    public class Post
+    public class Create
     {
         public class Command : IRequest<Result>
         {
@@ -63,7 +63,7 @@ namespace Web.Features.Api.Documents
                     CreatedOn = DateTimeOffset.Now
                 };
 
-                var file = new File
+                var revision = new PublishedRevision
                 {
                     CreatedBy = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now,
@@ -72,15 +72,11 @@ namespace Web.Features.Api.Documents
                     AccessKey = _encryptor
                         .Encrypt(fileKey, null)
                         .ToBase64String(),
-                    PageCount = 0,
-                    Path = "",
                     Size = message.File.Length,
-                    Status = StatusTypes.Active,
-                    ThumbnailPath = "",
-                    VersionNum = 1
+                    VersionNum = 0
                 };
 
-                document.Files.Add(file);
+                document.Revisions.Add(revision);
 
                 _db.Documents.Add(document);
 
@@ -104,14 +100,8 @@ namespace Web.Features.Api.Documents
 
                 // metadata
 
-                file.Metadata.Add(new Metadata
-                {
-                    Abstract = fileInfo.Abstract,
-                    CreatedBy = _userContext.UserId,
-                    CreatedOn = DateTimeOffset.Now,
-                    Title = message.File.FileName,
-                    VersionNum = 1
-                });
+                revision.Abstract = fileInfo.Abstract;
+                revision.Title = message.File.FileName;
 
                 document.Content = new DocumentContent
                 {
@@ -122,12 +112,12 @@ namespace Web.Features.Api.Documents
                 {
                     var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
 
-                    file.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey)
+                    revision.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey)
                         .ConfigureAwait(false);
 
-                    file.PageCount = fileInfo.PageCount;
+                    revision.PageCount = fileInfo.PageCount;
 
-                    file.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey)
+                    revision.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey)
                         .ConfigureAwait(false);
 
                     // save and commit
@@ -140,8 +130,8 @@ namespace Web.Features.Api.Documents
 
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 
-                    _fileStorage.TryDelete(file.ThumbnailPath);
-                    _fileStorage.TryDelete(file.Path);
+                    _fileStorage.TryDelete(revision.ThumbnailPath);
+                    _fileStorage.TryDelete(revision.Path);
 
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 

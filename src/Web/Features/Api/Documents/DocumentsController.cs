@@ -20,7 +20,7 @@ namespace Web.Features.Api.Documents
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> Get(Get.Query query)
+        public async Task<IActionResult> Index(Index.Query query)
         {
             var result = await _mediator.Send(query).ConfigureAwait(false);
 
@@ -33,16 +33,16 @@ namespace Web.Features.Api.Documents
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Post.Command command)
+        public async Task<IActionResult> Create(Create.Command command)
         {
             var result = await _mediator.Send(command).ConfigureAwait(false);
 
-            return CreatedAtAction(nameof(Documents.Get)
-                , new RouteValueDictionary(new Get.Query {Id = result.DocumentId}), null);
+            return CreatedAtAction(nameof(Documents.Index)
+                , new RouteValueDictionary(new Index.Query {Id = result.DocumentId}), null);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(Put.Command command)
+        public async Task<IActionResult> Edit(Edit.Command command)
         {
             var result = await _mediator.Send(command).ConfigureAwait(false);
 
@@ -51,7 +51,7 @@ namespace Web.Features.Api.Documents
                 return NotFound();
             }
 
-            return await Get(new Get.Query {Id = result.DocumentId}).ConfigureAwait(false);
+            return await Index(new Index.Query {Id = result.DocumentId}).ConfigureAwait(false);
         }
 
         [HttpGet("{id:int}/thumbnail")]

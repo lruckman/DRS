@@ -56,7 +56,8 @@ namespace Web.Features.Api.Search
 
             public async Task<Result> Handle(Query message)
             {
-                var documentQuery = _db.Files
+                var documentQuery = _db.PublishedRevisions
+                    .Where(pr => pr.EndDate == null)
                     .AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(message.Q))
@@ -64,7 +65,7 @@ namespace Web.Features.Api.Search
                     //todo: fix
                     documentQuery = documentQuery
                         .FromSql(
-                            $"SELECT f.* FROM [dbo].[{nameof(File)}s] AS f JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON f.DocumentId = s.[Key] AND f.Status = @p1 AND f.EndDate IS NULL",
+                            $"SELECT f.* FROM [dbo].[{nameof(Revision)}s] AS f JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON f.DocumentId = s.[Key] AND f.Status = @p1 AND f.EndDate IS NULL",
                             message.Q, (int)StatusTypes.Active);
                 }
 
@@ -113,11 +114,7 @@ namespace Web.Features.Api.Search
             {
                 public MappingProfile()
                 {
-                    CreateMap<File, Result.DocumentResult>()
-                        .ForMember(d => d.Abstract, o => o.MapFrom(s =>
-                            s.Metadata.Single(m => m.EndDate == null).Abstract))
-                        .ForMember(d => d.Title, o => o.MapFrom(s =>
-                            s.Metadata.Single(m => m.EndDate == null).Title));
+                    CreateMap<Revision, Result.DocumentResult>();
                 }
             }
         }
@@ -137,8 +134,8 @@ namespace Web.Features.Api.Search
 
                 //todo: array all the things?
                 public string SelfLink => $"/api/documents/{DocumentId}";
-                public string ThumbnailLink => $"/api/files/{DocumentId}/thumbnail";
-                public string ViewLink => $"/api/files/{DocumentId}/view";
+                public string ThumbnailLink => $"/api/documents/{DocumentId}/thumbnail";
+                public string ViewLink => $"/api/documents/{DocumentId}/view";
 
                 public string Abstract { get; set; }
                 public string Title { get; set; }

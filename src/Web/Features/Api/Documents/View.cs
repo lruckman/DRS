@@ -16,7 +16,6 @@ namespace Web.Features.Api.Documents
         public class Query : IRequest<Result>
         {
             public int? Id { get; set; }
-            public int? V { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -42,26 +41,24 @@ namespace Web.Features.Api.Documents
 
             public async Task<Result> Handle(Query message)
             {
-                var file = await _db.Files
-                    .Where(f => f.DocumentId == message.Id.Value
-                            && ((message.V == null && f.EndDate == null) || f.VersionNum == message.V.Value)
-                            && f.Status != StatusTypes.Deleted)
+                var currentRevision = await _db.PublishedRevisions
+                    .Where(pr => pr.DocumentId == message.Id.Value && pr.EndDate == null)
                     .SingleOrDefaultAsync()
                     .ConfigureAwait(false);
 
-                if (file == null)
+                if (currentRevision == null)
                 {
                     return null;
                 }
 
                 var fileKey = _encryptor
-                    .DecryptBase64(file.AccessKey);
+                    .DecryptBase64(currentRevision.AccessKey);
 
                 return new Result
                 {
                     FileContents = _encryptor
-                        .DecryptFile(file.Path, fileKey),
-                    ContentType = MimeTypeMap.GetMimeType(file.Extension)
+                        .DecryptFile(currentRevision.Path, fileKey),
+                    ContentType = MimeTypeMap.GetMimeType(currentRevision.Extension)
                 };
             }
         }

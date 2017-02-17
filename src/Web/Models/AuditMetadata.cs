@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Web.Models
 {
-    public class AuditMetadata
+    public abstract class AuditMetadata
     {
         [Required, MaxLength(450)]
         public string CreatedBy { get; set; }

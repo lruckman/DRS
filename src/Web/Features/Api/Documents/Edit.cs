@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,7 +12,7 @@ using Web.Models;
 
 namespace Web.Features.Api.Documents
 {
-    public class Put
+    public class Edit
     {
         public class Command : IRequest<Result>
         {
@@ -47,53 +48,60 @@ namespace Web.Features.Api.Documents
             private readonly ApplicationDbContext _db;
             private readonly IDocumentSecurity _documentSecurity;
             private readonly IUserContext _userContext;
+            private readonly IMapper _mapper;
 
-            public CommandHandler(ApplicationDbContext db, IDocumentSecurity documentSecurity, IUserContext userContext)
+            public CommandHandler(ApplicationDbContext db, IDocumentSecurity documentSecurity, IUserContext userContext,
+                IMapper mapper)
             {
-                _db = db;
-                _documentSecurity = documentSecurity;
-                _userContext = userContext;
+                _db = db ?? throw new ArgumentNullException(nameof(db));
+                _documentSecurity = documentSecurity ?? throw new ArgumentNullException(nameof(documentSecurity));
+                _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+                _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             }
 
             public async Task<Result> Handle(Command message)
             {
-                var file = await _db.Files
+                var currentVersion = await _db.PublishedRevisions
                     .Include(f => f.Document)
                     .Include(f => f.Document.Distributions)
-                    .Include(f => f.Metadata)
                     .SingleOrDefaultAsync(f => f.DocumentId == message.Id.Value && f.EndDate == null)
                     .ConfigureAwait(false);
 
-                if (file == null)
+                if (currentVersion == null)
                 {
                     return null;
                 }
 
-                var currentMetadata = file.Metadata
-                    .Single(m => m.EndDate == null);
-
-                if (currentMetadata.Title != message.Title
-                    || currentMetadata.Abstract != message.Abstract)
+                if (currentVersion.Title != message.Title
+                    || currentVersion.Abstract != message.Abstract)
                 {
-                    currentMetadata.EndDate = DateTimeOffset.Now;
-                    file.Metadata.Add(new Metadata
-                    {
-                        Abstract = message.Abstract,
-                        CreatedBy = _userContext.UserId,
-                        CreatedOn = DateTimeOffset.Now,
-                        Title = message.Title,
-                        VersionNum = ++currentMetadata.VersionNum
-                    });
+                    currentVersion.EndDate = DateTimeOffset.Now;
+
+                    var newVersion = _mapper.Map<PublishedRevision>(currentVersion);
+
+                    newVersion.VersionNum = await _db.Revisions
+                        .Where(r => r.DocumentId == message.Id.Value)
+                        .MaxAsync(d => d.VersionNum)
+                        .ConfigureAwait(false);
+
+                    newVersion.VersionNum++;
+
+                    newVersion.Abstract = message.Abstract;
+                    newVersion.Title = message.Title;
+                    newVersion.CreatedBy = _userContext.UserId;
+                    newVersion.CreatedOn = DateTimeOffset.Now;
+
+                    _db.PublishedRevisions.Add(newVersion);
                 }
 
                 // remove deleted libraries
 
-                var deletedLibraryIds = file.Document.Distributions
+                var deletedLibraryIds = currentVersion.Document.Distributions
                     .Select(l => l.DistributionGroupId)
                     .Except(message.LibraryIds)
                     .ToArray();
 
-                file.Document.Distributions.RemoveAll(ld => deletedLibraryIds.Contains(ld.DistributionGroupId));
+                currentVersion.Document.Distributions.RemoveAll(ld => deletedLibraryIds.Contains(ld.DistributionGroupId));
 
                 // add new libraries
 
@@ -101,15 +109,25 @@ namespace Web.Features.Api.Documents
                     .ConfigureAwait(false);
 
                 var newLibraryIds = message.LibraryIds
-                    .Except(file.Document.Distributions.Select(l => l.DistributionGroupId))
+                    .Except(currentVersion.Document.Distributions.Select(l => l.DistributionGroupId))
                     .Intersect(second)
                     .ToArray();
 
-                file.Document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
+                currentVersion.Document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
 
                 await _db.SaveChangesAsync().ConfigureAwait(false);
 
-                return new Result { DocumentId = file.DocumentId };
+                return new Result { DocumentId = currentVersion.DocumentId };
+            }
+
+            public class MappingProfile : Profile
+            {
+                public MappingProfile()
+                {
+                    CreateMap<PublishedRevision, PublishedRevision>()
+                        .ForMember(d => d.EndDate, o => o.MapFrom(s => (DateTimeOffset?)null))
+                        .ForMember(d => d.IndexDate, o => o.MapFrom(s => (DateTimeOffset?)null));
+                }
             }
         }
 

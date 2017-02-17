@@ -6,7 +6,12 @@ namespace Web.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Document> Documents { get; set; }
-        public DbSet<File> Files { get; set; }
+
+        public DbSet<Revision> Revisions { get; set; }
+        public DbSet<PendingRevision> PendingRevisions { get; set; }
+        public DbSet<DeletedRevision> DeletedRevisions { get; set; }
+        public DbSet<PublishedRevision> PublishedRevisions { get; set; }
+
         public DbSet<DistributionGroup> DistributionGroups { get; set; }
         public DbSet<DistributionGroupType> DistributionGroupTypes { get; set; }
         public DbSet<NamedDistribution> NamedDistributions { get; set; }
@@ -21,6 +26,12 @@ namespace Web.Models
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Revision>()
+                .HasDiscriminator<int>("Status")
+                .HasValue<PendingRevision>((int)Models.StatusTypes.Pending)
+                .HasValue<PublishedRevision>((int)Models.StatusTypes.Active)
+                .HasValue<DeletedRevision>((int)Models.StatusTypes.Deleted);
 
             // distribution
 
@@ -39,7 +50,7 @@ namespace Web.Models
 
             // file
 
-            builder.Entity<File>()
+            builder.Entity<Revision>()
                 .HasKey(f => new { f.DocumentId, f.VersionNum });
 
             // nameddistribution

@@ -11,7 +11,7 @@ namespace Web.Models
         public int Id { get; set; }
 
         public virtual List<Distribution> Distributions { get; set; } = new List<Distribution>();
-        public virtual List<File> Files { get; set; } = new List<File>();
+        public virtual List<Revision> Revisions { get; set; } = new List<Revision>();
 
         public virtual DocumentContent Content { get; set; } //todo: remove when lucene
     }

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Web.Models
 {
-    [Table("Files")]
-    public class File : AuditMetadata
+    [Table("Revisions")]
+    public abstract class Revision : AuditMetadata
     {
         public int DocumentId { get; set; }
         public virtual Document Document { get; set; }
@@ -31,10 +30,16 @@ namespace Web.Models
         [MaxLength(1024)]
         public string AccessKey { get; set; }
 
-        public StatusTypes Status { get; set; }
+        public int Status { get; set; } //todo: change back to enum once fixed. https://github.com/aspnet/EntityFramework/issues/5529
 
         public DateTimeOffset? EndDate { get; set; }
 
-        public virtual List<Metadata> Metadata { get; set; } = new List<Metadata>();
+        [Required, MaxLength(60)]
+        public string Title { get; set; }
+
+        [MaxLength(512)]
+        public string Abstract { get; set; }
+
+        public DateTimeOffset? IndexDate { get; set; }
     }
 }

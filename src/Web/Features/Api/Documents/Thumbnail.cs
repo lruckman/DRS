@@ -44,25 +44,23 @@ namespace Web.Features.Api.Documents
             {
                 Debug.Assert(message.Id != null);
 
-                var file = await _db.Files
-                    .Where(f => f.DocumentId == message.Id.Value
-                            && ((message.V == null && f.EndDate == null) || f.VersionNum == message.V.Value)
-                            && f.Status != StatusTypes.Deleted)
+                var currentRevision = await _db.PublishedRevisions
+                    .Where(pr => pr.DocumentId == message.Id.Value && pr.EndDate == null)
                     .SingleOrDefaultAsync()
                     .ConfigureAwait(false);
 
-                if (file == null)
+                if (currentRevision == null)
                 {
                     return null;
                 }
 
                 var fileKey = _encryptor
-                    .DecryptBase64(file.AccessKey);
+                    .DecryptBase64(currentRevision.AccessKey);
 
                 return new Result
                 {
                     FileContents = _encryptor
-                        .DecryptFile(file.ThumbnailPath, fileKey)
+                        .DecryptFile(currentRevision.ThumbnailPath, fileKey)
                 };
             }
         }
