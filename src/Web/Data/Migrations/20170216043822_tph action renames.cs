@@ -27,7 +27,7 @@ namespace Web.data.migrations
                     CreatedOn = table.Column<DateTimeOffset>(nullable: false),
                     EndDate = table.Column<DateTimeOffset>(nullable: true),
                     Extension = table.Column<string>(maxLength: 16, nullable: false),
-                    IndexDate = table.Column<DateTimeOffset>(nullable: true),
+                    IndexedOn = table.Column<DateTimeOffset>(nullable: true),
                     PageCount = table.Column<int>(nullable: false),
                     Path = table.Column<string>(maxLength: 256, nullable: false),
                     Size = table.Column<long>(nullable: false),

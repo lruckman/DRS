@@ -311,7 +311,7 @@ namespace Web.data.migrations
                         .IsRequired()
                         .HasMaxLength(16);
 
-                    b.Property<DateTimeOffset?>("IndexDate");
+                    b.Property<DateTimeOffset?>("IndexedOn");
 
                     b.Property<int>("PageCount");
 

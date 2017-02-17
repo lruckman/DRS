@@ -40,6 +40,6 @@ namespace Web.Models
         [MaxLength(512)]
         public string Abstract { get; set; }
 
-        public DateTimeOffset? IndexDate { get; set; }
+        public DateTimeOffset? IndexedOn { get; set; }
     }
 }

@@ -126,7 +126,7 @@ namespace Web.Features.Api.Documents
                 {
                     CreateMap<PublishedRevision, PublishedRevision>()
                         .ForMember(d => d.EndDate, o => o.MapFrom(s => (DateTimeOffset?)null))
-                        .ForMember(d => d.IndexDate, o => o.MapFrom(s => (DateTimeOffset?)null));
+                        .ForMember(d => d.IndexedOn, o => o.MapFrom(s => (DateTimeOffset?)null));
                 }
             }
         }
