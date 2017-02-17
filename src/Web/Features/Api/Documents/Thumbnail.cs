@@ -16,7 +16,6 @@ namespace Web.Features.Api.Documents
         public class Query : IRequest<Result>
         {
             public int? Id { get; set; }
-            public int? V { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
