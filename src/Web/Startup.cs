@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using Web.Engine;
 using Web.Engine.Filters;
+using Web.Engine.Services.Hangfire;
 using Web.Engine.ViewEngine;
 using Web.Models;
 
@@ -45,16 +46,19 @@ namespace Web
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
+
+            DefaultConnection = Configuration.GetConnectionString("DefaultConnection");
         }
 
         private static IConfigurationRoot Configuration { get; set; }
+        private static string DefaultConnection { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"), o => o.EnableRetryOnFailure()));
+                options.UseSqlServer(DefaultConnection, o => o.EnableRetryOnFailure()));
 
             services.Configure<DRSConfig>(Configuration.GetSection("DRS"));
 
@@ -99,6 +103,8 @@ namespace Web
             Mapper.AssertConfigurationIsValid();
 
             services.AddMediatR(typeof(Startup));
+
+            HangfireConfiguration.ConfigureServices(services, DefaultConnection);
 
             var container = new Container(cfg => cfg.AddRegistry<WebRegistry>());
 
@@ -159,6 +165,8 @@ namespace Web
             app.UseIdentity();
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
+
+            HangfireConfiguration.Configure(app, DefaultConnection);
 
             app.UseMvc(routes =>
             {

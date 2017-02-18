@@ -34,6 +34,8 @@ xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="1.2.0" />
     <PackageReference Include="FluentValidation.Mvc6" Version="6.4.0-beta3" />
     <PackageReference Include="Ghostscript.NET" Version="1.2.1" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.8" />
+    <PackageReference Include="HangFire.SqlServer" Version="1.6.8" />
     <PackageReference Include="iTextSharp" Version="5.5.10" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="2.0.0" />
     <PackageReference Include="MediaTypeMap" Version="2.1.0" />
