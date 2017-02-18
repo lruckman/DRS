@@ -12,7 +12,6 @@ using Web.Engine;
 using Web.Engine.Extensions;
 using Web.Engine.Services;
 using Web.Models;
-using Revision = Web.Models.Revision;
 
 namespace Web.Features.Api.Documents
 {
