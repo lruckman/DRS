@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Web.Engine;
 using Web.Engine.Helpers;
+using Web.Engine.Services;
 using Web.Engine.Validation.Custom;
 using Web.Models;
 
@@ -44,14 +45,17 @@ namespace Web.Features.Api.Search
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _config;
             private readonly IDocumentSecurity _documentSecurity;
+            private readonly IFileIndexer _fileIndexer;
 
             public QueryHandler(ApplicationDbContext db,
                 IConfigurationProvider config,
-                IDocumentSecurity documentSecurity)
+                IDocumentSecurity documentSecurity,
+                IFileIndexer fileIndexer)
             {
                 _db = db;
                 _config = config;
                 _documentSecurity = documentSecurity;
+                _fileIndexer = fileIndexer;
             }
 
             public async Task<Result> Handle(Query message)
@@ -62,11 +66,9 @@ namespace Web.Features.Api.Search
 
                 if (!string.IsNullOrWhiteSpace(message.Q))
                 {
-                    //todo: fix
-                    documentQuery = documentQuery
-                        .FromSql(
-                            $"SELECT f.* FROM [dbo].[{nameof(Revision)}s] AS f JOIN FREETEXTTABLE([dbo].[vDocumentSearch], *, @p0) AS s ON f.DocumentId = s.[Key] AND f.Status = @p1 AND f.EndDate IS NULL",
-                            message.Q, (int)StatusTypes.Active);
+                    var ids = _fileIndexer.Search(message.Q);
+
+                    documentQuery = documentQuery.Where(dq => ids.Contains(dq.DocumentId));
                 }
 
                 if (message.LibraryIds.Length == 0)
@@ -76,7 +78,7 @@ namespace Web.Features.Api.Search
                     var userLibraryIds = await _documentSecurity
                         .GetUserDistributionGroupIdsAsync(PermissionTypes.Read)
                         .ConfigureAwait(false);
-
+                    //todo: roll this into fileindexer
                     message.LibraryIds = userLibraryIds
                         .Select(i => i)
                         .ToArray();

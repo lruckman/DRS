@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using Web.Engine;
 using Web.Engine.Filters;
+using Web.Engine.Services;
 using Web.Engine.Services.Hangfire;
 using Web.Engine.ViewEngine;
 using Web.Models;
@@ -52,6 +53,8 @@ namespace Web
 
         private static IConfigurationRoot Configuration { get; set; }
         private static string DefaultConnection { get; set; }
+        //todo: remove when hangfire issue resolved
+        public static IServiceProvider Container { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
@@ -61,6 +64,7 @@ namespace Web
                 options.UseSqlServer(DefaultConnection, o => o.EnableRetryOnFailure()));
 
             services.Configure<DRSConfig>(Configuration.GetSection("DRS"));
+            services.Configure<FileIndexer.Config>(Configuration.GetSection("DRS"));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -112,7 +116,9 @@ namespace Web
 
             container.Populate(services);
 
-            return container.GetInstance<IServiceProvider>();
+            Container = container.GetInstance<IServiceProvider>();
+
+            return Container;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -166,7 +172,7 @@ namespace Web
 
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 
-            HangfireConfiguration.Configure(app, DefaultConnection);
+            HangfireConfiguration.Configure(app, Container, DefaultConnection);
 
             app.UseMvc(routes =>
             {

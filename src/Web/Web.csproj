@@ -9,15 +9,19 @@ xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="ClientApp\dist\**" />
+    <Compile Remove="logs\**" />
     <Compile Remove="wwwroot\App_Data\**" />
     <Compile Remove="wwwroot\dist\**" />
     <Content Remove="ClientApp\dist\**" />
+    <Content Remove="logs\**" />
     <Content Remove="wwwroot\App_Data\**" />
     <Content Remove="wwwroot\dist\**" />
     <EmbeddedResource Remove="ClientApp\dist\**" />
+    <EmbeddedResource Remove="logs\**" />
     <EmbeddedResource Remove="wwwroot\App_Data\**" />
     <EmbeddedResource Remove="wwwroot\dist\**" />
     <None Remove="ClientApp\dist\**" />
+    <None Remove="logs\**" />
     <None Remove="wwwroot\App_Data\**" />
     <None Remove="wwwroot\dist\**" />
   </ItemGroup>
@@ -54,6 +58,7 @@ xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS
     <PackageReference Include="Serilog.Sinks.Async" Version="1.0.2-dev-00008" />
     <PackageReference Include="Serilog.Sinks.Literate" Version="2.1.0" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.1-dev-00767" />
+    <PackageReference Include="SimpleLucene" Version="1.0.0.1" />
     <PackageReference Include="StructureMap.Microsoft.DependencyInjection" Version="1.3.0" />
     <PackageReference Include="Tesseract" Version="3.2.0-alpha2" />
   </ItemGroup>
