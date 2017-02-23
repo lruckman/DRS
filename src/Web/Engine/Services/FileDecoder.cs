@@ -96,7 +96,7 @@ namespace Web.Engine.Services
 
         public FileDecoder(IOptions<DRSConfig> config)
         {
-            _config = config.Value;
+            _config = config.Value ?? throw new ArgumentNullException(nameof(config));
         }
 
         public IFileInfo Decode(string filename, byte[] buffer)
