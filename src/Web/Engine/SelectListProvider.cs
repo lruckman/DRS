@@ -25,16 +25,13 @@ namespace Web.Engine
             _configurationProvider = configurationProvider;
         }
 
-        public async Task<IEnumerable<SelectListItem>> GetLibraries(string userId)
-        {
-            return await _db.NamedDistributions
+        public async Task<IEnumerable<SelectListItem>> GetLibraries(string userId) => await _db.NamedDistributions
                 .Where(ul => ul.ApplicationUserId == userId)
                 .Select(ul => ul.DistributionGroup)
                 .OrderBy(l => l.Name)
                 .ProjectTo<SelectListItem>(_configurationProvider)
                 .ToArrayAsync()
                 .ConfigureAwait(false);
-        }
 
         public class MappingProfile : Profile
         {

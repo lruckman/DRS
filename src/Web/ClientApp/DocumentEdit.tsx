@@ -2,12 +2,12 @@
 import classNames from 'classnames';
 import ValidationSummary from './ValidationSummary';
 import { Button, Modal, ProgressBar } from 'react-bootstrap';
-import Select from 'react-select';
+import * as Select from 'react-select';
 import FileDrop from 'react-file-drop';
-import update from 'react-addons-update';
 import { ILibraryListItem } from './ILibraryListItem';
 import { IDocumentDetails } from './IDocumentDetails';
 import { IModelError } from './IModelError';
+import update from 'immutability-helper';
 
 interface IDocumentEditProp {
     libraries: ILibraryListItem[],

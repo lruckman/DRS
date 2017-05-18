@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Web.Features.Account.Account;
 using Web.Features.Documents;
-using Web.Features.Home;
 using Web.Models;
 
 namespace Web.Features.Account
@@ -124,7 +123,7 @@ namespace Web.Features.Account
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation(4, "User logged out.");
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction(nameof(AccountController.Login));
         }
 
         ////
@@ -448,7 +447,7 @@ namespace Web.Features.Account
                 return Redirect(returnUrl);
             }
 
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction(nameof(DocumentsController.Index), "Documents");
         }
 
         //#endregion

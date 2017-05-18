@@ -12,7 +12,7 @@ using Web.Models;
 
 namespace Web.Features.Api.Documents
 {
-    public class Index
+    public static class Index
     {
         public class Query : IRequest<Result>
         {
@@ -48,17 +48,13 @@ namespace Web.Features.Api.Documents
                 _config = config;
             }
 
-            public async Task<Result> Handle(Query message)
-            {
-                return await _db.PublishedRevisions
+            public Task<Result> Handle(Query message) => _db.PublishedRevisions
                     .Where(pr => pr.DocumentId == message.Id
                             && pr.EndDate == null)
                     .ProjectTo<Result>(_config)
-                    .SingleOrDefaultAsync()
-                    .ConfigureAwait(false);
-            }
+                    .SingleOrDefaultAsync();
 
-            public class MappingProfile : Profile
+            public class MappingProfile : AutoMapper.Profile
             {
                 public MappingProfile()
                 {

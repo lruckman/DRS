@@ -8,22 +8,22 @@ xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x86\*.*" "C:\Development\DRS
 xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\x64\"</PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="ClientApp\dist\**" />
     <Compile Remove="logs\**" />
     <Compile Remove="wwwroot\App_Data\**" />
-    <Compile Remove="wwwroot\dist\**" />
-    <Content Remove="ClientApp\dist\**" />
     <Content Remove="logs\**" />
     <Content Remove="wwwroot\App_Data\**" />
-    <Content Remove="wwwroot\dist\**" />
-    <EmbeddedResource Remove="ClientApp\dist\**" />
     <EmbeddedResource Remove="logs\**" />
     <EmbeddedResource Remove="wwwroot\App_Data\**" />
-    <EmbeddedResource Remove="wwwroot\dist\**" />
-    <None Remove="ClientApp\dist\**" />
     <None Remove="logs\**" />
     <None Remove="wwwroot\App_Data\**" />
-    <None Remove="wwwroot\dist\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="wwwroot/dist\main.js" />
+    <Content Remove="wwwroot/dist\main.js.map" />
+    <Content Remove="wwwroot/dist\vendor.bundle.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="wwwroot\dist\placeholder.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

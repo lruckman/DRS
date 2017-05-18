@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import moment from 'moment';
+import * as moment from 'moment';
 import { IDocumentDetails } from "./IDocumentDetails";
 
 interface IDocumentPropertiesProp {

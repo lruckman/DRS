@@ -112,7 +112,7 @@ namespace Web.Features.Api.Search
                 return result;
             }
 
-            public class MappingProfile : Profile
+            public class MappingProfile : AutoMapper.Profile
             {
                 public MappingProfile()
                 {

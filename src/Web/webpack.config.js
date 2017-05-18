@@ -1,70 +1,45 @@
-﻿var path = require('path');
-var webpack = require('webpack');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
+﻿const path = require('path');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 
 var extractCSS = new ExtractTextPlugin('vendor.bundle.css');
+const clientBundleOutputDir = './wwwroot/dist';
 
 var clientBundleConfig = {
-    devtool: 'inline-source-map',
-    resolve: {
-        extensions: ['', '.js', '.jsx', '.ts', '.tsx']
-    },
-    module: {
-        loaders: [
-            { test: /\.tsx$/, include: /ClientApp/, exclude: /node_modules/, loader: 'babel-loader' },
-            { test: /\.ts$/, include: /ClientApp/, exclude: /node_modules/, loader: 'ts-loader?silent' },
-            { test: /\.css$/, loader: extractCSS.extract(['css']) },
-            { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader?limit=100000' }
+    stats: { modules: false },
+    resolve: { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
+    entry: {
+        'main': './ClientApp/boot-client.tsx',
+        vendor: [
+            'classnames'
+            , 'react'
+            , 'react-addons-css-transition-group'
+            , 'react-bootstrap'
+            , 'react-dom'
+            , 'react-file-drop'
+            , 'react-select'
+            , 'moment'
         ]
     },
-    entry: {
-        main: ['./ClientApp/boot-client.tsx'],
-        vendor: [
-            'aspnet-prerendering',
-            'classnames',
-            'react',
-            'react-addons-css-transition-group',
-            'react-addons-update',
-            'react-bootstrap',
-            'react-dom',
-            'react-file-drop',
-            'react-select',
-            'moment'
+    module: {
+        rules: [
+            { test: /\.tsx?$/, include: /ClientApp/, use: 'babel-loader' },
+            { test: /\.tsx?$/, include: /ClientApp/, use: 'awesome-typescript-loader?silent=true' },
+            { test: /\.css$/, use: ExtractTextPlugin.extract({ use: 'css-loader' }) },
+            { test: /\.(png|jpg|jpeg|gif|svg)$/, use: 'url-loader?limit=25000' }
         ]
     },
     output: {
-        path: path.join(__dirname, 'wwwroot', 'dist'),
+        path: path.join(__dirname, clientBundleOutputDir),
         filename: '[name].js',
-        publicPath: '/dist/'
+        publicPath: '/dist/' // Webpack dev middleware, if enabled, handles requests for this URL prefix
     },
     plugins: [
-        extractCSS,
-        new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js') // Moves vendor content out of other bundles
+        new CheckerPlugin(),
+        new ExtractTextPlugin('vendor.bundle.css'),
+        new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' }) // Moves vendor content out of other bundles
     ]
 };
-var serverBundleConfig = {
-    target: 'node',
-    devtool: 'inline-source-map',
-    resolve: {
-        extensions: ['', '.js', '.jsx', '.ts', '.tsx']
-    },
-    module: {
-        loaders: [
-            { test: /\.tsx$/, include: /ClientApp/, loader: 'babel-loader' },
-            { test: /\.css$/, loader: 'ignore-loader' },
-        ]
-    },
-    entry: {
-        'boot-server': path.join(__dirname, 'ClientApp', 'boot-server.tsx')
-    },
-    output: {
-        path: path.join(__dirname, 'ClientApp', 'dist'),
-        filename: '[name].js',
-        publicPath: '/dist/',
-        libraryTarget: 'commonjs'
-    },
-    plugins: []
-};
 
-module.exports = [clientBundleConfig, serverBundleConfig];
+module.exports = [clientBundleConfig];

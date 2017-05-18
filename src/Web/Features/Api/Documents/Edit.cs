@@ -12,7 +12,7 @@ using Web.Models;
 
 namespace Web.Features.Api.Documents
 {
-    public class Edit
+    public static class Edit
     {
         public class Command : IRequest<Result>
         {
@@ -120,7 +120,7 @@ namespace Web.Features.Api.Documents
                 return new Result { DocumentId = currentVersion.DocumentId };
             }
 
-            public class MappingProfile : Profile
+            public class MappingProfile : AutoMapper.Profile
             {
                 public MappingProfile()
                 {
