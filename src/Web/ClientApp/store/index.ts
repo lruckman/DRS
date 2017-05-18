@@ -1,26 +1,24 @@
 ﻿import { ActionCreatorGeneric } from 'redux-typed';
+import { Dispatch } from 'redux';
 
-import * as DocumentResults from './DocumentResults';
-import * as SearchFormStore from './SearchForm';
+import * as DocumentStore from './Document';
+import * as DistributionGroupStore from './DistributionGroup';
+import * as UserErrorStore from './UserError';
 
-// The top-level state object
 export interface ApplicationState {
-    //documentResults: DocumentResults.IDocumentResultsState;
-    search: SearchFormStore.State;
+    distributionGroups: DistributionGroupStore.State
+    , documents: DocumentStore.State
+    , userErrors: UserErrorStore.State
 }
 
-// Whenever an action is dispatched, Redux will update each top-level application state property using
-// the reducer with the matching name. It's important that the names match exactly, and that the reducer
-// acts on the corresponding ApplicationState property type.
 export const reducers = {
-    //documentResults: DocumentResults.reducer,
-    search: SearchFormStore.reducer
+    distributionGroups: DistributionGroupStore.reducer
+    , documents: DocumentStore.reducer
+    , userErrors: UserErrorStore.reducer
 };
 
-// This type can be used as a hint on action creators so that its 'dispatch' and 'getState' params are
-// correctly typed to match your store.
-export interface AppThunkAction<TAction> {
-    (dispatch: (action: TAction) => void, getState: () => ApplicationState): void;
-}
+export interface TypedActionCreatorGeneric<TState, TReturn> extends Function {
+    (dispatch: Dispatch<TState>, getState: () => TState): TReturn;
+};
 
-export type ActionCreator = ActionCreatorGeneric<ApplicationState>;
+export type TypedActionCreator<TReturn> = TypedActionCreatorGeneric<ApplicationState, TReturn>;

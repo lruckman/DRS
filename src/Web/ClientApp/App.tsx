@@ -2,8 +2,7 @@
 import classNames from 'classnames';
 import DocumentProperties from './DocumentProperties';
 import DocumentEdit from './DocumentEdit';
-import DocumentList from './containers/DocumentList';
-import SearchForm from './containers/SearchForm';
+import { SearchForm, DocumentList } from './containers';
 
 //import { IDocumentDetails } from "./IDocumentDetails";
 //import { ILibraryListItem } from './ILibraryListItem';

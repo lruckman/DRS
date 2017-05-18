@@ -1,11 +1,6 @@
-﻿export interface Library {
-    text: string;
-    value: string;
-}
-
-export interface DistributionGroup {
+﻿export interface DistributionGroup {
     name: string;
-    id: string;
+    id: number;
     createdOn: string
     modifiedOn: string
 }
