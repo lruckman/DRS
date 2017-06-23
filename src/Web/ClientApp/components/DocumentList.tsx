@@ -3,7 +3,6 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../store';
-import * as SearchFormStore from '../store/SearchForm';
 import { Document, Library } from '../models';
 
 type ResultProps = {
@@ -65,39 +64,49 @@ const Result = (props: ResultProps) => {
     </div>
 }
 
-type ResultListProps = {
+export type DocumentListStateProps = {
     keywords: string
     , libraryIds: number[]
     , libraryOptions: Library[]
-    , error: Error
     , isFetching: boolean
     , documents: Document[]
     , selected: number[]
     , nextPage: string
-    , onSelect: (id: number) => void
 }
 
-const ResultList = (props: ResultListProps) => {
+export type DocumentListDispatchProps = {
+    onSelect: (id: number) => void
+}
 
-    let { onSelect, documents, nextPage, selected } = props;
+type OwnProps = DocumentListStateProps & DocumentListDispatchProps;
 
-    let handleClick = (document: Document) =>
+const DocumentList = ({ onSelect, documents, nextPage, selected }: OwnProps) => {
+
+    const handleClick = (document: Document) =>
         onSelect(document.id);
 
-    let handleDblClick = (document: Document) =>
+    const handleDblClick = (document: Document) =>
         window.open(document.viewLink, '_blank');
 
     return <div data-next-page={nextPage}>
-        <ReactCSSTransitionGroup transitionName="result" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
-            {documents.map(document => <Result {...document} key={document.id} isSelected={selected.indexOf(document.id) !== -1}
-                onClick={handleClick} onDblClick={handleDblClick} />)}
+        <ReactCSSTransitionGroup
+            transitionName="result"
+            transitionEnterTimeout={500}
+            transitionLeaveTimeout={300}
+        >
+            {
+                documents.map(document =>
+                    <Result
+                        {...document}
+                        key={document.id}
+                        isSelected={selected.indexOf(document.id) !== -1}
+                        onClick={handleClick}
+                        onDblClick={handleDblClick}
+                    />
+                )
+            }
         </ReactCSSTransitionGroup>
     </div>
 }
 
-export default ResultList;
-
-//export default connect(
-//    (state: ApplicationState) => state.documentResults, // Selects which state properties are merged into the component's props
-//    IDocumentResultsState.actionCreators                 // Selects which action creators are merged into the component's props
-//)(ResultList);
+export default DocumentList;

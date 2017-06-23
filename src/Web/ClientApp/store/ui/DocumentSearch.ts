@@ -1,15 +1,16 @@
-﻿import { getJson } from '../fetchHelpers';
+﻿import { getJson } from '../../fetchHelpers';
 import { typeName, isActionType, Action, Reducer } from 'redux-typed';
-import { TypedActionCreator } from './';
-import { Document } from '../models';
+import { TypedActionCreator } from '../';
+import { Document } from '../../models';
 import queryString from 'query-string';
 
 // -----------------
 // STATE
 
 export interface State {
-    byId: { [id: number]: Document }
-    , allIds: number[]
+    allIds: number[];
+    selectedIds: number[];
+    isFetching: boolean;
 }
 
 export interface SearchDocumentsResult {
@@ -46,44 +47,42 @@ export const actionCreators = {
             .then((data: SearchDocumentsResult) => dispatch(new DocumentsSearchSuccess(data)))
             .catch((error: Error) => dispatch(new DocumentsSearchFailure(error)));
     }
+    , select: (id: number): TypedActionCreator<Promise<any>> => (dispatch, getState) => {
+
+    }
 };
 
 // ----------------
 // REDUCER
 
 const unloadedState: State = {
-    byId: {}
-    , allIds: []
-}
-
-const addDocuments = (state: State, documents: { [id: number]: Document }): State => {
-    const allIds: number[] = [...state.allIds];
-    const byId: { [id: number]: Document } = { ...state.byId };
-
-    Object.keys(documents)
-        .forEach((key, index) => {
-
-            const document: Document = documents[key];
-
-            if (!byId[document.id]) {
-                allIds.push(document.id);
-            }
-
-            byId[document.id] = document;
-
-        });
-
-    return {
-        ...state
-        , byId
-        , allIds
-    }
+    allIds: []
+    , selectedIds: []
+    , isFetching: false
 }
 
 export const reducer: Reducer<State> = (state, action: any) => {
 
-    if (action.normalized && action.normalized.entities && action.normalized.entities.documents) {
-        return addDocuments(state, action.normalized.entities.documents);
+    if (isActionType(action, DocumentsSearch)) {
+        return {
+            ...state
+            , isFetching: true
+        }
+    }
+
+    if (isActionType(action, DocumentsSearchFailure)) {
+        return {
+            ...state
+            , isFetching: false
+        }
+    }
+
+    if (isActionType(action, DocumentsSearchSuccess)) {
+        return {
+            ...state
+            , allIds: (action as DocumentsSearchSuccess).normalized.result
+            , isFetching: false
+        }
     }
 
     return state || unloadedState;

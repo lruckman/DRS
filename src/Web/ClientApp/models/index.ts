@@ -13,3 +13,10 @@ export interface Document {
     thumbnailLink: string;
     title: string;
 }
+
+export interface Library {
+    id: number
+    , createdOn: Date
+    , modifiedOn: Date
+    , name: string
+}

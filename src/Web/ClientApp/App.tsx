@@ -1,8 +1,7 @@
 ﻿import * as React from 'react';
 import classNames from 'classnames';
 import DocumentProperties from './DocumentProperties';
-import DocumentEdit from './DocumentEdit';
-import { SearchForm, DocumentList } from './containers';
+import { SearchForm, DocumentList, DocumentEdit } from './containers';
 
 //import { IDocumentDetails } from "./IDocumentDetails";
 //import { ILibraryListItem } from './ILibraryListItem';

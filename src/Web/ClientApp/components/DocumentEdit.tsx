@@ -9,14 +9,17 @@ import { IDocumentDetails } from './IDocumentDetails';
 import { IModelError } from './IModelError';
 import update from 'immutability-helper';
 
-interface IDocumentEditProp {
-    libraries: ILibraryListItem[],
+export type DocumentEditStateProps = {
+    libraries: ILibraryListItem[];
     location: string;
+}
+
+export type DocumentEditDispatchProps = {
     onUpdate: (location: string) => void;
     onClose: () => void;
 }
 
-interface IDocumentEditState {
+type DocumentEditState = {
     add?: {
         uploading: boolean;
         uploadPercent: number;
@@ -28,10 +31,8 @@ interface IDocumentEditState {
     document?: IDocumentDetails;
 }
 
-export default class DocumentEdit extends React.Component<IDocumentEditProp, IDocumentEditState> {
-
-    static defaultProps: IDocumentEditProp;
-
+export default class DocumentEdit extends React.Component<DocumentEditStateProps & DocumentEditDispatchProps, DocumentEditState> {
+    
     constructor() {
         super();
 
@@ -47,7 +48,7 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
         title: (HTMLInputElement)
     }
 
-    getDefaultState(): IDocumentEditState {
+    getDefaultState(): DocumentEditState {
         return {
             add: {
                 uploading: false,
@@ -72,7 +73,7 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
         };
     }
 
-    componentWillReceiveProps(props: IDocumentEditProp) {
+    componentWillReceiveProps(props: DocumentEditStateProps & DocumentEditDispatchProps) {
         if (props.location && this.props.location !== props.location) {
             this.edit(props.location);
         }
@@ -383,11 +384,4 @@ export default class DocumentEdit extends React.Component<IDocumentEditProp, IDo
             </Modal>
         </div>;
     }
-}
-
-DocumentEdit.defaultProps = {
-    libraries: [],
-    location: '',
-    onUpdate: function (location: string) { },
-    onClose: function () { },
 }

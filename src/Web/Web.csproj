@@ -8,12 +8,16 @@ xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x86\*.*" "C:\Development\DRS
 xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\x64\"</PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="ClientApp\dist\**" />
     <Compile Remove="logs\**" />
     <Compile Remove="wwwroot\App_Data\**" />
+    <Content Remove="ClientApp\dist\**" />
     <Content Remove="logs\**" />
     <Content Remove="wwwroot\App_Data\**" />
+    <EmbeddedResource Remove="ClientApp\dist\**" />
     <EmbeddedResource Remove="logs\**" />
     <EmbeddedResource Remove="wwwroot\App_Data\**" />
+    <None Remove="ClientApp\dist\**" />
     <None Remove="logs\**" />
     <None Remove="wwwroot\App_Data\**" />
   </ItemGroup>
