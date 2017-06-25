@@ -19,8 +19,22 @@ namespace Web.Features.Api.Documents
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet]
         public async Task<IActionResult> Index(Index.Query query)
+        {
+            var results = await _mediator.Send(query)
+                .ConfigureAwait(false);
+
+            if (results == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(results);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> Details(Details.Query query)
         {
             var result = await _mediator.Send(query).ConfigureAwait(false);
 
@@ -37,8 +51,8 @@ namespace Web.Features.Api.Documents
         {
             var result = await _mediator.Send(command).ConfigureAwait(false);
 
-            return CreatedAtAction(nameof(Documents.Index)
-                , new RouteValueDictionary(new Index.Query {Id = result.DocumentId}), null);
+            return CreatedAtAction(nameof(Documents.Details)
+                , new RouteValueDictionary(new Details.Query { Id = result.DocumentId }), null);
         }
 
         [HttpPut("{id:int}")]
@@ -51,13 +65,15 @@ namespace Web.Features.Api.Documents
                 return NotFound();
             }
 
-            return await Index(new Index.Query {Id = result.DocumentId}).ConfigureAwait(false);
+            return await Details(new Details.Query { Id = result.DocumentId })
+                .ConfigureAwait(false);
         }
 
         [HttpGet("{id:int}/thumbnail")]
         public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
         {
-            var model = await _mediator.Send(query).ConfigureAwait(false);
+            var model = await _mediator.Send(query)
+                .ConfigureAwait(false);
 
             if (model == null)
             {
@@ -70,7 +86,8 @@ namespace Web.Features.Api.Documents
         [HttpGet("{id:int}/view")]
         public async Task<IActionResult> View(View.Query query)
         {
-            var model = await _mediator.Send(query).ConfigureAwait(false);
+            var model = await _mediator.Send(query)
+                .ConfigureAwait(false);
 
             if (model == null)
             {
