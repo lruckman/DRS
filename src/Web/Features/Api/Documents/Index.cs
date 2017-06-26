@@ -20,7 +20,7 @@ namespace Web.Features.Api.Documents
         {
             public int[] LibraryIds { get; set; } = { };
 
-            public string Q { get; set; }
+            public string Keywords { get; set; }
 
             public int PageIndex { get; set; }
 
@@ -64,9 +64,9 @@ namespace Web.Features.Api.Documents
                     .Where(pr => pr.EndDate == null)
                     .AsQueryable();
 
-                if (!string.IsNullOrWhiteSpace(message.Q))
+                if (!string.IsNullOrWhiteSpace(message.Keywords))
                 {
-                    var ids = _fileIndexer.Search(message.Q);
+                    var ids = _fileIndexer.Search(message.Keywords);
 
                     documentQuery = documentQuery.Where(dq => ids.Contains(dq.DocumentId));
                 }
@@ -99,7 +99,7 @@ namespace Web.Features.Api.Documents
                 if (result.TotalCount > message.MaxResults * (message.PageIndex + 1))
                 {
                     result.NextLink =
-                        $"/api/documents/?{nameof(message.Q)}={message.Q}{string.Join($"&{nameof(message.LibraryIds)}=", message.LibraryIds)}&{nameof(message.OrderBy)}={message.OrderBy}&{nameof(message.PageIndex)}={message.PageIndex + 1}";
+                        $"/api/documents/?{nameof(message.Keywords)}={message.Keywords}{string.Join($"&{nameof(message.LibraryIds)}=", message.LibraryIds)}&{nameof(message.OrderBy)}={message.OrderBy}&{nameof(message.PageIndex)}={message.PageIndex + 1}";
                 }
 
                 result.Documents = await documentQuery
