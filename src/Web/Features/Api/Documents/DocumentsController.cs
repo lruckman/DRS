@@ -22,7 +22,8 @@ namespace Web.Features.Api.Documents
         [HttpGet]
         public async Task<IActionResult> Index(Index.Query query)
         {
-            var results = await _mediator.Send(query)
+            var results = await _mediator
+                .Send(query)
                 .ConfigureAwait(false);
 
             if (results == null)
@@ -36,7 +37,9 @@ namespace Web.Features.Api.Documents
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Details(Details.Query query)
         {
-            var result = await _mediator.Send(query).ConfigureAwait(false);
+            var result = await _mediator
+                .Send(query)
+                .ConfigureAwait(false);
 
             if (result == null)
             {
@@ -49,30 +52,56 @@ namespace Web.Features.Api.Documents
         [HttpPost]
         public async Task<IActionResult> Create(Create.Command command)
         {
-            var result = await _mediator.Send(command).ConfigureAwait(false);
+            var result = await _mediator
+                .Send(command)
+                .ConfigureAwait(false);
 
-            return CreatedAtAction(nameof(Documents.Details)
-                , new RouteValueDictionary(new Details.Query { Id = result.DocumentId }), null);
+            var document = await _mediator
+                .Send(
+                    new Details.Query
+                    {
+                        Id = result.DocumentId
+                    }
+                )
+                .ConfigureAwait(false);
+
+            return CreatedAtAction(
+                nameof(Documents.Details)
+                , new RouteValueDictionary(
+                    new Details.Query
+                    {
+                        Id = result.DocumentId
+                    }
+                )
+                , document);
         }
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Edit(Edit.Command command)
         {
-            var result = await _mediator.Send(command).ConfigureAwait(false);
+            var result = await _mediator
+                .Send(command)
+                .ConfigureAwait(false);
 
             if (result == null)
             {
                 return NotFound();
             }
 
-            return await Details(new Details.Query { Id = result.DocumentId })
+            return await Details(
+                    new Details.Query
+                    {
+                        Id = result.DocumentId
+                    }
+                )
                 .ConfigureAwait(false);
         }
 
         [HttpGet("{id:int}/thumbnail")]
         public async Task<IActionResult> Thumbnail(Thumbnail.Query query)
         {
-            var model = await _mediator.Send(query)
+            var model = await _mediator
+                .Send(query)
                 .ConfigureAwait(false);
 
             if (model == null)
@@ -86,7 +115,8 @@ namespace Web.Features.Api.Documents
         [HttpGet("{id:int}/view")]
         public async Task<IActionResult> View(View.Query query)
         {
-            var model = await _mediator.Send(query)
+            var model = await _mediator
+                .Send(query)
                 .ConfigureAwait(false);
 
             if (model == null)
