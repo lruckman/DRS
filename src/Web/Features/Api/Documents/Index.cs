@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,8 +62,8 @@ namespace Web.Features.Api.Documents
             public async Task<Result> Handle(Query message)
             {
                 var documentQuery = _db.PublishedRevisions
-                    .Where(pr => pr.EndDate == null)
-                    .AsQueryable();
+                    .Where(pr => pr.EndDate == null);
+                    //.AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(message.Keywords))
                 {
@@ -116,7 +117,10 @@ namespace Web.Features.Api.Documents
             {
                 public MappingProfile()
                 {
-                    CreateMap<Revision, Result.DocumentResult>();
+                    CreateMap<Revision, Result.DocumentResult>()
+                        .ForMember(d => d.Version, o => o.MapFrom(s => s.VersionNum))
+                        .ForMember(d => d.CreatedOn, o => o.MapFrom(s => s.Document.CreatedOn))
+                        .ForMember(d => d.ModifiedOn, o => o.MapFrom(s => s.CreatedOn));
                 }
             }
         }
@@ -133,14 +137,18 @@ namespace Web.Features.Api.Documents
                 public int DocumentId { get; set; }
                 public long Size { get; set; }
                 public int PageCount { get; set; }
+                public int Version { get; set; }
 
                 //todo: array all the things?
-                public string SelfLink => $"/api/documents/{DocumentId}";
+                //public string SelfLink => $"/api/documents/{DocumentId}";
                 public string ThumbnailLink => $"/api/documents/{DocumentId}/thumbnail";
-                public string ViewLink => $"/api/documents/{DocumentId}/view";
+                //public string ViewLink => $"/api/documents/{DocumentId}/view";
 
                 public string Abstract { get; set; }
                 public string Title { get; set; }
+
+                public DateTimeOffset ModifiedOn { get; set; }
+                public DateTimeOffset CreatedOn { get; set; }
             }
         }
     }

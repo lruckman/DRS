@@ -1,28 +1,25 @@
 import * as React from 'react';
-import Select from 'react-select';
-import { DistributionGroup } from '../models';
-import { UserLibraryPicker } from '../containers';
+//import { UserLibraryPicker } from '../containers';
 
-import 'react-select/dist/react-select.css';
-
-export type SearchFormStateProps = {
-    isFetching: boolean
-    , keywords: string
-    , libraryIds: number[]
-}
-
-export type SearchFormDispatchProps = {
-    onSearch: (keywords: string, libraryIds: number[]) => void
-}
-
-type State = {
+export type DocumentSearchFormStateProps = {
     keywords: string
     , libraryIds: number[]
 }
 
-class SearchForm extends React.Component<SearchFormStateProps & SearchFormDispatchProps, State> {
+export type DocumentSearchFormDispatchProps = {
+    onSearch: (keywords: string, libraryIds: number[]) => void
+}
 
-    constructor(props: SearchFormStateProps & SearchFormDispatchProps) {
+type OwnProps = DocumentSearchFormDispatchProps & DocumentSearchFormStateProps;
+
+type OwnState = {
+    keywords: string
+    , libraryIds: number[]
+}
+
+class DocumentSearchForm extends React.Component<OwnProps, OwnState> {
+
+    constructor(props: OwnProps) {
         super(props);
         this.state = {
             keywords: props.keywords
@@ -30,10 +27,10 @@ class SearchForm extends React.Component<SearchFormStateProps & SearchFormDispat
         }
 
         this.handleLibraryChange = this.handleLibraryChange.bind(this);
-        this.handleSearchKeyUp = this.handleSearchKeyUp.bind(this);
+        this.handleSearchKeyPress = this.handleSearchKeyPress.bind(this);
     }
 
-    componentWillReceiveProps(nextProps: SearchFormStateProps & SearchFormDispatchProps) {
+    componentWillReceiveProps(nextProps: OwnProps) {
         this.setState({
             ...this.state
             , libraryIds: nextProps.libraryIds
@@ -49,12 +46,13 @@ class SearchForm extends React.Component<SearchFormStateProps & SearchFormDispat
         this.props.onSearch(this.state.keywords, libraryIds);
     }
 
-    handleSearchKeyUp(e) {
+    handleSearchKeyPress(e: React.SyntheticEvent<HTMLInputElement>) {
+        e.preventDefault();
         this.setState({
             ...this.state
-            , keywords: e.target.value
+            , keywords: e.currentTarget.value
         });
-        this.props.onSearch(e.target.value, this.state.libraryIds);
+        this.props.onSearch(e.currentTarget.value, this.state.libraryIds);
     }
 
     public render() {
@@ -64,17 +62,20 @@ class SearchForm extends React.Component<SearchFormStateProps & SearchFormDispat
         return <form className="search-form">
             <div className="form-group has-feedback">
                 <input type="search" className="form-control" value={keywords}
-                    onKeyUp={this.handleSearchKeyUp} placeholder="Search for documents" />
+                    onKeyPress={this.handleSearchKeyPress} placeholder="Search for documents" />
                 <span className="form-control-feedback">
                     <i className="fa fa-search"></i>
                 </span>
             </div>
             <div className="form-group">
                 <label>Filter by libraries</label>
-                <UserLibraryPicker selected={libraryIds} onChange={this.handleLibraryChange} />
+                {/*<UserLibraryPicker
+                    selected={libraryIds}
+                    onChange={this.handleLibraryChange}
+                />*/}
             </div>
         </form>
     }
 }
 
-export default SearchForm;
+export default DocumentSearchForm;

@@ -1,9 +1,9 @@
 ﻿import * as React from 'react';
 import classNames from 'classnames';
-import { IModelError } from './IModelError';
+import { ModelError } from './models';
 
 interface IValidationSummaryProp {
-    errors: IModelError[];
+    errors: ModelError[];
     message?: string;
 }
 
@@ -16,23 +16,22 @@ export default class ValiationSummary extends React.Component<IValidationSummary
     }
 
     render() {
-        var rows = Object.keys(this.props.errors).map(function (key) {
-            var row = this.props.errors[key].map(function (error, i) {
-                return (<li key={i}>{error}</li>);
-            });
-            return (row);
-        }, this);
+        var rows = Object.keys(this.props.errors).map((key) =>
+            this.props.errors[key].map((error, i) =>
+                <li key={i}>{error}</li>
+            ), this);
+
         var cssClass = classNames({
             'alert': true,
             'alert-danger': true,
             'hidden': rows.length === 0
         });
         return <div className={cssClass}>
-                {this.props.message}
-                <ul>
-                    {rows}
-                </ul>
-            </div>;
+            {this.props.message}
+            <ul>
+                {rows}
+            </ul>
+        </div>;
     }
 }
 

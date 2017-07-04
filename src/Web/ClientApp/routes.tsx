@@ -1,20 +1,19 @@
 ﻿import * as React from 'react';
-import { Router, Route, HistoryBase } from 'react-router';
-import { Layout } from './components/Layout';
-import App from './App';
-import * as SearchFormStore from './store/SearchForm';
+import { Route } from 'react-router';
+import { Layout } from './components';
+//import { App } from './containers';
+import { Search } from './containers';
+import { actionCreators as LibraryStore } from './store/entity/Library';
 
 export const getRoutes = (store) => {
     const { dispatch } = store;
 
-    const loadThings = (nextState, replace, callback) => Promise.all([
-        dispatch(SearchFormStore.actionCreators.getLibraries())
-    ])
+    const loadThings = (nextState, replace, callback) => dispatch(LibraryStore.fetch())
         .catch(console.log)
         .then(() => callback());
 
     return <Route component={Layout}>
-        <Route path='*' components={{ body: App }} onEnter={loadThings} />
+        <Route path='*' components={{ body: Search }} onEnter={loadThings} />
     </Route>;
 
 }

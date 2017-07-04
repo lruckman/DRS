@@ -1,19 +1,19 @@
 ﻿import * as React from 'react';
 import { connect } from 'react-redux';
 import { ApplicationState } from '../store';
-import { LibraryPicker, LibraryPickerStateProps, LibraryPickerDispatchProps } from '../components'
+import { LibraryPicker, LibraryPickerDispatchProps, LibraryPickerStateProps } from '../components'
 
-type ContainerProps = {
+type OwnProps = {
     selected: number[]
     , onChange: (libraryIds: number[]) => void
 }
 
-const mapStateToProps = (state: ApplicationState, { selected }: ContainerProps): LibraryPickerStateProps => ({
+const mapStateToProps = (state: ApplicationState, { selected }: OwnProps): LibraryPickerStateProps => ({
     selected
-    , libraryOptions: state.distributionGroups.allIds.map(id => state.distributionGroups.byId[id])
+    , libraryOptions: state.entities.libraries.allIds.map(id => state.entities.libraries.byId[id])
 })
 
-const mapDispatchToProps = (dispatch: any, { onChange }: ContainerProps): LibraryPickerDispatchProps => ({
+const mapDispatchToProps = (dispatch: any, { onChange }: OwnProps): LibraryPickerDispatchProps => ({
     onChange
 })
 

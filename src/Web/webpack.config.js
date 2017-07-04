@@ -2,6 +2,7 @@
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 var extractCSS = new ExtractTextPlugin('vendor.bundle.css');
 const clientBundleOutputDir = './wwwroot/dist';
@@ -36,9 +37,15 @@ var clientBundleConfig = {
         publicPath: '/dist/' // Webpack dev middleware, if enabled, handles requests for this URL prefix
     },
     plugins: [
-        new CheckerPlugin(),
-        new ExtractTextPlugin('vendor.bundle.css'),
-        new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' }) // Moves vendor content out of other bundles
+        new CheckerPlugin()
+        , new ExtractTextPlugin('vendor.bundle.css')
+        , new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' }) // Moves vendor content out of other bundles
+        , new CircularDependencyPlugin({
+            // exclude detection of files based on a RegExp
+            exclude: /a\.js|node_modules/,
+            // add errors to webpack instead of warnings
+            failOnError: false
+        })
     ]
 };
 

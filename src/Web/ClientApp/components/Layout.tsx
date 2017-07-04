@@ -4,10 +4,12 @@ export interface LayoutProps {
     body: React.ReactElement<any>;
 }
 
-export class Layout extends React.Component<LayoutProps, void> {
+class Layout extends React.Component<LayoutProps, null> {
     public render() {
         return <div>
             {this.props.body}
         </div>;
     }
 }
+
+export default Layout;

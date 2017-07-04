@@ -1,8 +1,9 @@
 ﻿import { getJson } from '../../fetchHelpers';
 import { typeName, isActionType, Action, Reducer } from 'redux-typed';
 import { TypedActionCreator } from '../';
-import { Document } from '../../models';
+import { DocumentSearchResults, NormalizedDocuments } from '../../models';
 import queryString from 'query-string';
+import { normalize } from '../../utilities';
 
 // -----------------
 // STATE
@@ -10,45 +11,75 @@ import queryString from 'query-string';
 export interface State {
     allIds: number[];
     selectedIds: number[];
-    isFetching: boolean;
-}
-
-export interface SearchDocumentsResult {
-    documents: Document[];
-    nextLink: string;
+    isSearching: boolean;
 }
 
 // ----------------
 // ACTIONS
 
-@typeName("DOCUMENTS_SEARCH")
-class DocumentsSearch extends Action {
+@typeName("DOCUMENT_SEARCH_REQUESTED")
+class DocumentSearchRequested extends Action {
     constructor() {
         super();
     }
 }
-@typeName("DOCUMENTS_SEARCH_FAILURE")
-class DocumentsSearchFailure extends Action {
+@typeName("DOCUMENT_SEARCH_FAILED")
+class DocumentSearchFailed extends Action {
     constructor(public error: Error) {
         super();
     }
 }
-@typeName("DOCUMENTS_SEARCH_SUCCESS")
-class DocumentsSearchSuccess extends Action {
-    constructor(public normalized: SearchDocumentsResult) {
+@typeName("DOCUMENT_SEARCH_SUCCESS")
+class DocumentSearchSuccess extends Action {
+    constructor(public normalized: NormalizedDocuments, public resultCount: number, public nextLink: string) {
+        super();
+    }
+}
+
+@typeName("SELECT_DOCUMENT")
+class SelectDocument extends Action {
+    constructor(public ids: number[]) {
+        super();
+    }
+}
+
+@typeName("DESELECT_DOCUMENT")
+class DeselectDocument extends Action {
+    constructor(public ids: number[]) {
         super();
     }
 }
 
 export const actionCreators = {
-    search: (keywords: string, libraryIds: number[]): TypedActionCreator<Promise<SearchDocumentsResult>> => (dispatch, getState) => {
-        const qs = queryString.stringify({ q: keywords, libraryids: libraryIds.join("&libraryids=") });
-        return getJson(`/api/search/?${qs}`, {})
-            .then((data: SearchDocumentsResult) => dispatch(new DocumentsSearchSuccess(data)))
-            .catch((error: Error) => dispatch(new DocumentsSearchFailure(error)));
+    search: (keywords: string, libraryIds: number[]): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
+        const qs = queryString.stringify({
+            keywords
+            , libraryids: !libraryIds || libraryIds.length == 0
+                ? undefined
+                : libraryIds.join("&libraryids=")
+        });
+        return getJson(`/api/documents/?${qs}`, {})
+            .then((data: DocumentSearchResults) => {
+                const normalized = normalize.documents(data.documents);
+                dispatch(new DocumentSearchSuccess(normalized, data.totalCount, data.nextLink));
+                return normalized.result
+            })
+            .catch((error: Error) => {
+                dispatch(new DocumentSearchFailed(error));
+                return undefined;
+            });
     }
-    , select: (id: number): TypedActionCreator<Promise<any>> => (dispatch, getState) => {
-
+    , selectDocument: (id: number): TypedActionCreator<void> => (dispatch, getState) => {
+        dispatch(new SelectDocument([id]));
+    }
+    , selectAllDocuments: (): TypedActionCreator<void> => (dispatch, getState) => {
+        dispatch(new SelectDocument(getState().ui.documentSearch.allIds));
+    }
+    , deselectDocument: (id: number): TypedActionCreator<void> => (dispatch, getState) => {
+        dispatch(new DeselectDocument([id]));
+    }
+    , deselectAllDocument: (): TypedActionCreator<void> => (dispatch, getState) => {
+        dispatch(new DeselectDocument(getState().ui.documentSearch.selectedIds));
     }
 };
 
@@ -58,30 +89,47 @@ export const actionCreators = {
 const unloadedState: State = {
     allIds: []
     , selectedIds: []
-    , isFetching: false
+    , isSearching: false
 }
 
 export const reducer: Reducer<State> = (state, action: any) => {
 
-    if (isActionType(action, DocumentsSearch)) {
+    if (isActionType(action, DocumentSearchRequested)) {
         return {
             ...state
-            , isFetching: true
+            , isSearching: true
         }
     }
 
-    if (isActionType(action, DocumentsSearchFailure)) {
+    if (isActionType(action, DocumentSearchFailed)) {
         return {
             ...state
-            , isFetching: false
+            , isSearching: false
         }
     }
 
-    if (isActionType(action, DocumentsSearchSuccess)) {
+    if (isActionType(action, DocumentSearchSuccess)) {
         return {
             ...state
-            , allIds: (action as DocumentsSearchSuccess).normalized.result
-            , isFetching: false
+            , allIds: action.normalized.result
+            , isSearching: false
+        }
+    }
+
+    if (isActionType(action, SelectDocument)) {
+        return {
+            ...state
+            , selectedIds: [
+                ...action.ids
+                , ...state.selectedIds.filter(existing => !action.ids.find(added => existing != added))
+            ]
+        }
+    }
+
+    if (isActionType(action, DeselectDocument)) {
+        return {
+            ...state
+            , selectedIds: state.selectedIds.filter(selected => !action.ids.find(deselected => selected != deselected))
         }
     }
 

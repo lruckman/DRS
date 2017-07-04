@@ -62,7 +62,8 @@ namespace Web.Features.Api.Documents
                         .ForMember(d => d.CreatedOn, o => o.MapFrom(s => s.Document.CreatedOn))
                         .ForMember(d => d.ModifiedOn, o => o.MapFrom(s => s.CreatedOn))
                         .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
-                            s.Document.Distributions.Select(d => d.DistributionGroupId.ToString())));
+                            s.Document.Distributions.Select(d => d.DistributionGroupId.ToString())))
+                        .ForMember(d => d.Version, o => o.MapFrom(s => s.VersionNum));
                 }
             }
         }
@@ -77,8 +78,8 @@ namespace Web.Features.Api.Documents
             public string[] LibraryIds { get; set; } = { }; // todo: rename
             public int PageCount { get; set; }
             public long Size { get; set; }
-            public string ThumbnailLink => $"/api/documents/{DocumentId}/thumbnail?v={VersionNum}"; // todo: array?
-            public int VersionNum { get; set; }
+            public string ThumbnailLink => $"/api/documents/{DocumentId}/thumbnail?v={Version}";
+            public int Version { get; set; }
 
             public string Abstract { get; set; }
             public string Title { get; set; }

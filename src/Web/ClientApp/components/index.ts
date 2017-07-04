@@ -1,7 +1,5 @@
-export { default as DocumentEdit, DocumentEditStateProps, DocumentEditDispatchProps } from './DocumentEdit';
 
-export { default as DocumentList, DocumentListDispatchProps, DocumentListStateProps } from './DocumentList';
+export { default as Search } from './Search';
 
-export { default as LibraryPicker, LibraryPickerStateProps, LibraryPickerDispatchProps } from './LibraryPicker';
-
-export { default as SearchForm } from './SearchForm';
+export { default as Layout, LayoutProps } from './Layout';
+export { default as LibraryPicker, LibraryPickerDispatchProps, LibraryPickerStateProps } from './LibraryPicker';
