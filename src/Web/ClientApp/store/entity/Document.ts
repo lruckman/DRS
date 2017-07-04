@@ -1,8 +1,9 @@
 ﻿import { typeName, isActionType, Action, Reducer } from 'redux-typed';
 import { TypedActionCreator } from '../';
-import { DocumentFile, NormalizedDocuments } from '../../models';
+import { DocumentFile, DocumentSearchResults, NormalizedDocuments } from '../../models';
 import { getEntity, normalize } from '../../utilities';
-import { postJson, putJson } from '../../fetchHelpers';
+import { postJson, putJson, getJson } from '../../fetchHelpers';
+import queryString from 'query-string';
 
 // -----------------
 // STATE
@@ -32,6 +33,25 @@ class DocumentSaveFailed extends Action {
 @typeName("DOCUMENT_SAVE_SUCCESS")
 class DocumentSaveSuccess extends Action {
     constructor(public normalized: NormalizedDocuments) {
+        super();
+    }
+}
+
+@typeName("DOCUMENT_SEARCH_REQUESTED")
+export class DocumentSearchRequested extends Action {
+    constructor() {
+        super();
+    }
+}
+@typeName("DOCUMENT_SEARCH_FAILED")
+export class DocumentSearchFailed extends Action {
+    constructor(public error: Error) {
+        super();
+    }
+}
+@typeName("DOCUMENT_SEARCH_SUCCESS")
+export class DocumentSearchSuccess extends Action {
+    constructor(public normalized: NormalizedDocuments, public resultCount: number, public nextLink: string) {
         super();
     }
 }
@@ -66,6 +86,21 @@ export const actionCreators = {
                 return normalized.result[0];
             })
             .catch((error: Error) => dispatch(new DocumentSaveFailed(error)));
+    }
+    , search: (keywords: string, libraryIds: number[]): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
+        const qs = queryString.stringify({
+            keywords
+            , libraryids: !libraryIds || libraryIds.length == 0
+                ? undefined
+                : libraryIds.join("&libraryids=")
+        });
+        return getJson(`/api/documents/?${qs}`, {})
+            .then((data: DocumentSearchResults) => {
+                const normalized = normalize.documents(data.documents);
+                dispatch(new DocumentSearchSuccess(normalized, data.totalCount, data.nextLink));
+                return normalized.result
+            })
+            .catch((error: Error) => dispatch(new DocumentSearchFailed(error)));
     }
     , upload: (file: File): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
         dispatch(new DocumentUploadRequested());

@@ -8,8 +8,8 @@ type DocumentResultStateProps = {
 } & DocumentFile;
 
 type DocumentResultDispatchProps = {
-    onClick: (document: DocumentFile) => void
-    , onDblClick: (document: DocumentFile) => void
+    onClick: (id: number) => void
+    , onDblClick: (id: number) => void
 }
 
 type OwnProps = DocumentResultDispatchProps & DocumentResultStateProps;
@@ -26,27 +26,27 @@ class DocumentResult extends React.Component<OwnProps, null> {
         this.handleDblClick = this.handleDblClick.bind(this);
     }
 
-    handleClick(e: React.FormEvent<HTMLAnchorElement>) {
+    handleClick(e: React.SyntheticEvent<HTMLAnchorElement>) {
         e.preventDefault();
         
         this.clickStatus = 1;
 
         const clickHandler = () => {
             if (this.clickStatus === 1) {
-                this.props.onClick(null);
+                this.props.onClick(this.props.id);
             }
         }
 
         this.clickTimer = setTimeout(clickHandler, 200);
     }
 
-    handleDblClick(e: React.FormEvent<HTMLAnchorElement>) {
+    handleDblClick(e: React.SyntheticEvent<HTMLAnchorElement>) {
         e.preventDefault();
 
         clearTimeout(this.clickTimer);
 
         this.clickStatus = 0;
-        this.props.onDblClick(null);
+        this.props.onDblClick(this.props.id);
     }
 
     public render() {

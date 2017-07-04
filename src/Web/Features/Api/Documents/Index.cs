@@ -63,7 +63,7 @@ namespace Web.Features.Api.Documents
             {
                 var documentQuery = _db.PublishedRevisions
                     .Where(pr => pr.EndDate == null);
-                    //.AsQueryable();
+                //.AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(message.Keywords))
                 {
@@ -118,6 +118,7 @@ namespace Web.Features.Api.Documents
                 public MappingProfile()
                 {
                     CreateMap<Revision, Result.DocumentResult>()
+                        .ForMember(d => d.Id, o => o.MapFrom(s => s.DocumentId))
                         .ForMember(d => d.Version, o => o.MapFrom(s => s.VersionNum))
                         .ForMember(d => d.CreatedOn, o => o.MapFrom(s => s.Document.CreatedOn))
                         .ForMember(d => d.ModifiedOn, o => o.MapFrom(s => s.CreatedOn));
@@ -134,14 +135,14 @@ namespace Web.Features.Api.Documents
 
             public class DocumentResult
             {
-                public int DocumentId { get; set; }
+                public int Id { get; set; }
                 public long Size { get; set; }
                 public int PageCount { get; set; }
                 public int Version { get; set; }
 
                 //todo: array all the things?
                 //public string SelfLink => $"/api/documents/{DocumentId}";
-                public string ThumbnailLink => $"/api/documents/{DocumentId}/thumbnail";
+                public string ThumbnailLink => $"/api/documents/{Id}/thumbnail";
                 //public string ViewLink => $"/api/documents/{DocumentId}/view";
 
                 public string Abstract { get; set; }
