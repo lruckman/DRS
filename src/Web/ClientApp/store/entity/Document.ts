@@ -56,20 +56,20 @@ export class DocumentSearchSuccess extends Action {
     }
 }
 
-@typeName("DOCUMENT_UPLOAD_REQUESTED")
-class DocumentUploadRequested extends Action {
+@typeName("DOCUMENT_CREATE_REQUESTED")
+class DocumentCreateRequested extends Action {
     constructor() {
         super();
     }
 }
-@typeName("DOCUMENT_UPLOAD_FAILED")
-class DocumentUploadFailed extends Action {
+@typeName("DOCUMENT_CREATE_FAILED")
+class DocumentCreateFailed extends Action {
     constructor(public error: Error) {
         super();
     }
 }
-@typeName("DOCUMENT_UPLOAD_SUCCESS")
-class DocumentUploadSuccess extends Action {
+@typeName("DOCUMENT_CREATE_SUCCESS")
+class DocumentCreateSuccess extends Action {
     constructor(public normalized: NormalizedDocuments) {
         super();
     }
@@ -88,6 +88,7 @@ export const actionCreators = {
             .catch((error: Error) => dispatch(new DocumentSaveFailed(error)));
     }
     , search: (keywords: string, libraryIds: number[]): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
+        dispatch(new DocumentSearchRequested());
         const qs = queryString.stringify({
             keywords
             , libraryids: !libraryIds || libraryIds.length == 0
@@ -102,15 +103,16 @@ export const actionCreators = {
             })
             .catch((error: Error) => dispatch(new DocumentSearchFailed(error)));
     }
-    , upload: (file: File): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
-        dispatch(new DocumentUploadRequested());
+    , upload: (file: File): TypedActionCreator<Promise<number>> => (dispatch, getState) => {
+        dispatch(new DocumentCreateRequested());
+        //todo: save, upload, show edit, upload, show edit, ....
         return postJson('/api/documents', { file })
             .then((data: DocumentFile) => {
                 const normalized = normalize.documents([data]);
-                dispatch(new DocumentUploadSuccess(normalized));
-                return normalized.result;
+                dispatch(new DocumentCreateSuccess(normalized));
+                return normalized.result[0];
             })
-            .catch((error: Error) => dispatch(new DocumentUploadFailed(error)));
+            .catch((error: Error) => dispatch(new DocumentCreateFailed(error)));
     }
 }
 

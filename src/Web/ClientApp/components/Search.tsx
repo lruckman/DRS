@@ -1,13 +1,13 @@
 ﻿import * as React from 'react';
 import classNames from 'classnames';
-import { DocumentResults, DocumentSearchForm } from '../document/containers';
+import { DocumentEditor, DocumentFileDrop, DocumentResults, DocumentSearchForm } from '../document/containers';
 
 
 export type SearchStateProps = {
     documentsSelected: boolean
 }
 
-export type SearchDispatchProps = { }
+export type SearchDispatchProps = {}
 
 type OwnProps = SearchDispatchProps & SearchStateProps;
 
@@ -23,15 +23,19 @@ const Search = ({ documentsSelected }: OwnProps) => {
         'slide-in-right': true
     });
 
-    return <div className="search-box row">
-        <div className="col-sm-3">
-            <DocumentSearchForm />
-        </div>
-        <div className={resultsPanelClassNames}>
-            <DocumentResults />
-        </div>
-        <div className={propertyPanelClassNames}>
-           
+    return <div>
+        <DocumentFileDrop />
+        <div className="search-box row">
+            <div className="col-sm-3">
+                <DocumentSearchForm />
+            </div>
+            <div className={resultsPanelClassNames}>
+                <DocumentResults />
+                <DocumentEditor />
+            </div>
+            <div className={propertyPanelClassNames}>
+
+            </div>
         </div>
     </div>;
 }

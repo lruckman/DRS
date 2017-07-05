@@ -1,11 +1,14 @@
 ﻿import { combineReducers } from 'redux';
 
+import * as DocumentEditorStore from './DocumentEditor';
 import * as DocumentSearchStore from './DocumentSearch';
 
 export interface State {
-    documentSearch: DocumentSearchStore.State
+    documentEditor: DocumentEditorStore.State
+    , documentSearch: DocumentSearchStore.State
 }
 
 export const reducer = combineReducers({
-    documentSearch: DocumentSearchStore.reducer
+    documentEditor: DocumentEditorStore.reducer
+    , documentSearch: DocumentSearchStore.reducer
 });
