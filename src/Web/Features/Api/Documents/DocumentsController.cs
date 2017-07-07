@@ -60,7 +60,7 @@ namespace Web.Features.Api.Documents
                 .Send(
                     new Details.Query
                     {
-                        Id = result.DocumentId
+                        Id = result.Id
                     }
                 )
                 .ConfigureAwait(false);
@@ -70,7 +70,7 @@ namespace Web.Features.Api.Documents
                 , new RouteValueDictionary(
                     new Details.Query
                     {
-                        Id = result.DocumentId
+                        Id = result.Id
                     }
                 )
                 , document);

@@ -19,7 +19,7 @@ namespace Web.Features.Api.Documents
             public int? Id { get; set; }
             public string Title { get; set; }
             public string Abstract { get; set; }
-            public int[] LibraryIds { get; set; } = { }; //todo: rename
+            public int[] LibraryIds { get; set; } = { };
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -33,9 +33,9 @@ namespace Web.Features.Api.Documents
                 RuleFor(m => m.Abstract)
                     .Length(0, 512);
 
-                RuleFor(m => m.LibraryIds)
-                    .NotEmpty().WithName("Libraries")
-                    .HasLibraryPermission(documentSecurity, PermissionTypes.Modify);
+                //RuleFor(m => m.LibraryIds)
+                //    .NotEmpty().WithName("Libraries")
+                //    .HasLibraryPermission(documentSecurity, PermissionTypes.Modify);
 
                 RuleFor(m => m.Title)
                     .NotNull()
@@ -94,26 +94,26 @@ namespace Web.Features.Api.Documents
                     _db.PublishedRevisions.Add(newVersion);
                 }
 
-                // remove deleted libraries
+                //// remove deleted libraries
 
-                var deletedLibraryIds = currentVersion.Document.Distributions
-                    .Select(l => l.DistributionGroupId)
-                    .Except(message.LibraryIds)
-                    .ToArray();
+                //var deletedLibraryIds = currentVersion.Document.Distributions
+                //    .Select(l => l.DistributionGroupId)
+                //    .Except(message.LibraryIds)
+                //    .ToArray();
 
-                currentVersion.Document.Distributions.RemoveAll(ld => deletedLibraryIds.Contains(ld.DistributionGroupId));
+                //currentVersion.Document.Distributions.RemoveAll(ld => deletedLibraryIds.Contains(ld.DistributionGroupId));
 
-                // add new libraries
+                //// add new libraries
 
-                var second = await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify)
-                    .ConfigureAwait(false);
+                //var second = await _documentSecurity.GetUserDistributionGroupIdsAsync(PermissionTypes.Modify)
+                //    .ConfigureAwait(false);
 
-                var newLibraryIds = message.LibraryIds
-                    .Except(currentVersion.Document.Distributions.Select(l => l.DistributionGroupId))
-                    .Intersect(second)
-                    .ToArray();
+                //var newLibraryIds = message.LibraryIds
+                //    .Except(currentVersion.Document.Distributions.Select(l => l.DistributionGroupId))
+                //    .Intersect(second)
+                //    .ToArray();
 
-                currentVersion.Document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
+                //currentVersion.Document.Distributions.AddRange(newLibraryIds.Select(id => new Distribution { DistributionGroupId = id }));
 
                 await _db.SaveChangesAsync().ConfigureAwait(false);
 

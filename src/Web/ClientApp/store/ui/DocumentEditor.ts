@@ -43,17 +43,23 @@ class CancelDocumentEdit extends Action {
 }
 
 export const actionCreators = {
-    upload: (files: File[]): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
+    upload: (files: FileList): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
         dispatch(new FileUploadRequested());
 
-        const promises: Promise<number>[] = files
-            .map(file => dispatch(DocumentActions.upload(file)));
+        const promises: Promise<number>[] = Array.from(files)
+            .map(file => dispatch(DocumentActions.create(file)));
 
         return Promise.all(promises)
             .then(ids => {
-                dispatch(new FileUploadSuccess(ids));
-                return ids;
-            });
+                if (ids) {
+                    const newIds = ids.filter(id => id);
+                    if (newIds.length !== 0) {
+                        dispatch(new FileUploadSuccess(newIds));
+                        return newIds;
+                    }
+                }
+            })
+            .catch((error: Error) => alert(error.message));
     }
     , save: (document: DocumentFile): TypedActionCreator<Promise<number>> => (dispatch, getState) => {
         return dispatch(DocumentActions.save(document))

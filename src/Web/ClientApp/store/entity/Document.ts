@@ -2,7 +2,7 @@
 import { TypedActionCreator } from '../';
 import { DocumentFile, DocumentSearchResults, NormalizedDocuments } from '../../models';
 import { getEntity, normalize } from '../../utilities';
-import { postJson, putJson, getJson } from '../../fetchHelpers';
+import { putJson, getJson, postRaw } from '../../fetchHelpers';
 import queryString from 'query-string';
 
 // -----------------
@@ -103,10 +103,18 @@ export const actionCreators = {
             })
             .catch((error: Error) => dispatch(new DocumentSearchFailed(error)));
     }
-    , upload: (file: File): TypedActionCreator<Promise<number>> => (dispatch, getState) => {
+    , create: (file: File): TypedActionCreator<Promise<number>> => (dispatch, getState) => {
+
         dispatch(new DocumentCreateRequested());
-        //todo: save, upload, show edit, upload, show edit, ....
-        return postJson('/api/documents', { file })
+
+        const options = {
+            body: new FormData()
+        }
+
+        options.body.append('file', file);
+
+        return postRaw('/api/documents', options)
+            .then(response => response.json())
             .then((data: DocumentFile) => {
                 const normalized = normalize.documents([data]);
                 dispatch(new DocumentCreateSuccess(normalized));

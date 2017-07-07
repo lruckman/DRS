@@ -4,7 +4,7 @@ import FileDrop from 'react-file-drop';
 export type DocumentFileDropStateProps = {};
 
 export type DocumentFileDropDispatchProps = {
-    onDrop: (files: File[]) => void
+    onDrop: (files: FileList) => void
 }
 
 type OwnProps = DocumentFileDropDispatchProps & DocumentFileDropStateProps;

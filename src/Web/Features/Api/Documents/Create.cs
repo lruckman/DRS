@@ -142,7 +142,7 @@ namespace Web.Features.Api.Documents
 
                 // the document that was created
 
-                return new Result { DocumentId = document.Id };
+                return new Result { Id = document.Id };
             }
         }
 
@@ -154,7 +154,7 @@ namespace Web.Features.Api.Documents
             }
 
             public StatusTypes Status { get; set; } = StatusTypes.Success;
-            public int DocumentId { get; set; }
+            public int Id { get; set; }
         }
     }
 }

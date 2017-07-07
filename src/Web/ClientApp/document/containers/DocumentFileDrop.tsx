@@ -7,7 +7,7 @@ import { DocumentFileDrop, DocumentFileDropDispatchProps, DocumentFileDropStateP
 const mapStateToProps = (state: ApplicationState): DocumentFileDropStateProps => ({});
 
 const mapDispatchToProps = (dispatch: any): DocumentFileDropDispatchProps => ({
-    onDrop: (files: File[]) => dispatch(DocumentEditorAcitons.upload(files))
+    onDrop: (files: FileList) => dispatch(DocumentEditorAcitons.upload(files))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DocumentFileDrop);

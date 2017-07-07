@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import { Button, Modal } from 'react-bootstrap';
-import { DocumentThumbnail } from '../containers';
+import { DocumentThumbnail } from '../components';
 import { DocumentFile } from '../../models';
 
 export type DocumentEditorStateProps = {
@@ -73,7 +73,7 @@ class DocumentEditor extends React.Component<OwnProps, OwnState> {
                     <div className="row">
                         <div className="col-md-4">
                             <DocumentThumbnail
-                                documentId={this.state.document.id}
+                                url={this.state.document.thumbnailLink}
                             />
                             <dl className="text-muted dl-horizontal">
                                 <dt>Pages:</dt>
