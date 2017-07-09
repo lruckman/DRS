@@ -77,7 +77,7 @@ namespace Web.Features.Api.Documents
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Edit(Edit.Command command)
+        public async Task<IActionResult> Edit([FromBody]Edit.Command command)
         {
             var result = await _mediator
                 .Send(command)
