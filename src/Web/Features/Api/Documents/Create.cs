@@ -111,17 +111,20 @@ namespace Web.Features.Api.Documents
                 {
                     var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
 
-                    revision.ThumbnailPath = await _fileStorage.Save(thumbnail, fileKey)
+                    revision.ThumbnailPath = await _fileStorage
+                        .Save(thumbnail, fileKey)
                         .ConfigureAwait(false);
 
                     revision.PageCount = fileInfo.PageCount;
 
-                    revision.Path = await _fileStorage.Save(fileInfo.Buffer, fileKey)
+                    revision.Path = await _fileStorage
+                        .Save(fileInfo.Buffer, fileKey)
                         .ConfigureAwait(false);
 
                     // save and commit
 
-                    await _db.SaveChangesAsync().ConfigureAwait(false);
+                    await _db.SaveChangesAsync()
+                        .ConfigureAwait(false);
                 }
                 catch
                 {
@@ -139,7 +142,7 @@ namespace Web.Features.Api.Documents
 
                 // the document that was created
 
-                return new Result { DocumentId = document.Id };
+                return new Result { Id = document.Id };
             }
         }
 
@@ -151,7 +154,7 @@ namespace Web.Features.Api.Documents
             }
 
             public StatusTypes Status { get; set; } = StatusTypes.Success;
-            public int DocumentId { get; set; }
+            public int Id { get; set; }
         }
     }
 }

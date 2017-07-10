@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,15 +36,9 @@ namespace Web
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", true, true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true);
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
+                .AddEnvironmentVariables();
 
-            if (env.IsDevelopment())
-            {
-                // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
-                //builder.AddUserSecrets();
-            }
-
-            builder.AddEnvironmentVariables();
             Configuration = builder.Build();
 
             DefaultConnection = Configuration.GetConnectionString("DefaultConnection");
@@ -134,6 +127,12 @@ namespace Web
                 app.UseDatabaseErrorPage();
                 app.UseBrowserLink();
 
+                //app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                //{
+                //    HotModuleReplacement = true,
+                //    ReactHotModuleReplacement = true
+                //});
+
                 // prepopulates database
 
                 app.EnsureSampleData();
@@ -141,36 +140,11 @@ namespace Web
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-
-                // For more details on creating database during deployment see http://go.microsoft.com/fwlink/?LinkID=615859
-                //try
-                //{
-                //    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
-                //        .CreateScope())
-                //    {
-                //        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
-                //            .Database.Migrate();
-                //    }
-                //}
-                //catch
-                //{
-                //}
-            }
-
-            if (env.IsDevelopment())
-            {
-                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = true,
-                    ReactHotModuleReplacement = true
-                });
             }
 
             app.UseStaticFiles();
 
             app.UseIdentity();
-
-            // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 
             HangfireConfiguration.Configure(app, Container, DefaultConnection);
 
@@ -178,7 +152,11 @@ namespace Web
             {
                 routes.MapRoute(
                     "default",
-                    "{controller=Home}/{action=Index}/{id?}");
+                    "{controller=Documents}/{action=Index}/{id?}");
+
+                //routes.MapSpaFallbackRoute(
+                //    "spa-fallback",
+                //    "{controller=Documents}/{action=Index}");
             });
         }
     }

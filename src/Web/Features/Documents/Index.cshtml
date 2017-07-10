@@ -5,12 +5,7 @@
 @{
     var libraries = await SelectListProvider.GetLibraries(UserAccessor.UserId);
 }
-<div id="my-spa" asp-prerender-module="ClientApp/dist/boot-server"
-     asp-prerender-data="new {
-                    searchUrl=@Url.Action("get", "search"),
-                    addDocumentUrl=@Url.Action("get", "documents"),
-                    libraries=libraries
-                 }">Loading...</div>
+<div id="my-spa">Loading...</div>
 @section styles {
     <link rel="stylesheet" href="~/dist/vendor.bundle.css" asp-append-version="true" />
 }

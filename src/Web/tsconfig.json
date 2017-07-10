@@ -1,14 +1,18 @@
 ﻿{
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true, // classNames import fix
+    "baseUrl": ".",
     "moduleResolution": "node",
     "target": "es6",
     "jsx": "preserve",
+    "experimentalDecorators": true,
     "sourceMap": true,
+    "skipDefaultLibCheck": true,
     "lib": [ "es6", "dom" ],
-    "experimentalDecorators": true
+    "types": [ "webpack-env" ]
   },
   "exclude": [
-    "bin",
+      "bin",
     "node_modules"
   ]
 }
