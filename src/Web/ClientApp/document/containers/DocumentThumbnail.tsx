@@ -7,9 +7,13 @@ type OwnProps = {
     documentId: number
 }
 
-const mapStateToProps = (state: ApplicationState, { documentId }: OwnProps): DocumentThumbnailStateProps => ({
-    url: state.entities.documents.byId[documentId].thumbnailLink
-});
+const mapStateToProps = (state: ApplicationState, { documentId }: OwnProps): DocumentThumbnailStateProps => {
+    const document = state.entities.documents.byId[documentId];
+    return {
+        alt: document.title
+        , url: document.thumbnailLink
+    }
+};
 
 const mapDispatchToProps = (dispatch: any, props: OwnProps): DocumentThumbnailDispatchProps => ({});
 

@@ -73,6 +73,7 @@ class DocumentEditor extends React.Component<OwnProps, OwnState> {
                     <div className="row">
                         <div className="col-md-4">
                             <DocumentThumbnail
+                                alt={this.state.document.title}
                                 url={this.state.document.thumbnailLink}
                             />
                             <dl className="text-muted dl-horizontal">
