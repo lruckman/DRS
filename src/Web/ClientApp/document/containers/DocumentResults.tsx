@@ -16,7 +16,6 @@ const mapStateToProps = (state: ApplicationState): DocumentResultsStateProps => 
 
 const mapDispatchToProps = (dispatch: any): DocumentResultsDispatchProps => ({
     onSelect: (id: number) => dispatch(DocumentSearchActions.selectDocument(id))
-    , onOpen: (id: number) => window.open(id.toString(), '_blank')
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DocumentResults);

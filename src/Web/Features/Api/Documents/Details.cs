@@ -80,6 +80,7 @@ namespace Web.Features.Api.Documents
             public int PageCount { get; set; }
             public long Size { get; set; }
             public string ThumbnailLink => $"/api/documents/{Id}/thumbnail?v={Version}";
+            public string ViewLink => $"/api/documents/{Id}/view";
             public int Version { get; set; }
 
             public string Abstract { get; set; }

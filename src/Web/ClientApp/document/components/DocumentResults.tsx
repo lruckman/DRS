@@ -15,12 +15,11 @@ export type DocumentResultsStateProps = {
 
 export type DocumentResultsDispatchProps = {
     onSelect: (id: number) => void
-    , onOpen: (id: number) => void
 }
 
 type OwnProps = DocumentResultsStateProps & DocumentResultsDispatchProps;
 
-const DocumentResults = ({ onSelect, documents, nextPage, onOpen, selected }: OwnProps) =>
+const DocumentResults = ({ onSelect, documents, nextPage, selected }: OwnProps) =>
     <div data-next-page={nextPage}>
         <ReactCSSTransitionGroup
             transitionName="result"
@@ -33,8 +32,7 @@ const DocumentResults = ({ onSelect, documents, nextPage, onOpen, selected }: Ow
                         {...document}
                         key={document.id}
                         isSelected={selected.indexOf(document.id) !== -1}
-                        onClick={onSelect}
-                        onDblClick={onOpen}
+                        onSelect={onSelect}
                     />
                 )
             }

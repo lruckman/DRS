@@ -143,7 +143,7 @@ namespace Web.Features.Api.Documents
                 //todo: array all the things?
                 //public string SelfLink => $"/api/documents/{DocumentId}";
                 public string ThumbnailLink => $"/api/documents/{Id}/thumbnail";
-                //public string ViewLink => $"/api/documents/{DocumentId}/view";
+                public string ViewLink => $"/api/documents/{Id}/view";
 
                 public string Abstract { get; set; }
                 public string Title { get; set; }

@@ -2,6 +2,7 @@
     abstract: string
     , id: number
     , thumbnailLink: string
+    , viewLink: string
     , title: string
     , createdOn: string
     , modifiedOn: string

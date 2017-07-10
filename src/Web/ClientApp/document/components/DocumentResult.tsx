@@ -8,8 +8,7 @@ type DocumentResultStateProps = {
 } & DocumentFile;
 
 type DocumentResultDispatchProps = {
-    onClick: (id: number) => void
-    , onDblClick: (id: number) => void
+    onSelect: (id: number) => void
 }
 
 type OwnProps = DocumentResultDispatchProps & DocumentResultStateProps;
@@ -33,7 +32,7 @@ class DocumentResult extends React.Component<OwnProps, null> {
 
         const clickHandler = () => {
             if (this.clickStatus === 1) {
-                this.props.onClick(this.props.id);
+                this.props.onSelect(this.props.id);
             }
         }
 
@@ -46,7 +45,7 @@ class DocumentResult extends React.Component<OwnProps, null> {
         clearTimeout(this.clickTimer);
 
         this.clickStatus = 0;
-        this.props.onDblClick(this.props.id);
+        window.open(this.props.viewLink, '_blank');
     }
 
     public render() {
