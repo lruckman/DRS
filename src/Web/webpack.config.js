@@ -1,7 +1,6 @@
 ﻿const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 var extractCSS = new ExtractTextPlugin('vendor.bundle.css');
@@ -26,7 +25,7 @@ var clientBundleConfig = {
     module: {
         rules: [
             { test: /\.tsx?$/, include: /ClientApp/, use: 'babel-loader' },
-            { test: /\.tsx?$/, include: /ClientApp/, use: 'awesome-typescript-loader?silent=true' },
+            { test: /\.tsx?$/, include: /ClientApp/, use: 'ts-loader' },
             { test: /\.css$/, use: ExtractTextPlugin.extract({ use: 'css-loader' }) },
             { test: /\.(png|jpg|jpeg|gif|svg)$/, use: 'url-loader?limit=25000' }
         ]
@@ -37,15 +36,21 @@ var clientBundleConfig = {
         publicPath: '/dist/' // Webpack dev middleware, if enabled, handles requests for this URL prefix
     },
     plugins: [
-        new CheckerPlugin()
-        , new ExtractTextPlugin('vendor.bundle.css')
+        new ExtractTextPlugin('vendor.bundle.css')
         , new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' }) // Moves vendor content out of other bundles
-        , new CircularDependencyPlugin({
+        , new webpack.optimize.ModuleConcatenationPlugin()
+        /*, new CircularDependencyPlugin({
             // exclude detection of files based on a RegExp
             exclude: /a\.js|node_modules/,
             // add errors to webpack instead of warnings
             failOnError: false
+        })*/
+        , new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify('production')
+            }
         })
+        , new webpack.optimize.UglifyJsPlugin()
     ]
 };
 
