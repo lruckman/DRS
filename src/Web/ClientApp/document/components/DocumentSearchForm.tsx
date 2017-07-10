@@ -67,13 +67,13 @@ class DocumentSearchForm extends React.Component<OwnProps, OwnState> {
                     <i className="fa fa-search"></i>
                 </span>
             </div>
-            <div className="form-group">
+            {/*<div className="form-group">
                 <label>Filter by libraries</label>
-                {/*<UserLibraryPicker
+                <UserLibraryPicker
                     selected={libraryIds}
                     onChange={this.handleLibraryChange}
-                />*/}
-            </div>
+                />
+            </div>*/}
         </form>
     }
 }
