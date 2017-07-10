@@ -1,6 +1,6 @@
 ﻿import * as React from 'react';
 import classNames from 'classnames';
-import { DocumentEditor, DocumentFileDrop, DocumentResults, DocumentSearchForm } from '../document/containers';
+import { DocumentEditor, DocumentFileDrop, DocumentResults, DocumentSearchForm, DocumentProperties } from '../document/containers';
 
 
 export type SearchStateProps = {
@@ -34,7 +34,7 @@ const Search = ({ documentsSelected }: OwnProps) => {
                 <DocumentEditor />
             </div>
             <div className={propertyPanelClassNames}>
-
+                <DocumentProperties />
             </div>
         </div>
     </div>;

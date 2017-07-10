@@ -4,7 +4,7 @@ import { ApplicationState } from '../store';
 import { Search } from '../components';
 
 const mapStateToProps = (state: ApplicationState) => ({
-    documentsSelected: false //state.ui.documentSearch.selectedIds.length !== 0
+    documentsSelected: state.ui.documentSearch.selectedIds.length !== 0
 });
 
 const mapDispatchToProps = (dispatch: any) => ({});
