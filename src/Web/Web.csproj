@@ -3,9 +3,13 @@
     <TargetFramework>net451</TargetFramework>
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <PreBuildEvent>xcopy /Y "C:\Development\DRS\src\Web\tessdata\*.*" "C:\Development\DRS\src\Web\bin\Debug\net461\tessdata\"
-xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x86\*.*" "C:\Development\DRS\src\Web\bin\Debug\net461\x86\"
-xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS\src\Web\bin\Debug\net461\x64\"</PreBuildEvent>
+    <PreBuildEvent>
+      xcopy /Y "C:\Development\DRS\src\Web\tessdata\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\win7-x86\tessdata\"
+      xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x86\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\win7-x86\x86\"
+      xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\win7-x86\x64\"</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="ClientApp\dist\**" />
