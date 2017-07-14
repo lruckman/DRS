@@ -63,11 +63,11 @@ namespace Web.Features.Api.Documents
             {
                 var documentQuery = _db.PublishedRevisions
                     .Where(pr => pr.EndDate == null);
-                //.AsQueryable();
 
                 if (!string.IsNullOrWhiteSpace(message.Keywords))
                 {
-                    var ids = _fileIndexer.Search(message.Keywords);
+                    var ids = _fileIndexer.Search(message.Keywords)
+                        .ToArray();
 
                     documentQuery = documentQuery.Where(dq => ids.Contains(dq.DocumentId));
                 }
@@ -100,7 +100,7 @@ namespace Web.Features.Api.Documents
                 if (result.TotalCount > message.MaxResults * (message.PageIndex + 1))
                 {
                     result.NextLink =
-                        $"/api/documents/?{nameof(message.Keywords)}={message.Keywords}{string.Join($"&{nameof(message.LibraryIds)}=", message.LibraryIds)}&{nameof(message.OrderBy)}={message.OrderBy}&{nameof(message.PageIndex)}={message.PageIndex + 1}";
+                        $"/api/documents/?{nameof(message.Keywords)}={message.Keywords}{string.Join($"&{nameof(message.LibraryIds)}=", message.LibraryIds)}&{nameof(message.OrderBy)}={message.OrderBy}&{nameof(message.PageIndex)}={(message.PageIndex + 1).ToString()}";
                 }
 
                 result.Documents = await documentQuery
@@ -142,8 +142,8 @@ namespace Web.Features.Api.Documents
 
                 //todo: array all the things?
                 //public string SelfLink => $"/api/documents/{DocumentId}";
-                public string ThumbnailLink => $"/api/documents/{Id}/thumbnail";
-                public string ViewLink => $"/api/documents/{Id}/view";
+                public string ThumbnailLink => $"/api/documents/{Id.ToString()}/thumbnail";
+                public string ViewLink => $"/api/documents/{Id.ToString()}/view";
 
                 public string Abstract { get; set; }
                 public string Title { get; set; }

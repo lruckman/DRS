@@ -18,14 +18,13 @@ namespace Web.Engine.Services.Hangfire.Jobs
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
             optionsBuilder.UseSqlServer("Server=.\\;Database=DRS;Trusted_Connection=True;MultipleActiveResultSets=true");
 
-
             _db = new ApplicationDbContext(optionsBuilder.Options);
 
             var decoder = new FileDecoder(Options.Create(new DRSConfig
             {
                 BasePath = "C:\\Development\\DRS\\src\\Web\\wwwroot",
                 DocumentPath = "C:\\Development\\DRS\\src\\Web\\wwwroot\\App_Data\\documents",
-                TessDataPath = "C:\\Development\\DRS\\src\\Web\\bin\\Debug\\net451\\tessdata"
+                TessDataPath = "C:\\Development\\DRS\\src\\Web\\bin\\Debug\\net451\\win7-x86\\tessdata"
             }));
 
             var encryptor = new FileEncryptor();
