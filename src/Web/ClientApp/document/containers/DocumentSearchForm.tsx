@@ -5,8 +5,8 @@ import { actionCreators as DocumentStore } from '../../store/entity/Document';
 import { DocumentSearchForm, DocumentSearchFormDispatchProps, DocumentSearchFormStateProps } from '../components'
 
 const mapStateToProps = (state: ApplicationState): DocumentSearchFormStateProps => ({
-    keywords: null //todo:
-    , libraryIds: [] //todo:
+    keywords: state.ui.documentSearch.keywords
+    , libraryIds: state.ui.documentSearch.libraryIds
 });
 
 const mapDispatchToProps = (dispatch: any): DocumentSearchFormDispatchProps => ({

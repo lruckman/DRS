@@ -66,7 +66,9 @@ namespace Web.Features.Api.Documents
 
                 if (!string.IsNullOrWhiteSpace(message.Keywords))
                 {
-                    var ids = _fileIndexer.Search(message.Keywords)
+                    var keywords = $"{message.Keywords.Trim('*')}*"; // cannot start search text witha '*', add a '*' to the end so we do a starts with
+
+                    var ids = _fileIndexer.Search(keywords)
                         .ToArray();
 
                     documentQuery = documentQuery.Where(dq => ids.Contains(dq.DocumentId));
