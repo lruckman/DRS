@@ -152,7 +152,7 @@ namespace Web
             {
                 routes.MapRoute(
                     "default",
-                    "{controller=Documents}/{action=Index}/{id?}");
+                    "{controller=Home}/{action=Index}");
 
                 //routes.MapSpaFallbackRoute(
                 //    "spa-fallback",

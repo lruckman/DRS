@@ -61,8 +61,8 @@ namespace Web.Engine.Services
                 var query = new RevisionQuery().WithKeywords(keywords);
                 var result = searchService.SearchIndex(query.Query);
 
-
-                return result.Results.Select(d => int.Parse(d.GetValue(RevisionIdField)));
+                return result.Results
+                    .Select(d => int.Parse(d.GetValue(RevisionIdField)));
             }
         }
 
@@ -92,31 +92,67 @@ namespace Web.Engine.Services
             {
                 var document = new Lucene.Net.Documents.Document();
 
-                document.Add(new Field(RevisionIdField, entity.DocumentId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
+                document.Add(
+                    new Field(
+                        RevisionIdField,
+                        entity.DocumentId.ToString(),
+                        Field.Store.YES,
+                        Field.Index.NOT_ANALYZED
+                        )
+                );
 
                 var fileKey = _encryptor
                     .DecryptBase64(entity.AccessKey);
 
-                var fileinfo = _decoder.Decode(entity.Path, _encryptor.DecryptFile(entity.Path, fileKey));
+                var fileinfo = _decoder
+                    .Decode(entity.Extension, _encryptor.DecryptFile(entity.Path, fileKey));
 
                 if (!string.IsNullOrWhiteSpace(fileinfo.Content))
                 {
-                    document.Add(new Field(RevisionContentField, fileinfo.Content, Field.Store.NO, Field.Index.ANALYZED));
+                    document.Add(
+                        new Field(
+                            RevisionContentField,
+                            fileinfo.Content,
+                            Field.Store.NO,
+                            Field.Index.ANALYZED
+                            )
+                    );
                 }
 
                 if (!string.IsNullOrWhiteSpace(entity.Abstract))
                 {
-                    document.Add(new Field(RevisionAbstractField, entity.Abstract, Field.Store.NO, Field.Index.ANALYZED));
+                    document.Add(
+                        new Field(
+                            RevisionAbstractField,
+                            entity.Abstract,
+                            Field.Store.NO,
+                            Field.Index.ANALYZED
+                            )
+                    );
                 }
 
                 if (!string.IsNullOrWhiteSpace(entity.Title))
                 {
-                    document.Add(new Field(RevisionTitleField, entity.Title, Field.Store.NO, Field.Index.ANALYZED));
+                    document.Add(
+                        new Field(
+                            RevisionTitleField,
+                            entity.Title,
+                            Field.Store.NO,
+                            Field.Index.ANALYZED
+                            )
+                    );
                 }
 
                 foreach (var distributionGroup in entity.Document.Distributions)
                 {
-                    document.Add(new Field(RevisionDistributionGroupField, distributionGroup.DistributionGroupId.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED_NO_NORMS));
+                    document.Add(
+                        new Field(
+                            RevisionDistributionGroupField,
+                            distributionGroup.DistributionGroupId.ToString(),
+                            Field.Store.YES,
+                            Field.Index.NOT_ANALYZED_NO_NORMS
+                            )
+                    );
                 }
 
                 return document;
@@ -128,7 +164,11 @@ namespace Web.Engine.Services
 
         public class RevisionQuery : QueryBase
         {
-            public static string[] TextFields = new[] { RevisionTitleField, RevisionAbstractField, RevisionContentField };
+            public static string[] TextFields = new[] {
+                RevisionTitleField,
+                RevisionAbstractField,
+                RevisionContentField
+            };
 
             public RevisionQuery WithKeywords(string keywords)
             {
@@ -144,7 +184,11 @@ namespace Web.Engine.Services
 
             private MultiFieldQueryParser GetMultiFieldQueryParser(string[] fields)
             {
-                return new MultiFieldQueryParser(Lucene.Net.Util.Version.LUCENE_29, fields, new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_29));
+                return new MultiFieldQueryParser(
+                    Lucene.Net.Util.Version.LUCENE_29,
+                    fields,
+                    new StandardAnalyzer(Lucene.Net.Util.Version.LUCENE_29)
+                );
             }
 
             private Query CreateMultiFieldQuery(string[] fields, string keywords)

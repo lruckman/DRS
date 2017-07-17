@@ -39,7 +39,7 @@ class DocumentSaveSuccess extends Action {
 
 @typeName("DOCUMENT_SEARCH_REQUESTED")
 export class DocumentSearchRequested extends Action {
-    constructor() {
+    constructor(public keywords: string, public libraryIds: number[]) {
         super();
     }
 }
@@ -88,7 +88,7 @@ export const actionCreators = {
             .catch((error: Error) => dispatch(new DocumentSaveFailed(error)));
     }
     , search: (keywords: string, libraryIds: number[]): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
-        dispatch(new DocumentSearchRequested());
+        dispatch(new DocumentSearchRequested(keywords, libraryIds));
         const qs = queryString.stringify({
             keywords
             , libraryids: !libraryIds || libraryIds.length == 0

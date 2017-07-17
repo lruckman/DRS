@@ -9,9 +9,12 @@ import { DocumentSearchFailed, DocumentSearchRequested, DocumentSearchSuccess } 
 // STATE
 
 export interface State {
-    allIds: number[];
-    selectedIds: number[];
-    isSearching: boolean;
+    allIds: number[]
+    , selectedIds: number[]
+    , keywords: string
+    , libraryIds: number[]
+    , isSearching: boolean
+    , matchCount: number
 }
 
 // ----------------
@@ -51,8 +54,11 @@ export const actionCreators = {
 
 const unloadedState: State = {
     allIds: []
+    , keywords: ''
+    , libraryIds: []
     , selectedIds: []
     , isSearching: false
+    , matchCount: 0
 }
 
 export const reducer: Reducer<State> = (state, action: any) => {
@@ -61,6 +67,8 @@ export const reducer: Reducer<State> = (state, action: any) => {
         return {
             ...state
             , isSearching: true
+            , keywords: action.keywords
+            , libraryIds: action.libraryIds
         }
     }
 
