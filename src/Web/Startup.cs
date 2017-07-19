@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation.AspNetCore;
+using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,6 +18,7 @@ using Web.Engine;
 using Web.Engine.Filters;
 using Web.Engine.Services;
 using Web.Engine.Services.Hangfire;
+using Web.Engine.Services.Hangfire.Jobs;
 using Web.Engine.ViewEngine;
 using Web.Models;
 
@@ -41,29 +43,27 @@ namespace Web
 
             Configuration = builder.Build();
 
-            DefaultConnection = Configuration.GetConnectionString("DefaultConnection");
+            DefaultConnectionString = Configuration.GetConnectionString("DefaultConnection");
         }
 
         private static IConfigurationRoot Configuration { get; set; }
-        private static string DefaultConnection { get; set; }
-        //todo: remove when hangfire issue resolved
-        public static IServiceProvider Container { get; set; }
+        private static string DefaultConnectionString { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(DefaultConnection, o => o.EnableRetryOnFailure()));
+                options.UseSqlServer(DefaultConnectionString, o => o.EnableRetryOnFailure()));
 
             services.Configure<DRSConfig>(Configuration.GetSection("DRS"));
-            services.Configure<FileIndexer.Config>(Configuration.GetSection("DRS"));
+            services.Configure<Engine.Services.Lucene.Config>(Configuration.GetSection("DRS"));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            //services.AddReact();
+            services.AddHangfire(x => x.UseSqlServerStorage(DefaultConnectionString));
 
             services
                 .AddMvc(
@@ -101,21 +101,22 @@ namespace Web
 
             services.AddMediatR(typeof(Startup));
 
-            HangfireConfiguration.ConfigureServices(services, DefaultConnection);
-
             var container = new Container(cfg => cfg.AddRegistry<WebRegistry>());
 
             // populates structuremap with .NET services
 
             container.Populate(services);
 
-            Container = container.GetInstance<IServiceProvider>();
-
-            return Container;
+            return container.GetInstance<IServiceProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IApplicationLifetime appLifetime)
+        public void Configure(
+            IApplicationBuilder app,
+            IHostingEnvironment env,
+            ILoggerFactory loggerFactory,
+            IApplicationLifetime appLifetime,
+            IServiceProvider serviceProvider)
         {
             loggerFactory.AddSerilog();
             // Ensure any buffered events are sent at shutdown
@@ -143,10 +144,22 @@ namespace Web
             }
 
             app.UseStaticFiles();
-
             app.UseIdentity();
 
-            HangfireConfiguration.Configure(app, Container, DefaultConnection);
+            // Hangfire
+
+            GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(serviceProvider));
+
+            app.UseHangfireServer();
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new DashboardAuthorizationFilter() }
+            });
+
+            RecurringJob
+                .AddOrUpdate<IndexRevisionsJob>(nameof(IndexRevisionsJob)
+                , j => j.Run()
+                , "*/5 * * * *", TimeZoneInfo.Local);
 
             app.UseMvc(routes =>
             {
