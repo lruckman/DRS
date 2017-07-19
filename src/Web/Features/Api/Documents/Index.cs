@@ -46,17 +46,17 @@ namespace Web.Features.Api.Documents
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _config;
             private readonly IDocumentSecurity _documentSecurity;
-            private readonly IFileIndexer _fileIndexer;
+            private readonly IFileSearcher _fileSearcher;
 
             public QueryHandler(ApplicationDbContext db,
                 IConfigurationProvider config,
                 IDocumentSecurity documentSecurity,
-                IFileIndexer fileIndexer)
+                IFileSearcher fileSearcher)
             {
                 _db = db;
                 _config = config;
                 _documentSecurity = documentSecurity;
-                _fileIndexer = fileIndexer;
+                _fileSearcher = fileSearcher;
             }
 
             public async Task<Result> Handle(Query message)
@@ -68,7 +68,7 @@ namespace Web.Features.Api.Documents
                 {
                     var keywords = $"{message.Keywords.Trim('*')}*"; // cannot start search text witha '*', add a '*' to the end so we do a starts with
 
-                    var ids = _fileIndexer.Search(keywords)
+                    var ids = _fileSearcher.Search(keywords)
                         .ToArray();
 
                     documentQuery = documentQuery.Where(dq => ids.Contains(dq.DocumentId));
@@ -141,9 +141,7 @@ namespace Web.Features.Api.Documents
                 public long Size { get; set; }
                 public int PageCount { get; set; }
                 public int Version { get; set; }
-
-                //todo: array all the things?
-                //public string SelfLink => $"/api/documents/{DocumentId}";
+                
                 public string ThumbnailLink => $"/api/documents/{Id.ToString()}/thumbnail";
                 public string ViewLink => $"/api/documents/{Id.ToString()}/view";
 
