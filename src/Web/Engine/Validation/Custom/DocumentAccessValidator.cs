@@ -19,6 +19,7 @@ namespace Web.Engine.Validation.Custom
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
+            //todo: handle collections
             var documentId = context.PropertyValue as int?;
 
             if (documentId == null)

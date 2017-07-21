@@ -35,6 +35,13 @@ class FileUploadSuccess extends Action {
     }
 }
 
+@typeName("START_DOCUMENT_EDIT")
+class StartDocumentEdit extends Action {
+    constructor(public ids: number[]) {
+        super();
+    }
+}
+
 @typeName("CANCEL_DOCUMENT_EDIT")
 class CancelDocumentEdit extends Action {
     constructor(public id: number) {
@@ -43,7 +50,19 @@ class CancelDocumentEdit extends Action {
 }
 
 export const actionCreators = {
-    upload: (files: FileList): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
+    delete: (ids: number | number[]): TypedActionCreator<void> => (dispatch, getState) => {
+        //todo: confirm, then delete
+    }
+    , edit: (ids: number | number[]): TypedActionCreator<void> => (dispatch, getState) => {
+
+        if (ids instanceof Array) {
+            dispatch(new StartDocumentEdit(ids));
+            return;
+        }
+
+        dispatch(new StartDocumentEdit([ids]));
+    }
+    , upload: (files: FileList): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
         dispatch(new FileUploadRequested());
 
         const promises: Promise<number>[] = Array.from(files)
@@ -55,6 +74,7 @@ export const actionCreators = {
                     const newIds = ids.filter(id => id);
                     if (newIds.length !== 0) {
                         dispatch(new FileUploadSuccess(newIds));
+                        dispatch(actionCreators.edit(newIds));
                         return newIds;
                     }
                 }
@@ -96,17 +116,17 @@ const unloadedState: State = {
 
 export const reducer: Reducer<State> = (state, action: any) => {
 
-    if (isActionType(action, FileUploadSuccess)) {
-        return {
-            ids: action.ids
-            , editCount: action.ids.length
-        }
-    }
-
     if (isActionType(action, CancelDocumentEdit)) {
         return {
             ...state
             , ids: state.ids.filter(id => id != action.id)
+        }
+    }
+
+    if (isActionType(action, StartDocumentEdit)) {
+        return {
+            ids: action.ids
+            , editCount: action.ids.length
         }
     }
 

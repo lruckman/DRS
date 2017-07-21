@@ -2,6 +2,7 @@
 import { connect } from 'react-redux';
 import { ApplicationState } from '../../store';
 import { actionCreators as DocumentSearchActions } from '../../store/ui/DocumentSearch';
+import { actionCreators as DocumentEditorActions } from '../../store/ui/DocumentEditor';
 import { DocumentResults, DocumentResultsDispatchProps, DocumentResultsStateProps } from '../components';
 
 const mapStateToProps = (state: ApplicationState): DocumentResultsStateProps => ({
@@ -15,7 +16,9 @@ const mapStateToProps = (state: ApplicationState): DocumentResultsStateProps => 
 });
 
 const mapDispatchToProps = (dispatch: any): DocumentResultsDispatchProps => ({
-    onSelect: (id: number) => dispatch(DocumentSearchActions.selectDocument(id))
+    onDelete: (id: number) => dispatch(DocumentEditorActions.delete(id))
+    , onEdit: (id: number) => dispatch(DocumentEditorActions.edit(id))
+    , onSelect: (id: number) => dispatch(DocumentSearchActions.selectDocument(id))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DocumentResults);

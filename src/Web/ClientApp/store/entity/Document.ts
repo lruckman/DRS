@@ -2,7 +2,7 @@
 import { TypedActionCreator } from '../';
 import { DocumentFile, DocumentSearchResults, NormalizedDocuments } from '../../models';
 import { getEntity, normalize } from '../../utilities';
-import { putJson, getJson, postRaw } from '../../fetchHelpers';
+import { putJson, getJson, postRaw, deleteRaw } from '../../fetchHelpers';
 import queryString from 'query-string';
 
 // -----------------
@@ -75,6 +75,25 @@ class DocumentCreateSuccess extends Action {
     }
 }
 
+@typeName("DOCUMENT_DELETE_REQUESTED")
+class DocumentDeleteRequested extends Action {
+    constructor() {
+        super();
+    }
+}
+@typeName("DOCUMENT_DELETE_FAILED")
+class DocumentDeleteFailed extends Action {
+    constructor(public error: Error) {
+        super();
+    }
+}
+@typeName("DOCUMENT_DELETE_SUCCESS")
+class DocumentDeleteSuccess extends Action {
+    constructor(public ids: number) {
+        super();
+    }
+}
+
 export const actionCreators = {
     save: (document: DocumentFile): TypedActionCreator<Promise<number>> => (dispatch, getState) => {
         dispatch(new DocumentSaveRequested());
@@ -121,6 +140,21 @@ export const actionCreators = {
                 return normalized.result[0];
             })
             .catch((error: Error) => dispatch(new DocumentCreateFailed(error)));
+    }
+    , delete: (ids: number | number[]): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
+
+        dispatch(new DocumentDeleteRequested());
+
+        const options = {
+            body: { ids }
+        }
+
+        return deleteRaw('/api/documents', options)
+            .then(response => response.json())
+            .then((data: DocumentFile) => {
+                return null; //todo: finish
+            })
+            .catch((error: Error) => dispatch(new DocumentDeleteFailed(error)));
     }
 }
 
