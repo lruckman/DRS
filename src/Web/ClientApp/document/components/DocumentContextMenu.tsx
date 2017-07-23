@@ -1,6 +1,5 @@
 ﻿import * as React from 'react';
-import { ContextMenu, MenuItem } from 'react-contextmenu';
-import { connectMenu } from 'react-contextmenu/src/connectMenu';
+import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu';
 
 export type DocumentContextMenuStateProps = {
     id: string
