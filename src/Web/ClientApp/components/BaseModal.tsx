@@ -3,7 +3,7 @@ import { Modal } from 'react-bootstrap';
 
 import './BaseModal.css';
 
-type ModalStateProps = {
+export type BaseModalStateProps = {
     title: string
     , children?: JSX.Element
     , buttons: JSX.Element[]
@@ -12,11 +12,11 @@ type ModalStateProps = {
     , closeButton?: boolean
 }
 
-type ModalDispatchProps = {
+export type BaseModalDispatchProps = {
     onHide: () => void
 }
 
-type OwnProps = ModalStateProps & ModalDispatchProps;
+type OwnProps = BaseModalStateProps & BaseModalDispatchProps;
 
 const BaseModal = ({ title, children, buttons, show, onHide, className, closeButton }: OwnProps) =>
     <Modal

@@ -6,15 +6,12 @@
 
 .modal-body { padding-top: 0; padding-bottom: 29px; }
 
-.modal-footer { background: #f7f7f7; border-radius: 5px; padding: 29px 39px; }
-    .modal-footer .btn { width: 49%; }
-
 .modal-backdrop { background-color: #ccc; }
     .modal-backdrop.in { opacity: .85; }
 
-.alert .modal-footer { background: none; padding: 0; border-top: solid 1px #eee; }
-    .alert .modal-footer .btn { width: 50%; border-radius: 0 0 5px 5px; border: 0; padding: 15px; }
-        .alert .modal-footer .btn + .btn { margin: 0; border-radius: 0 0 5px 0; }
+.modal-footer { background: none; padding: 0; border-radius: 5px; border-top: solid 1px #eee; }
+    .modal-footer .btn { width: 50%; border-radius: 0 0 5px 5px; border: 0; padding: 15px; }
+        .modal-footer .btn + .btn { margin: 0; border-radius: 0 0 5px 0; }
 
 @media (min-width: 768px) {
     .modal-xl { width: 90%; max-width: 1200px; }
