@@ -1,8 +1,8 @@
 ﻿import * as React from 'react';
 import { DocumentFile, Library } from '../../models';
-import DocumentResult from './DocumentResult';
+import { DocumentResult, DocumentContextMenu } from './';
+import { ContextMenuTrigger } from 'react-contextmenu';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
 import './DocumentResults.css';
 
@@ -24,21 +24,38 @@ export type DocumentResultsDispatchProps = {
 
 type OwnProps = DocumentResultsStateProps & DocumentResultsDispatchProps;
 
+function collect(props) {
+    return props;
+}
+
 class DocumentResults extends React.Component<OwnProps, null> {
 
     constructor(props: OwnProps) {
         super(props);
 
+        this.handleItemClick = this.handleItemClick.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
     }
 
-    handleEdit(e: React.SyntheticEvent<any>, data: { id: number }) {
-        this.props.onEdit(data.id);
+    handleEdit(e: React.SyntheticEvent<any>, documentId: number) {
+        this.props.onEdit(documentId);
     }
 
-    handleDelete(e: React.SyntheticEvent<any>, data: { id: number }) {
-        this.props.onDelete(data.id);
+    handleDelete(e: React.SyntheticEvent<any>, documentId: number) {
+        this.props.onDelete(documentId);
+    }
+
+    handleItemClick(e: React.SyntheticEvent<any>, action: string, documentId: number) {
+        if (action === 'delete') {
+            this.handleDelete(e, documentId);
+            return;
+        }
+        if (action === 'edit') {
+            this.handleEdit(e, documentId);
+            return;
+        }
+        console.log(`Unknown document context menu action: ${action}`);
     }
 
     render() {
@@ -49,34 +66,25 @@ class DocumentResults extends React.Component<OwnProps, null> {
                 transitionEnterTimeout={500}
                 transitionLeaveTimeout={300}
             >
-
-                <ContextMenuTrigger
-                    id="documentContextMenu"
-                >
-                    {
-                        documents.map(document =>
-                            <DocumentResult
-                                {...document}
-                                key={document.id}
-                                isSelected={selected.indexOf(document.id) !== -1}
-                                onSelect={onSelect}
-                            />
-                        )
-                    }
-                </ContextMenuTrigger>
-                <ContextMenu
-                    id="documentContextMenu"
-                    className="menu"
-                >
-                    <MenuItem data={"some_data"} onClick={this.handleEdit}>
-                        Edit
-                    </MenuItem>
-                    <MenuItem divider />
-                    <MenuItem data={"some_data"} onClick={this.handleDelete}>
-                        Delete
-                    </MenuItem>
-                </ContextMenu>
+                {
+                    documents.map(document =>
+                        <div className="card pulse" key={document.id}>
+                            <ContextMenuTrigger
+                                id="documentContextMenu"
+                                collect={collect}
+                                onItemClick={(e: React.SyntheticEvent<any>, data: { action: string }, target: any) => this.handleItemClick(e, data.action, document.id)}
+                            >
+                                <DocumentResult
+                                    {...document}
+                                    isSelected={selected.indexOf(document.id) !== -1}
+                                    onSelect={onSelect}
+                                />
+                            </ContextMenuTrigger>
+                        </div>
+                    )
+                }
             </ReactCSSTransitionGroup>
+            <DocumentContextMenu />
         </div>;
     }
 }

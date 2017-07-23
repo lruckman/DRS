@@ -53,8 +53,7 @@ class DocumentResult extends React.Component<OwnProps, null> {
         const { isSelected, title, abstract, thumbnailLink } = this.props;
 
         const resultClass = classNames({
-            'active': isSelected,
-            'card pulse': true
+            'active': isSelected
         });
 
         return <div className={resultClass}>
