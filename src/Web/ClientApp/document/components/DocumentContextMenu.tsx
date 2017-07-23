@@ -1,5 +1,6 @@
 ﻿import * as React from 'react';
-import { ContextMenu, MenuItem, connectMenu } from 'react-contextmenu';
+import { ContextMenu, MenuItem } from 'react-contextmenu';
+import { connectMenu } from 'react-contextmenu/src/connectMenu';
 
 export type DocumentContextMenuStateProps = {
     id: string
@@ -23,7 +24,7 @@ const DocumentContextMenu = ({ id, trigger }: OwnProps) => {
             data={{ action: 'edit', id: 0 }}
             onClick={handleItemClick}
         >
-            Edit
+            <i className="fa fa-pencil"></i> Edit
         </MenuItem>
         <MenuItem
             divider
@@ -32,7 +33,7 @@ const DocumentContextMenu = ({ id, trigger }: OwnProps) => {
             data={{ action: 'delete', id: 0 }}
             onClick={handleItemClick}
         >
-            Delete
+            <i className="fa fa-trash"></i> Delete
         </MenuItem>
     </ContextMenu>
 }

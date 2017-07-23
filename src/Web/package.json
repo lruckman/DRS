@@ -37,7 +37,7 @@
     "normalizr": "^3.2.3",
     "react": "^15.3.2",
     "react-addons-css-transition-group": "^15.4.1",
-    "react-bootstrap": "^0.30.7",
+    "react-bootstrap": "^0.31.1",
     "react-contextmenu": "^2.6.5",
     "react-dom": "^15.3.2",
     "react-file-drop": "^0.1.8",
