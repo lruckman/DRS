@@ -8,8 +8,8 @@ const mapStateToProps = (state: ApplicationState): ConfirmationModalStateProps =
     ...state.ui.modal
 });
 
-const mapDispatchToProps = (): ConfirmationModalDispatchProps => ({
-    onHide: ModalActions.hideConfirmation
+const mapDispatchToProps = (dispatch: any): ConfirmationModalDispatchProps => ({
+    onHide: () => dispatch(ModalActions.hideConfirmation())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ConfirmationModal)

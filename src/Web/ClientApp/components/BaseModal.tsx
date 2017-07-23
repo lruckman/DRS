@@ -9,6 +9,7 @@ type ModalStateProps = {
     , buttons: JSX.Element[]
     , show: boolean
     , className: string
+    , closeButton?: boolean
 }
 
 type ModalDispatchProps = {
@@ -17,7 +18,7 @@ type ModalDispatchProps = {
 
 type OwnProps = ModalStateProps & ModalDispatchProps;
 
-const BaseModal = ({ title, children, buttons, show, onHide, className }: OwnProps) =>
+const BaseModal = ({ title, children, buttons, show, onHide, className, closeButton }: OwnProps) =>
     <Modal
         backdrop="static"
         show={show}
@@ -26,7 +27,7 @@ const BaseModal = ({ title, children, buttons, show, onHide, className }: OwnPro
     >
         {
             title &&
-            <Modal.Header closeButton>
+            <Modal.Header closeButton={closeButton}>
                 <Modal.Title>{title}</Modal.Title>
             </Modal.Header>
         }

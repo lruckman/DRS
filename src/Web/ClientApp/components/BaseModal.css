@@ -1,4 +1,6 @@
-﻿.modal-header, .modal-body, .modal-footer { border: none; padding: 29px 39px 0; }
+﻿.modal { color: #333 }
+
+.modal-header, .modal-body, .modal-footer { border: none; padding: 29px 39px 0; }
 
 .modal-header { padding-bottom: 19px; }
 

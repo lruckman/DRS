@@ -26,14 +26,14 @@ class ConfirmationModal extends React.Component<OwnProps, null> {
     }
 
     handleConfirm(isConfirmed: boolean) {
-        this.props.onHide()
+        this.props.onHide();
         this.props.onConfirm(isConfirmed);
     }
 
     render() {
         const buttons = [
-            <Button key="cancelButton" onClick={this.handleConfirm(false)}>{this.props.abortText || "Cancel"}</Button>
-            , <Button key="confirmButton" bsStyle={this.props.destructive ? "danger" : this.props.warning ? "warning" : "primary"} onClick={this.handleConfirm(true)}>{this.props.confirmText || "OK"}</Button>
+            <Button key="cancelButton" onClick={() => this.handleConfirm(false)}>{this.props.abortText || "Cancel"}</Button>
+            , <Button key="confirmButton" bsStyle={this.props.destructive ? "danger" : this.props.warning ? "warning" : "primary"} onClick={() => this.handleConfirm(true)}>{this.props.confirmText || "OK"}</Button>
         ]
 
         const modalProps = {

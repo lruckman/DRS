@@ -3,6 +3,7 @@ import { typeName, isActionType, Action, Reducer } from 'redux-typed';
 import { TypedActionCreator } from '../';
 import { normalize } from '../../utilities';
 import { actionCreators as DocumentActions } from '../entity/Document';
+import { actionCreators as ModalActions } from '../ui/Modal';
 import { DocumentFile } from '../../models';
 
 // -----------------
@@ -51,7 +52,19 @@ class CancelDocumentEdit extends Action {
 
 export const actionCreators = {
     delete: (ids: number | number[]): TypedActionCreator<void> => (dispatch, getState) => {
-        //todo: confirm, then delete
+        const handleConfirmed = (isConfirmed: boolean) => {
+            if (isConfirmed) {
+                dispatch(DocumentActions.delete(ids));
+                return;
+            }
+        }
+
+        const confirmDelete = ModalActions.confirmDelete(
+            handleConfirmed
+            , "Are you sure you want to delete this document?"
+        );
+
+        dispatch(confirmDelete);
     }
     , edit: (ids: number | number[]): TypedActionCreator<void> => (dispatch, getState) => {
 

@@ -55,12 +55,7 @@ body { color: #f7f7f7; }
 /* modify control-labels */
 .control-label, .checkbox > label { color: #999 }
 
-.btn { border: none; font-weight: bold; padding: 8px 16px; text-transform: uppercase }
-    .btn:hover { background-color: rgba(153, 153, 153, 0.2); color: inherit; }
-.btn-primary { background-color: transparent; color: #337ab7; }
-    .btn-primary:hover { background-color: rgba(153, 153, 153, 0.2); color: #337ab7; }
-
-
+.btn { text-transform: uppercase }
 
 .file-drop { bottom: 0; height: 100%; left: 0; position: absolute; right: 0; top: 0; width: 100%; }
 
