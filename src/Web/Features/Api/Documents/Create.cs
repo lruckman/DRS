@@ -102,11 +102,6 @@ namespace Web.Features.Api.Documents
                 revision.Abstract = fileInfo.Abstract;
                 revision.Title = message.File.FileName;
 
-                document.Content = new DocumentContent
-                {
-                    Content = fileInfo.Content
-                };
-
                 try
                 {
                     var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
