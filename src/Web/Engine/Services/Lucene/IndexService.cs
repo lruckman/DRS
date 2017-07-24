@@ -39,6 +39,14 @@ namespace Web.Engine.Services.Lucene
             }
         }
 
+        public void Remove(Revision revision)
+        {
+            using (var indexWriter = GetIndexWriter(_config.IndexPath))
+            {
+                indexWriter.DeleteDocuments(_definition.GetIndex(revision));
+            }
+        }
+
         private static IndexWriter GetIndexWriter(string indexPath, bool isCreate = false)
         {
             var dir = FSDirectory.Open(indexPath);
