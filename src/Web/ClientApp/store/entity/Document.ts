@@ -2,7 +2,7 @@
 import { TypedActionCreator } from '../';
 import { DocumentFile, DocumentSearchResults, NormalizedDocuments } from '../../models';
 import { getEntity, normalize } from '../../utilities';
-import { putJson, getJson, postRaw, deleteRaw } from '../../fetchHelpers';
+import { putJson, getJson, postRaw, deleteJson } from '../../fetchHelpers';
 import queryString from 'query-string';
 
 // -----------------
@@ -88,8 +88,8 @@ class DocumentDeleteFailed extends Action {
     }
 }
 @typeName("DOCUMENT_DELETE_SUCCESS")
-class DocumentDeleteSuccess extends Action {
-    constructor(public ids: number) {
+export class DocumentDeleteSuccess extends Action {
+    constructor(public id: number) {
         super();
     }
 }
@@ -141,19 +141,13 @@ export const actionCreators = {
             })
             .catch((error: Error) => dispatch(new DocumentCreateFailed(error)));
     }
-    , delete: (ids: number | number[]): TypedActionCreator<Promise<number[]>> => (dispatch, getState) => {
+    , delete: (id: number): TypedActionCreator<Promise<number>> => (dispatch, getState) => {
 
         dispatch(new DocumentDeleteRequested());
 
-        const options = {
-            body: { ids }
-        }
-
-        return deleteRaw('/api/documents', options)
-            .then(response => response.json())
-            .then((data: DocumentFile) => {
-                return null; //todo: finish
-            })
+        return deleteJson(`/api/documents/${id}`, {})
+            .then(() => dispatch(new DocumentDeleteSuccess(id)))
+            .then(() => id)
             .catch((error: Error) => dispatch(new DocumentDeleteFailed(error)));
     }
 }
@@ -193,6 +187,18 @@ export const reducer: Reducer<State> = (state, action: any) => {
 
     if (getEntity<ByIdRecordset>(action, 'documents')) {
         return addEntities(state, getEntity<ByIdRecordset>(action, 'documents'));
+    }
+
+    if (isActionType(action, DocumentDeleteSuccess)) {
+        let omit;
+        return {
+            ...state
+            , byId: {
+                ...state.byId
+                , [action.id]: omit
+            }
+            , allIds: state.allIds.filter(id => id != action.id)
+        }
     }
 
     return state || unloadedState;

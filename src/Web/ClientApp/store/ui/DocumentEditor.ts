@@ -51,17 +51,17 @@ class CancelDocumentEdit extends Action {
 }
 
 export const actionCreators = {
-    delete: (ids: number | number[]): TypedActionCreator<void> => (dispatch, getState) => {
+    delete: (id: number): TypedActionCreator<void> => (dispatch, getState) => {
         const handleConfirmed = (isConfirmed: boolean) => {
             if (isConfirmed) {
-                dispatch(DocumentActions.delete(ids));
+                dispatch(DocumentActions.delete(id));
                 return;
             }
         }
 
         const confirmDelete = ModalActions.confirmDelete(
             handleConfirmed
-            , "Are you sure you want to delete this document?"
+            , `Are you sure you want to delete the document titled '${getState().entities.documents.byId[id].title}'?`
         );
 
         dispatch(confirmDelete);
