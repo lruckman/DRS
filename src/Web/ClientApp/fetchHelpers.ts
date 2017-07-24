@@ -2,14 +2,56 @@
 
 const getError = response => response.statusText;
 
-export const checkStatus = (response) => {
-    if (!response.ok) {
-        throw Error(getError(response))
-    }
-    return response;
+const isJsonResponse = (headers: Headers): boolean => {
+    const contentType = headers.get("content-type");
+    return (contentType && contentType.indexOf("application/json") !== -1);
 }
 
-export const parseJSON = (response) => response.json();
+const getErrorMessage = (response): Promise<string> => {
+    const headers: Headers = response.headers;
+    return response.text()
+        .then((body: string) => {
+            if (response.status === 400) {
+                // BAD REQUEST
+                if (isJsonResponse(headers)) {
+                    // JSON RESPONSE
+                    const json = body ? JSON.parse(body) : {};
+                    if (json.errors) {
+                        const flattenedErrors: string[] = [];
+                        Object.keys(json.errors)
+                            .forEach((key, index) => {
+                                const fieldErrors: string[] = json.errors[key];
+                                flattenedErrors.push(`${key}: ${fieldErrors.join(', ')}`);
+                            });
+                        return flattenedErrors.join(', ');
+                    }
+                }
+            }
+
+            return response.statusText;
+        });
+}
+
+export const checkStatus = (response) => {
+    if (response.ok) {
+        return response;
+    }
+
+    return getErrorMessage(response)
+        .then((message: string) => {
+            throw { message: message }
+        });
+}
+
+export const parseJSON = (response) => {
+    if (response.status === 204) {
+        return response;
+    }
+    return response.text()
+        .then((text: string) => {
+            return text ? JSON.parse(text) : {}
+        })
+}
 
 const setupRequestOptions = (options: any = {}, overrideMethod) => {
     if (overrideMethod) {

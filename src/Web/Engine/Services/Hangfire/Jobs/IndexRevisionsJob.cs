@@ -20,10 +20,45 @@ namespace Web.Engine.Services.Hangfire.Jobs
 
         public void Run()
         {
-            foreach (var revision in _db.PublishedRevisions
-                .Include(pr => pr.Document)
-                .Include(pr => pr.Document.Distributions)
-                .Where(pr => pr.EndDate == null && pr.IndexedOn == null)
+            IndexNewDocuments();
+        }
+
+        private void IndexNewDocuments()
+        {
+            foreach (var revision in _db.Revisions
+                .Include(r => r.Document)
+                .Include(r => r.Document.Distributions)
+                .Where(r => r.EndDate == null)
+                .Where(r => r.IndexedOn == null)
+                .Where(r => r.Status == (int)StatusTypes.Active || r.Status == (int)StatusTypes.Deleted)
+                .OrderBy(r => r.CreatedOn) // need to keep this in chronological order
+                .ToArray())
+            {
+                if (revision.Status == (int)StatusTypes.Deleted)
+                {
+                    _fileIndexer.Remove(revision);
+                }
+                else if (revision.Status == (int)StatusTypes.Active)
+                {
+                    _fileIndexer.Index(revision);
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(revision.Status), revision.Status, "Status value not expected.");
+                }
+
+                revision.IndexedOn = DateTimeOffset.Now;
+
+                _db.SaveChanges();
+            }
+        }
+
+        private void RemoveDeletedDocuments()
+        {
+            foreach (var revision in _db.DeletedRevisions
+                .Include(dr => dr.Document)
+                .Include(dr => dr.Document.Distributions)
+                .Where(dr => dr.EndDate == null && dr.IndexedOn == null)
                 .ToArray())
             {
                 _fileIndexer.Index(revision);

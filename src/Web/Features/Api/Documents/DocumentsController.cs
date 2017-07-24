@@ -76,6 +76,16 @@ namespace Web.Features.Api.Documents
                 , document);
         }
 
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(Delete.Command command)
+        {
+            var result = await _mediator
+                .Send(command)
+                .ConfigureAwait(false);
+
+            return NoContent();
+        }
+
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Edit([FromBody]Edit.Command command)
         {

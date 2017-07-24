@@ -1,0 +1,18 @@
+﻿.modal { color: #333 }
+
+.modal-header, .modal-body, .modal-footer { border: none; padding: 29px 39px 0; }
+
+.modal-header { padding-bottom: 19px; }
+
+.modal-body { padding-top: 0; padding-bottom: 29px; }
+
+.modal-backdrop { background-color: #ccc; }
+    .modal-backdrop.in { opacity: .85; }
+
+.modal-footer { background: none; padding: 0; border-radius: 5px; border-top: solid 1px #eee; }
+    .modal-footer .btn { width: 50%; border-radius: 0 0 5px 5px; border: 0; padding: 15px; }
+        .modal-footer .btn + .btn { margin: 0; border-radius: 0 0 5px 0; }
+
+@media (min-width: 768px) {
+    .modal-xl { width: 90%; max-width: 1200px; }
+}

@@ -7,5 +7,6 @@ namespace Web.Engine.Services
     {
         void Index(IEnumerable<Revision> entities);
         void Index(Revision revision);
+        void Remove(Revision revision);
     }
 }

@@ -1,208 +1,68 @@
 ﻿body { background: #333; }
-body { color: #f7f7f7;}
+body { color: #f7f7f7; }
 
-.body-content { padding-top: 20px; width: 100%;}
+.body-content { padding-top: 20px; width: 100%; }
 
-.search-form { position: relative; z-index: 9;}
+.search-form { position: relative; z-index: 9; }
 .search { color: #aaa; font-size: 16px; position: relative; }
-    .search input { text-indent: 24px;}
-    .search .fa-search {  left: 10px; position: absolute; top: 8px; }
+    .search input { text-indent: 24px; }
+    .search .fa-search { left: 10px; position: absolute; top: 8px; }
 
-.card { float: left; margin-bottom: 20px; margin-right: 20px; width: 200px;}
+.card { float: left; margin-bottom: 20px; margin-right: 20px; width: 200px; }
     .card.active { background: blue; }
-    .card .thumbnail { background-position: 50% 50%; background-size: cover; height: 275px; margin-bottom:0;width:200px }
+    .card .thumbnail { background-position: 50% 50%; background-size: cover; height: 275px; margin-bottom: 0; width: 200px }
     .card .title-container { padding: 5px 10px; }
     .card .title { color: #fff; display: block; }
     .card .abstract { color: #999; display: block; font-size: .9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .search-box .card { max-height: 322px; min-height: 322px;}
+.search-box .card { max-height: 322px; min-height: 322px; }
 
-.pulse {
-  -webkit-animation-name: pulse;
-  animation-name: pulse;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-  }
-  @-webkit-keyframes pulse {
-  0% {
-  -webkit-transform: scale3d(1, 1, 1);
-  transform: scale3d(1, 1, 1);
-  }
-  50% {
-  -webkit-transform: scale3d(1.05, 1.05, 1.05);
-  transform: scale3d(1.05, 1.05, 1.05);
-  }
-  100% {
-  -webkit-transform: scale3d(1, 1, 1);
-  transform: scale3d(1, 1, 1);
-  }
-  }
-  @keyframes pulse {
-  0% {
-  -webkit-transform: scale3d(1, 1, 1);
-  transform: scale3d(1, 1, 1);
-  }
-  50% {
-  -webkit-transform: scale3d(1.05, 1.05, 1.05);
-  transform: scale3d(1.05, 1.05, 1.05);
-  }
-  100% {
-  -webkit-transform: scale3d(1, 1, 1);
-  transform: scale3d(1, 1, 1);
-  }
-  } 
-  
-  .slide-in-right {
-  -webkit-animation-name: slideInRight;
-  animation-name: slideInRight;
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both;
-  }
-  @-webkit-keyframes slideInRight {
-  0% {
-  -webkit-transform: translateX(100%);
-  transform: translateX(100%);
-  visibility: visible;
-  }
-  100% {
-  -webkit-transform: translateX(0);
-  transform: translateX(0);
-  }
-  }
-  @keyframes slideInRight {
-  0% {
-  -webkit-transform: translateX(100%);
-  transform: translateX(100%);
-  visibility: visible;
-  }
-  100% {
-  -webkit-transform: translateX(0);
-  transform: translateX(0);
-  }
-  } 
+.pulse { -webkit-animation-name: pulse; animation-name: pulse; -webkit-animation-duration: 1s; animation-duration: 1s; -webkit-animation-fill-mode: both; animation-fill-mode: both; }
 
-
-.result-enter {
-  opacity: 0.01;
+@-webkit-keyframes pulse {
+    0% { -webkit-transform: scale3d(1, 1, 1); transform: scale3d(1, 1, 1); }
+    50% { -webkit-transform: scale3d(1.05, 1.05, 1.05); transform: scale3d(1.05, 1.05, 1.05); }
+    100% { -webkit-transform: scale3d(1, 1, 1); transform: scale3d(1, 1, 1); }
 }
 
-.result-enter.result-enter-active {
-  opacity: 1;
-  transition: opacity 500ms ease-in;
+@keyframes pulse {
+    0% { -webkit-transform: scale3d(1, 1, 1); transform: scale3d(1, 1, 1); }
+    50% { -webkit-transform: scale3d(1.05, 1.05, 1.05); transform: scale3d(1.05, 1.05, 1.05); }
+    100% { -webkit-transform: scale3d(1, 1, 1); transform: scale3d(1, 1, 1); }
 }
 
-.result-leave {
-  opacity: 1;
+.slide-in-right { -webkit-animation-name: slideInRight; animation-name: slideInRight; -webkit-animation-duration: 1s; animation-duration: 1s; -webkit-animation-fill-mode: both; animation-fill-mode: both; }
+
+@-webkit-keyframes slideInRight {
+    0% { -webkit-transform: translateX(100%); transform: translateX(100%); visibility: visible; }
+    100% { -webkit-transform: translateX(0); transform: translateX(0); }
 }
 
-.result-leave.result-leave-active {
-  opacity: 0.01;
-  transition: opacity 300ms ease-in;
+@keyframes slideInRight {
+    0% { -webkit-transform: translateX(100%); transform: translateX(100%); visibility: visible; }
+    100% { -webkit-transform: translateX(0); transform: translateX(0); }
 }
+
+
+.result-enter { opacity: 0.01; }
+
+    .result-enter.result-enter-active { opacity: 1; transition: opacity 500ms ease-in; }
+
+.result-leave { opacity: 1; }
+
+    .result-leave.result-leave-active { opacity: 0.01; transition: opacity 300ms ease-in; }
 
 /* modify control-labels */
 .control-label, .checkbox > label { color: #999 }
 
+.btn { text-transform: uppercase }
 
-/* modify modals */
-.modal-body { padding: 24px 24px 16px; }
-.modal-content { border-radius: 2px; }
-.modal-header { border: none; padding: 24px 24px 0; }
-.modal-footer { border: none; padding: 0 7px 7px; }
-.modal-title { color: #333; }
+.file-drop { bottom: 0; height: 100%; left: 0; position: absolute; right: 0; top: 0; width: 100%; }
 
-.btn { border: none; font-weight: bold; padding: 8px 16px; text-transform: uppercase }
-.btn:hover { background-color:rgba(153, 153, 153, 0.2);color: inherit; }
-.btn-primary { background-color: transparent; color: #337ab7; }
-.btn-primary:hover { background-color:rgba(153, 153, 153, 0.2);color: #337ab7; }
+    .file-drop > .file-drop-target { -moz-transition: all 150ms linear; -ms-flex-align: center; -ms-flex-direction: column; -ms-flex-line-pack: center; -ms-flex-pack: center; -ms-transition: all 150ms linear; -o-transition: all 150ms linear; -webkit-align-content: center; -webkit-align-items: center; -webkit-box-align: center; -webkit-box-direction: normal; -webkit-box-orient: vertical; -webkit-box-pack: center; -webkit-flex-direction: column; -webkit-justify-content: center; -webkit-transition: all 150ms linear; align-content: center; align-items: center; display: flex; display: -webkit-box; display: -webkit-flex; display: -ms-flexbox; flex-direction: column; font-weight: bold; height: 100%; justify-content: center; left: 0; opacity: 0; position: absolute; text-align: center; top: 0; /* --------------- */ /* a little transition sizzle */ transition: all 150ms linear; width: 100%; /* --------------- */ }
+        .file-drop > .file-drop-target > .inner { -moz-transition: all 150ms linear; -ms-flex-align: center; -ms-flex-direction: column; -ms-flex-line-pack: center; -ms-flex-pack: center; -ms-transition: all 150ms linear; -o-transition: all 150ms linear; -webkit-align-content: center; -webkit-align-items: center; -webkit-box-align: center; -webkit-box-direction: normal; -webkit-box-orient: vertical; -webkit-box-pack: center; -webkit-flex-direction: column; -webkit-justify-content: center; -webkit-transition: all 150ms linear; align-content: center; align-items: center; /*border: 2px dashed #ccc;*/ bottom: 20px; display: flex; display: -webkit-box; display: -webkit-flex; display: -ms-flexbox; flex-direction: column; height: auto; left: 20px; position: absolute; right: 20px; top: 20px; width: auto; }
+        .file-drop > .file-drop-target h4 { font-weight: bold; }
 
+        .file-drop > .file-drop-target.file-drop-dragging-over-frame { background-color: rgba(153, 153, 153, 0.85); color: #fff; opacity: 1.0; z-index: 9999; }
 
-
-.file-drop {
-    bottom: 0;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 100%;
-}
-
-    .file-drop > .file-drop-target {
-        -moz-transition: all 150ms linear;
-        -ms-flex-align: center;
-        -ms-flex-direction: column;
-        -ms-flex-line-pack: center;
-        -ms-flex-pack: center;
-        -ms-transition: all 150ms linear;
-        -o-transition: all 150ms linear;
-        -webkit-align-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -webkit-box-direction: normal;
-        -webkit-box-orient: vertical;
-        -webkit-box-pack: center;
-        -webkit-flex-direction: column;
-        -webkit-justify-content: center;
-        -webkit-transition: all 150ms linear;
-        align-content: center;
-        align-items: center;
-        display: flex;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        flex-direction: column;
-        font-weight: bold;
-        height: 100%;
-        justify-content: center;
-        left: 0;
-        opacity: 0;
-        position: absolute;
-        text-align: center;
-        top: 0;
-        /* --------------- */
-        /* a little transition sizzle */
-        transition: all 150ms linear;
-        width: 100%;
-        /* --------------- */
-    }
-    .file-drop > .file-drop-target > .inner { 
-        -moz-transition: all 150ms linear;
-        -ms-flex-align: center;
-        -ms-flex-direction: column;
-        -ms-flex-line-pack: center;
-        -ms-flex-pack: center;
-        -ms-transition: all 150ms linear;
-        -o-transition: all 150ms linear;
-        -webkit-align-content: center;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -webkit-box-direction: normal;
-        -webkit-box-orient: vertical;
-        -webkit-box-pack: center;
-        -webkit-flex-direction: column;
-        -webkit-justify-content: center;
-        -webkit-transition: all 150ms linear;
-        align-content: center;
-        align-items: center;
-        /*border: 2px dashed #ccc;*/
-        bottom: 20px;
-        display: flex;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox; flex-direction: column; height: auto; left: 20px;  position:absolute; right: 20px; top: 20px; width: auto;}
-    .file-drop > .file-drop-target h4 { font-weight: bold; }
-
-        .file-drop > .file-drop-target.file-drop-dragging-over-frame {
-            background-color: rgba(153, 153, 153, 0.85);
-            color: #fff;
-            opacity: 1.0;
-            z-index: 9999;
-        }
-
-        .file-drop > .file-drop-target.file-drop-dragging-over-target {
-        }
+        .file-drop > .file-drop-target.file-drop-dragging-over-target { }

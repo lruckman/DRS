@@ -1,4 +1,5 @@
-
+export { default as BaseModal } from './BaseModal';
+export { default as ConfirmationModal, ConfirmationModalStateProps, ConfirmationModalDispatchProps } from './ConfirmationModal';
 export { default as Search } from './Search';
 
 export { default as Layout, LayoutProps } from './Layout';

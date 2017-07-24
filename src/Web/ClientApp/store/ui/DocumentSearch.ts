@@ -3,7 +3,7 @@ import { typeName, isActionType, Action, Reducer } from 'redux-typed';
 import { TypedActionCreator } from '../';
 import { DocumentSearchResults, NormalizedDocuments } from '../../models';
 import { normalize } from '../../utilities';
-import { DocumentSearchFailed, DocumentSearchRequested, DocumentSearchSuccess } from '../entity/Document';
+import { DocumentSearchFailed, DocumentSearchRequested, DocumentSearchSuccess, DocumentDeleteSuccess } from '../entity/Document';
 
 // -----------------
 // STATE
@@ -101,6 +101,14 @@ export const reducer: Reducer<State> = (state, action: any) => {
         return {
             ...state
             , selectedIds: state.selectedIds.filter(selected => !action.ids.find(deselected => selected != deselected))
+        }
+    }
+
+    if (isActionType(action, DocumentDeleteSuccess)) {
+        return {
+            ...state
+            , allIds: state.allIds.filter(id => id != action.id)
+            , selectedIds: state.allIds.filter(id => id != action.id)
         }
     }
 
