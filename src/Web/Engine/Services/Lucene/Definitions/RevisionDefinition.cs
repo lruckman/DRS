@@ -19,12 +19,12 @@ namespace Web.Engine.Services.Lucene.Definitions
         public const string RevisionDistributionGroupField = "distgrp";
 
         private readonly IFileDecoder _decoder;
-        private readonly IFileEncryptor _encryptor;
+        private readonly IFileStorage _fileStorage;
 
-        public RevisionDefinition(IFileDecoder decoder, IFileEncryptor encryptor)
+        public RevisionDefinition(IFileDecoder decoder, IFileStorage fileStorage)
         {
             _decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
-            _encryptor = encryptor ?? throw new ArgumentNullException(nameof(encryptor));
+            _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
         }
 
         public Term GetIndex(Revision entity)
@@ -38,12 +38,11 @@ namespace Web.Engine.Services.Lucene.Definitions
                         entity.DocumentId,
                         Field.Store.YES);
 
-            var fileKey = _encryptor
-                .DecryptBase64(entity.AccessKey);
+            var file = _fileStorage
+                .Open(entity.Path, entity.Extension, entity.AccessKey);
 
             var fileinfo = _decoder.Decode(
-                entity.Extension,
-                _encryptor.DecryptFile(entity.Path, fileKey));
+                entity.Extension, file.FileContents); // TODO build decoder into FileMeta object?
 
             if (!string.IsNullOrWhiteSpace(fileinfo.Content))
             {

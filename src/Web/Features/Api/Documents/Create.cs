@@ -125,12 +125,13 @@ namespace Web.Features.Api.Documents
                 {
                     // some clean ups
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    await _fileStorage
+                        .TryDelete(revision.ThumbnailPath)
+                        .ConfigureAwait(false);
 
-                    _fileStorage.TryDelete(revision.ThumbnailPath);
-                    _fileStorage.TryDelete(revision.Path);
-
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                    await _fileStorage
+                        .TryDelete(revision.Path)
+                        .ConfigureAwait(false);
 
                     throw;
                 }

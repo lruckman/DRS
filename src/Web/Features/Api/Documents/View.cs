@@ -1,8 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using MimeTypes;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
 using Web.Engine.Helpers;
 using Web.Engine.Services;
@@ -30,20 +28,17 @@ namespace Web.Features.Api.Documents
 
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
-            private readonly ApplicationDbContext _db;
-            private readonly IFileEncryptor _encryptor;
+            private readonly IFileStorage _fileStorage;
 
-            public QueryHandler(ApplicationDbContext db, IFileEncryptor encryptor)
+            public QueryHandler(IFileStorage fileStorage)
             {
-                _db = db;
-                _encryptor = encryptor;
+                _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
             public async Task<Result> Handle(Query message)
             {
-                var currentRevision = await _db.PublishedRevisions
-                    .Where(pr => pr.DocumentId == message.Id.Value && pr.EndDate == null)
-                    .SingleOrDefaultAsync()
+                var currentRevision = await _fileStorage
+                    .Open(message.Id.Value)
                     .ConfigureAwait(false);
 
                 if (currentRevision == null)
@@ -51,14 +46,10 @@ namespace Web.Features.Api.Documents
                     return null;
                 }
 
-                var fileKey = _encryptor
-                    .DecryptBase64(currentRevision.AccessKey);
-
                 return new Result
                 {
-                    FileContents = _encryptor
-                        .DecryptFile(currentRevision.Path, fileKey),
-                    ContentType = MimeTypeMap.GetMimeType(currentRevision.Extension)
+                    FileContents = currentRevision.FileContents,
+                    ContentType = currentRevision.ContentType
                 };
             }
         }
