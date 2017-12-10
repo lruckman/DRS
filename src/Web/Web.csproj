@@ -7,6 +7,7 @@
       xcopy /Y "C:\Development\DRS\src\Web\tessdata\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\win7-x86\tessdata\"
       xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x86\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\win7-x86\x86\"
       xcopy /I /E /Y "C:\Development\DRS\src\Web\tessdata\x64\*.*" "C:\Development\DRS\src\Web\bin\Debug\net451\win7-x86\x64\"</PreBuildEvent>
+    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\Debug\</OutputPath>
@@ -73,8 +74,10 @@
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0-msbuild3-final" />
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.0-msbuild3-final" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Engine\Decoders\Impl\" />
     <Folder Include="wwwroot\dist\" />
   </ItemGroup>
 </Project>

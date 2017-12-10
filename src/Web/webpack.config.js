@@ -1,7 +1,6 @@
 ﻿const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 var extractCSS = new ExtractTextPlugin('vendor.bundle.css');
 const clientBundleOutputDir = './wwwroot/dist';
@@ -39,18 +38,14 @@ var clientBundleConfig = {
         new ExtractTextPlugin('vendor.bundle.css')
         , new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' }) // Moves vendor content out of other bundles
         , new webpack.optimize.ModuleConcatenationPlugin()
-        /*, new CircularDependencyPlugin({
-            // exclude detection of files based on a RegExp
-            exclude: /a\.js|node_modules/,
-            // add errors to webpack instead of warnings
-            failOnError: false
-        })*/
+        /*
         , new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify('production')
             }
         })
         , new webpack.optimize.UglifyJsPlugin()
+        */
     ]
 };
 
