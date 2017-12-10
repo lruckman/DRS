@@ -39,17 +39,14 @@ namespace Web.Engine.Services.Lucene.Definitions
                         Field.Store.YES);
 
             var file = _fileStorage
-                .Open(entity.Path, entity.Extension, entity.AccessKey);
+                .Open(entity.Path, entity.AccessKey);
 
-            var fileinfo = _decoder.Decode(
-                entity.Extension, file.FileContents); // TODO build decoder into FileMeta object?
-
-            if (!string.IsNullOrWhiteSpace(fileinfo.Content))
+            if (!string.IsNullOrWhiteSpace(file.Content))
             {
                 yield return
                     new TextField(
                         Fields.RevisionContentField,
-                        fileinfo.Content,
+                        file.Content,
                         Field.Store.NO);
             }
 

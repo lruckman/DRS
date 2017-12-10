@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Web.Engine.Helpers;
 using Web.Engine.Services;
@@ -28,28 +30,35 @@ namespace Web.Features.Api.Documents
 
         public class QueryHandler : IAsyncRequestHandler<Query, Result>
         {
+            private readonly ApplicationDbContext _db;
             private readonly IFileStorage _fileStorage;
 
-            public QueryHandler(IFileStorage fileStorage)
+            public QueryHandler(ApplicationDbContext db, IFileStorage fileStorage)
             {
+                _db = db;
                 _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
             public async Task<Result> Handle(Query message)
             {
-                var currentRevision = await _fileStorage
-                    .Open(message.Id.Value)
+                var revision = await _db.Revisions
+                    .Where(r => r.DocumentId == message.Id.Value)
+                    .Where(r => r.EndDate == null)
+                    .SingleAsync()
                     .ConfigureAwait(false);
 
-                if (currentRevision == null)
+                var file = _fileStorage
+                    .Open(revision.Path, revision.AccessKey);
+
+                if (revision == null)
                 {
                     return null;
                 }
 
                 return new Result
                 {
-                    FileContents = currentRevision.FileContents,
-                    ContentType = currentRevision.ContentType
+                    FileContents = file.Buffer,
+                    ContentType = file.ContentType
                 };
             }
         }

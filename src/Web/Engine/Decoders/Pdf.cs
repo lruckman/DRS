@@ -1,17 +1,22 @@
-﻿using System.Drawing.Imaging;
-using System.IO;
-using Ghostscript.NET.Rasterizer;
+﻿using Ghostscript.NET.Rasterizer;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using Web.Engine.Extensions;
 
 namespace Web.Engine.Codecs.Decoders
 {
-    public class Pdf : File
+    public class Pdf : DecoderBase
     {
-        public override string ExtractContent(int? pageNumber)
+        public Pdf() : base(new[] { ".pdf" })
         {
-            using (var reader = new PdfReader(Buffer))
+        }
+
+        public override string TextContent(byte[] buffer, int? pageNumber)
+        {
+            using (var reader = new PdfReader(buffer))
             {
                 if (pageNumber != null)
                 {
@@ -32,25 +37,25 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        public override int ExtractPageCount()
+        public override int PageCount(byte[] buffer)
         {
-            using (var reader = new PdfReader(Buffer))
+            using (var reader = new PdfReader(buffer))
             {
                 return reader.NumberOfPages;
             }
         }
 
-        public override byte[] ExtractThumbnail(int width, int? height, int pageNumber)
+        public override byte[] CreateThumbnail(byte[] buffer, Size size, int pageNumber)
         {
             using (var rasterizer = new GhostscriptRasterizer())
             {
-                using (var stream = new MemoryStream(Buffer))
+                using (var stream = new MemoryStream(buffer))
                 {
                     rasterizer.Open(stream);
 
                     using (var thumbnail = rasterizer
                         .GetPage(200, 200, pageNumber)
-                        .ToFixedSize(width, height))
+                        .ToFixedSize(size.Width, size.Height))
                     {
                         using (var ms = new MemoryStream())
                         {
@@ -61,13 +66,6 @@ namespace Web.Engine.Codecs.Decoders
                     }
                 }
             }
-        }
-
-        public static readonly string[] SupportedFileTypes = {".pdf"};
-
-        public Pdf(byte[] buffer, DRSConfig config)
-            : base(buffer, config)
-        {
         }
     }
 }

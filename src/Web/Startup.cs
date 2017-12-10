@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using StructureMap;
@@ -106,6 +107,8 @@ namespace Web
             // populates structuremap with .NET services
 
             container.Populate(services);
+
+            FileDecoder.RegisterFileDecoders(container.GetInstance<IOptions<DRSConfig>>());
 
             return container.GetInstance<IServiceProvider>();
         }

@@ -36,24 +36,19 @@ namespace Web.Features.Api.Documents
             private readonly ApplicationDbContext _db;
             private readonly IUserContext _userContext;
             private readonly IFileStorage _fileStorage;
-            private readonly IFileDecoder _decoder;
             private readonly IFileEncryptor _encryptor;
 
             public CommandHandler(ApplicationDbContext db, IUserContext userContext,
-                IFileStorage fileStorage, IFileDecoder decoder, IFileEncryptor fileEncryptor)
+                IFileStorage fileStorage, IFileEncryptor fileEncryptor)
             {
                 _db = db;
                 _userContext = userContext;
-                _decoder = decoder;
                 _encryptor = fileEncryptor;
                 _fileStorage = fileStorage;
             }
 
             public async Task<Result> Handle(Command message)
             {
-                var fileKey = Encoding.UTF8
-                    .GetBytes(Guid.NewGuid().ToString("N"));
-
                 // create and add the document
 
                 var document = new Document
@@ -62,15 +57,18 @@ namespace Web.Features.Api.Documents
                     CreatedOn = DateTimeOffset.Now
                 };
 
+                var accessKey = _encryptor
+                        .Encrypt(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N")), null)
+                        .ToBase64String();
+
                 var revision = new PublishedRevision
                 {
                     CreatedBy = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now,
-                    Extension = Path.GetExtension(message.File.FileName ?? "")
+                    Extension = Path
+                        .GetExtension(message.File.FileName ?? "")
                         .ToLowerInvariant(),
-                    AccessKey = _encryptor
-                        .Encrypt(fileKey, null)
-                        .ToBase64String(),
+                    AccessKey = accessKey,
                     Size = message.File.Length,
                     VersionNum = 0
                 };
@@ -90,30 +88,27 @@ namespace Web.Features.Api.Documents
                     .FirstAsync()
                     .ConfigureAwait(false));
 
-                // get a parser
-
-                var fileInfo = _decoder
-                    .Decode(message.File.FileName, message.File
-                    .OpenReadStream()
-                    .ToByteArray());
+                var file = new FileMeta(
+                    message.File.OpenReadStream().ToByteArray(),
+                    message.File.FileName);
 
                 // metadata
 
-                revision.Abstract = fileInfo.Abstract;
+                revision.Abstract = file.Abstract;
                 revision.Title = message.File.FileName;
 
                 try
                 {
-                    var thumbnail = fileInfo.CreateThumbnail(new Size(600, 600), 1);
+                    var thumbnail = file.CreateThumbnail(new Size(600, 600), 1);
 
                     revision.ThumbnailPath = await _fileStorage
-                        .Save(thumbnail, fileKey)
+                        .Save(thumbnail, accessKey)
                         .ConfigureAwait(false);
 
-                    revision.PageCount = fileInfo.PageCount;
+                    revision.PageCount = file.PageCount;
 
                     revision.Path = await _fileStorage
-                        .Save(fileInfo.Buffer, fileKey)
+                        .Save(file.Buffer, accessKey)
                         .ConfigureAwait(false);
 
                     // save and commit

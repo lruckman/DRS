@@ -1,71 +1,55 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Web.Models;
 using File = System.IO.File;
-using System.Linq;
-using MimeTypes;
 
 namespace Web.Engine.Services
 {
     public class EncryptedFileStorage : IFileStorage
     {
-        private readonly DRSConfig _config;
-        private readonly ApplicationDbContext _db;
+        private readonly string _storageRoot;
         private readonly IFileEncryptor _encryptor;
+        private int _directorySeed;
 
         public EncryptedFileStorage(IOptions<DRSConfig> config, ApplicationDbContext db, IFileEncryptor encryptor)
         {
-            _config = config.Value;
-            _encryptor = encryptor;
-            _db = db;
+            if (config.Value == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+
+            _encryptor = encryptor ?? throw new ArgumentNullException(nameof(encryptor));
+            _storageRoot = config.Value.DocumentPath;
+
+            if (db == null)
+            {
+                throw new ArgumentNullException(nameof(db));
+            }
+
+            _directorySeed = db.Documents
+                .Max(d => d.Id);
         }
 
-        public async Task<FileMeta> Open(int documentId, int? versionNum = null)
-        {
-            var revision = await GetRevision(documentId, versionNum)
-                .ConfigureAwait(false);
-
-            return Open(
-                revision.Path,
-                revision.Extension,
-                revision.AccessKey
-                );
-        }
-
-        public async Task<FileMeta> OpenThumbnail(int documentId, int? versionNum = null)
-        {
-            var revision = await GetRevision(documentId, versionNum)
-                .ConfigureAwait(false);
-
-            return Open(
-                revision.ThumbnailPath,
-                revision.Extension,
-                revision.AccessKey
-                );
-        }
-
-        public FileMeta Open(string path, string extension, string accessKey)
+        public FileMeta Open(string path, string accessKey)
         {
             var fileContents = DecryptFile(path, accessKey);
+            var extension = Path.GetExtension(path);
 
-            var contentType = MimeTypeMap.GetMimeType(extension);
-
-            return new FileMeta(fileContents, contentType);
+            return new FileMeta(fileContents, extension);
         }
 
-        public async Task<string> Save(byte[] buffer, byte[] fileKey)
+        public async Task<string> Save(byte[] buffer, string accessKey)
         {
-            var path = await GetNewFileName(_config.DocumentPath)
-                .ConfigureAwait(false);
+            var path = GetNewFileName(++_directorySeed, _storageRoot);
 
-            await CreateDirectoryIfMissing(Path.GetDirectoryName(path))
+            await CreateDirectoryIfNotFound(Path.GetDirectoryName(path))
                 .ConfigureAwait(false);
 
             buffer = _encryptor
-                .Encrypt(buffer, fileKey);
+                .Encrypt(buffer, DecryptKey(accessKey));
 
             using (var fileStream = File.Create(path))
             {
@@ -77,11 +61,11 @@ namespace Web.Engine.Services
             return path;
         }
 
-        public async Task TryDelete(string filePath)
+        public async Task TryDelete(string path)
         {
             try
             {
-                await Delete(filePath)
+                await Delete(path)
                     .ConfigureAwait(false);
             }
             catch
@@ -89,33 +73,29 @@ namespace Web.Engine.Services
             }
         }
 
-        public async Task Delete(string filePath)
+        public async Task Delete(string path)
         {
-            if (!File.Exists(filePath))
+            if (!File.Exists(path))
             {
                 return;
             }
 
             await Task.Factory
-                .StartNew(() => File.Delete(filePath))
+                .StartNew(() => File.Delete(path))
                 .ConfigureAwait(false);
         }
 
-        private async Task<string> GetNewFileName(string rootPath)
+        private static string GetNewFileName(int directorySeed, string rootPath)
         {
-            var seed = await _db.Documents
-                .MaxAsync(d => d.Id)
-                .ConfigureAwait(false);
-
-            var subFolder1 = Math.Ceiling((seed + 1) / 1024m / 1024m / 1024m);
-            var subFolder2 = Math.Ceiling(subFolder1 / 1024m / 1024m);
-            var subFolder3 = Math.Ceiling(subFolder2 / 1024m);
+            var subFolder1 = Math.Floor(directorySeed / 1024m / 1024m / 1024m);
+            var subFolder2 = Math.Floor(subFolder1 / 1024m / 1024m);
+            var subFolder3 = Math.Floor(subFolder2 / 1024m);
 
             return Path.Combine(rootPath,
                 $@"{subFolder1}\{subFolder2}\{subFolder3}\{Guid.NewGuid():N}.bin");
         }
 
-        private Task CreateDirectoryIfMissing(string dirPath)
+        private Task CreateDirectoryIfNotFound(string dirPath)
         {
             if (Directory.Exists(dirPath))
             {
@@ -126,27 +106,10 @@ namespace Web.Engine.Services
                 .StartNew(() => Directory.CreateDirectory(dirPath));
         }
 
-        private Task<Revision> GetRevision(int documentId, int? versionNum = null)
-        {
-            if (versionNum != null)
-            {
-                return _db.Revisions
-                    .FindAsync(documentId, versionNum);
-            }
-
-            return _db.Revisions
-                    .Where(r => r.DocumentId == documentId)
-                    .Where(r => r.EndDate == null)
-                    .SingleAsync();
-        }
-
-        private byte[] DecryptFile(string path, string accessKey)
-        {
-            var fileKey = _encryptor
+        private byte[] DecryptKey(string accessKey) => _encryptor
                     .DecryptBase64(accessKey);
 
-            return _encryptor
-                .DecryptFile(path, fileKey);
-        }
+        private byte[] DecryptFile(string path, string accessKey) => _encryptor
+                .DecryptFile(path, DecryptKey(accessKey));
     }
 }
