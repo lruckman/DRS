@@ -1,18 +1,17 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Linq;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
 
 namespace Web.Models
 {
     public static class SeedData
     {
-        public static void EnsureSampleData(this IApplicationBuilder app)
+        public static void EnsureSampleData(this IServiceProvider services)
         {
-            var context = (ApplicationDbContext)app.ApplicationServices
+            var context = (ApplicationDbContext)services
                 .GetService(typeof(ApplicationDbContext));
 
-            var userManager = (UserManager<ApplicationUser>)app.ApplicationServices
+            var userManager = (UserManager<ApplicationUser>)services
                 .GetService(typeof(UserManager<ApplicationUser>));
 
             // add a test user

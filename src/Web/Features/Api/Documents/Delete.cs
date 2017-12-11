@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
 using Web.Engine.Helpers;
@@ -29,7 +30,7 @@ namespace Web.Features.Api.Documents
             }
         }
 
-        public class CommandHandler : IAsyncRequestHandler<Command, Result>
+        public class CommandHandler : IRequestHandler<Command, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IUserContext _userContext;
@@ -43,7 +44,7 @@ namespace Web.Features.Api.Documents
                 _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             }
 
-            public async Task<Result> Handle(Command message)
+            public async Task<Result> Handle(Command message, CancellationToken cancellationToken)
             {
                 var currentVersion = await _db.PublishedRevisions
                     .SingleOrDefaultAsync(r => r.DocumentId == message.Id && r.EndDate == null)

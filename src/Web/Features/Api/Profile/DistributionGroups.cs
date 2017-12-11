@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
 using Web.Models;
@@ -21,7 +22,7 @@ namespace Web.Features.Api.Profile
         {
         }
 
-        public class QueryHandler : IAsyncRequestHandler<Query, Result[]>
+        public class QueryHandler : IRequestHandler<Query, Result[]>
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _config;
@@ -41,7 +42,7 @@ namespace Web.Features.Api.Profile
                     .Where(dg => dg.Status == StatusTypes.Active);
             }
 
-            public Task<Result[]> Handle(Query message) => _db.NamedDistributions
+            public Task<Result[]> Handle(Query request, CancellationToken cancellationToken) => _db.NamedDistributions
                     .Where(nd => nd.ApplicationUserId == _userContext.UserId)
                     .Select(nd => nd.DistributionGroup)
                     .Where(dg => dg.Status == StatusTypes.Active)

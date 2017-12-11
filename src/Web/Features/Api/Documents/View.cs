@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine.Helpers;
 using Web.Engine.Services;
@@ -28,7 +29,7 @@ namespace Web.Features.Api.Documents
             }
         }
 
-        public class QueryHandler : IAsyncRequestHandler<Query, Result>
+        public class QueryHandler : IRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IFileStorage _fileStorage;
@@ -39,10 +40,10 @@ namespace Web.Features.Api.Documents
                 _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
-            public async Task<Result> Handle(Query message)
+            public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var revision = await _db.Revisions
-                    .Where(r => r.DocumentId == message.Id.Value)
+                    .Where(r => r.DocumentId == request.Id.Value)
                     .Where(r => r.EndDate == null)
                     .SingleAsync()
                     .ConfigureAwait(false);

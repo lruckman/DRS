@@ -4,7 +4,7 @@ using Hangfire;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +14,6 @@ using Newtonsoft.Json.Serialization;
 using Serilog;
 using StructureMap;
 using System;
-using System.IO;
 using Web.Engine;
 using Web.Engine.Filters;
 using Web.Engine.Services;
@@ -27,28 +26,19 @@ namespace Web
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .WriteTo.LiterateConsole()
-                .WriteTo.Async(a => a.RollingFile(Path.Combine(env.ContentRootPath, "logs/log-{Date}.txt")))
-                .CreateLogger();
+            //Log.Logger = new LoggerConfiguration()
+            //    .Enrich.FromLogContext()
+            //    .WriteTo.LiterateConsole()
+            //    .WriteTo.Async(a => a.RollingFile(Path.Combine(env.ContentRootPath, "logs/log-{Date}.txt")))
+            //    .CreateLogger();
 
-            // Set up configuration sources.
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", true, true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
-                .AddEnvironmentVariables();
-
-            Configuration = builder.Build();
-
-            DefaultConnectionString = Configuration.GetConnectionString("DefaultConnection");
+            Configuration = configuration;
         }
 
-        private static IConfigurationRoot Configuration { get; set; }
-        private static string DefaultConnectionString { get; set; }
+        private static IConfiguration Configuration { get; set; }
+        private static string DefaultConnectionString => Configuration.GetConnectionString("DefaultConnection");
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
@@ -63,6 +53,8 @@ namespace Web
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddAuthentication();
 
             services.AddHangfire(x => x.UseSqlServerStorage(DefaultConnectionString));
 
@@ -136,10 +128,6 @@ namespace Web
                 //    HotModuleReplacement = true,
                 //    ReactHotModuleReplacement = true
                 //});
-
-                // prepopulates database
-
-                app.EnsureSampleData();
             }
             else
             {
@@ -147,7 +135,7 @@ namespace Web
             }
 
             app.UseStaticFiles();
-            app.UseIdentity();
+            app.UseAuthentication();
 
             // Hangfire
 

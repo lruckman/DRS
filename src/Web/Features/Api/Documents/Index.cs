@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
 using Web.Engine.Helpers;
@@ -41,7 +42,7 @@ namespace Web.Features.Api.Documents
             }
         }
 
-        public class QueryHandler : IAsyncRequestHandler<Query, Result>
+        public class QueryHandler : IRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _config;
@@ -59,7 +60,7 @@ namespace Web.Features.Api.Documents
                 _fileSearcher = fileSearcher;
             }
 
-            public async Task<Result> Handle(Query message)
+            public async Task<Result> Handle(Query message, CancellationToken cancellationToken)
             {
                 var documentQuery = _db.PublishedRevisions
                     .Where(pr => pr.EndDate == null);
