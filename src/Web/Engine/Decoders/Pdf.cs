@@ -1,6 +1,7 @@
 ﻿using Ghostscript.NET.Rasterizer;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -47,11 +48,14 @@ namespace Web.Engine.Codecs.Decoders
 
         public override byte[] CreateThumbnail(byte[] buffer, Size size, int pageNumber)
         {
+            var ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll";// HostingEnvironment.MapPath("~/bin/gsdll64.dll");
+            var version = new Ghostscript.NET.GhostscriptVersionInfo(new Version(0, 0, 0), ghostDllPath, string.Empty, Ghostscript.NET.GhostscriptLicense.GPL);
+            
             using (var rasterizer = new GhostscriptRasterizer())
             {
                 using (var stream = new MemoryStream(buffer))
                 {
-                    rasterizer.Open(stream);
+                    rasterizer.Open(stream, version, false);
 
                     using (var thumbnail = rasterizer
                         .GetPage(200, 200, pageNumber)
