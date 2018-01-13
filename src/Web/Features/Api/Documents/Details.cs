@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine.Helpers;
 using Web.Engine.Validation.Custom;
@@ -36,7 +37,7 @@ namespace Web.Features.Api.Documents
             }
         }
 
-        public class QueryHandler : IAsyncRequestHandler<Query, Result>
+        public class QueryHandler : IRequestHandler<Query, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IConfigurationProvider _config;
@@ -48,8 +49,8 @@ namespace Web.Features.Api.Documents
                 _config = config;
             }
 
-            public Task<Result> Handle(Query message) => _db.PublishedRevisions
-                    .Where(pr => pr.DocumentId == message.Id
+            public Task<Result> Handle(Query request, CancellationToken cancellationToken) => _db.PublishedRevisions
+                    .Where(pr => pr.DocumentId == request.Id
                             && pr.EndDate == null)
                     .ProjectTo<Result>(_config)
                     .SingleOrDefaultAsync();

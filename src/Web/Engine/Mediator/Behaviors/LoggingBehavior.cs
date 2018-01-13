@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Web.Engine.Mediator.Behaviors
@@ -13,7 +14,7 @@ namespace Web.Engine.Mediator.Behaviors
             _logger = logger;
         }
 
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             _logger.LogInformation($"Handling {typeof(TRequest).Name}");
 

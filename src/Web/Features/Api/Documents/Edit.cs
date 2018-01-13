@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
 using Web.Engine.Helpers;
@@ -43,7 +44,7 @@ namespace Web.Features.Api.Documents
             }
         }
 
-        public class CommandHandler : IAsyncRequestHandler<Command, Result>
+        public class CommandHandler : IRequestHandler<Command, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IDocumentSecurity _documentSecurity;
@@ -59,12 +60,12 @@ namespace Web.Features.Api.Documents
                 _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             }
 
-            public async Task<Result> Handle(Command message)
+            public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
             {
                 var currentVersion = await _db.PublishedRevisions
                     .Include(f => f.Document)
                     .Include(f => f.Document.Distributions)
-                    .SingleOrDefaultAsync(f => f.DocumentId == message.Id.Value && f.EndDate == null)
+                    .SingleOrDefaultAsync(f => f.DocumentId == request.Id.Value && f.EndDate == null)
                     .ConfigureAwait(false);
 
                 if (currentVersion == null)
@@ -72,22 +73,22 @@ namespace Web.Features.Api.Documents
                     return null;
                 }
 
-                if (currentVersion.Title != message.Title
-                    || currentVersion.Abstract != message.Abstract)
+                if (currentVersion.Title != request.Title
+                    || currentVersion.Abstract != request.Abstract)
                 {
                     currentVersion.EndDate = DateTimeOffset.Now;
 
                     var newVersion = _mapper.Map<PublishedRevision>(currentVersion);
 
                     newVersion.VersionNum = await _db.Revisions
-                        .Where(r => r.DocumentId == message.Id.Value)
+                        .Where(r => r.DocumentId == request.Id.Value)
                         .MaxAsync(d => d.VersionNum)
                         .ConfigureAwait(false);
 
                     newVersion.VersionNum++;
 
-                    newVersion.Abstract = message.Abstract;
-                    newVersion.Title = message.Title;
+                    newVersion.Abstract = request.Abstract;
+                    newVersion.Title = request.Title;
                     newVersion.CreatedBy = _userContext.UserId;
                     newVersion.CreatedOn = DateTimeOffset.Now;
 

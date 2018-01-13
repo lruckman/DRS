@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
 using Web.Engine.Extensions;
@@ -31,7 +32,7 @@ namespace Web.Features.Api.Documents
             }
         }
 
-        public class CommandHandler : IAsyncRequestHandler<Command, Result>
+        public class CommandHandler : IRequestHandler<Command, Result>
         {
             private readonly ApplicationDbContext _db;
             private readonly IUserContext _userContext;
@@ -47,7 +48,7 @@ namespace Web.Features.Api.Documents
                 _fileStorage = fileStorage;
             }
 
-            public async Task<Result> Handle(Command message)
+            public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
             {
                 // create and add the document
 
@@ -66,10 +67,10 @@ namespace Web.Features.Api.Documents
                     CreatedBy = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now,
                     Extension = Path
-                        .GetExtension(message.File.FileName ?? "")
+                        .GetExtension(request.File.FileName ?? "")
                         .ToLowerInvariant(),
                     AccessKey = accessKey,
-                    Size = message.File.Length,
+                    Size = request.File.Length,
                     VersionNum = 0
                 };
 
@@ -89,13 +90,13 @@ namespace Web.Features.Api.Documents
                     .ConfigureAwait(false));
 
                 var file = new FileMeta(
-                    message.File.OpenReadStream().ToByteArray(),
-                    message.File.FileName);
+                    request.File.OpenReadStream().ToByteArray(),
+                    request.File.FileName);
 
                 // metadata
 
                 revision.Abstract = file.Abstract;
-                revision.Title = message.File.FileName;
+                revision.Title = request.File.FileName;
 
                 try
                 {
