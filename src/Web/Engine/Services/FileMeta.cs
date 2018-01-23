@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
+using System.IO;
 using Web.Engine.Codecs.Decoders;
 using Web.Engine.Extensions;
 
@@ -6,12 +8,11 @@ namespace Web.Engine.Services
 {
     public interface IFileMeta
     {
-        int PageCount { get; }
-        string Abstract { get; }
-        string Content { get; }
+        int PageCount();
+        string Abstract();
+        string Content();
         long Length { get; }
         byte[] CreateThumbnail(Size dimensions, int? pageNumber);
-        byte[] Buffer { get; }
     }
 
     public class FileMeta : IFileMeta
@@ -21,26 +22,35 @@ namespace Web.Engine.Services
         private int _pageCount;
         private string _content;
 
-        public FileMeta(byte[] buffer, string extension)
-        {
-            Buffer = buffer;
+        private Stream _fileStream;
 
-            ContentType = MimeTypes.MimeTypeMap.GetMimeType(extension);
-            _decoder = new FileDecoder().Get(extension);
+        private Stream FileStream
+        {
+            set { _fileStream = value;  }
+            get
+            {
+                _fileStream.Position = 0;
+                return _fileStream;
+            }
         }
 
-        public int PageCount => _pageCount == 0 ? _pageCount = _decoder.PageCount(Buffer) : _pageCount;
+        public FileMeta(Stream stream, string contentType, IDecoder decoder)
+        {
+            ContentType = contentType ?? throw new ArgumentNullException(nameof(contentType));
+            _decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+            _fileStream = stream ?? throw new ArgumentNullException(nameof(stream));
+        }
 
-        public string Abstract => Content?.NormalizeLineEndings()?.Truncate(512);
+        public int PageCount() => _pageCount == 0 ? _pageCount = _decoder.PageCount(FileStream) : _pageCount;
 
-        public string Content => string.IsNullOrWhiteSpace(_content) ? _content = _decoder.TextContent(Buffer) : _content;
+        public string Abstract() => Content()?.NormalizeLineEndings()?.Truncate(512);
+
+        public string Content() => string.IsNullOrWhiteSpace(_content) ? _content = _decoder.TextContent(FileStream) : _content;
 
         public string ContentType { get; }
 
-        public byte[] CreateThumbnail(Size dimensions, int? pageNumber) => _decoder.CreateThumbnail(Buffer, dimensions, pageNumber ?? 1);
+        public byte[] CreateThumbnail(Size dimensions, int? pageNumber) => _decoder.CreateThumbnail(FileStream, dimensions, pageNumber ?? 1);
 
-        public byte[] Buffer { get; }
-
-        public long Length => Buffer.LongLength;
+        public long Length => FileStream.Length;
     }
 }

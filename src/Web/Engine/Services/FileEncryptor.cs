@@ -8,7 +8,11 @@ namespace Web.Engine.Services
 {
     public interface IFileEncryptor
     {
-        byte[] Encrypt(byte[] buffer, byte[] key);
+        Stream Encrypt(Stream sourceStream, byte[] key, byte[] iv);
+        byte[] Encrypt(string valueToEncrypt);
+
+        (byte[] Key, byte[] IV) GenerateKeyAndIv();
+
         byte[] Decrypt(Stream stream, byte[] key = null);
         byte[] Decrypt(byte[] buffer, byte[] key = null);
         byte[] Decrypt(string s, byte[] key = null);
@@ -16,24 +20,77 @@ namespace Web.Engine.Services
         byte[] DecryptFile(string path, byte[] key = null);
     }
 
+    public static class FileEncryptorExtensions
+    {
+        public static string ToBase64String(this byte[] buffer)
+            => Convert.ToBase64String(buffer);
+
+        public static byte[] ToByteArray(this string input)
+            => Encoding.UTF8.GetBytes(input);
+    }
+
     public class FileEncryptor : IFileEncryptor
     {
         private const DataProtectionScope DataProtectionScope =
             System.Security.Cryptography.DataProtectionScope.LocalMachine;
+        
+        public string GenerateKey()
+            => Encrypt(Guid.NewGuid().ToString("N")).ToBase64String();
 
-        /// <summary>
-        ///     Encrypts the provided byte[]. The byte[] passed in will have its reference updated.
-        /// </summary>
-        /// <returns>Returns the encrypted byte[]</returns>
-        /// <exception cref="ArgumentNullException">Throws if buffer == null</exception>
-        public byte[] Encrypt(byte[] buffer, byte[] key)
+        public (byte[] Key, byte[] IV) GenerateKeyAndIv()
         {
-            if (buffer == null)
+            using (var rm = new RijndaelManaged())
             {
-                throw new ArgumentNullException(nameof(buffer));
+                rm.GenerateKey();
+                rm.GenerateIV();
+
+                return (rm.Key, rm.IV);
+            }
+        }
+
+        public byte[] Encrypt(string valueToEncrypt)
+        {
+            if (string.IsNullOrWhiteSpace(valueToEncrypt))
+            {
+                throw new ArgumentNullException(nameof(valueToEncrypt));
             }
 
-            return buffer = ProtectedData.Protect(buffer, key, DataProtectionScope);
+            var userData = valueToEncrypt.ToByteArray();
+
+            return ProtectedData.Protect(userData, null, DataProtectionScope);
+        }
+
+        public Stream Encrypt(Stream sourceStream, byte[] key, byte[] iv)
+        {
+            if (sourceStream == null)
+            {
+                throw new ArgumentNullException(nameof(sourceStream));
+            }
+
+            if (!sourceStream.CanRead)
+            {
+                throw new ArgumentException("Stream cannot be read.", nameof(sourceStream));
+            }
+
+            if (key == null || key.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (iv == null || iv.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(iv));
+            }
+
+            var rijAlg = new RijndaelManaged
+            {
+                Key = key,
+                IV = iv
+            };
+
+            var encryptor = rijAlg.CreateEncryptor();
+
+            return new CryptoStream(sourceStream, encryptor, CryptoStreamMode.Read);
         }
 
         public byte[] Decrypt(Stream stream, byte[] key = null)

@@ -6,11 +6,9 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
-using Web.Engine.Extensions;
 using Web.Engine.Services;
 using Web.Models;
 
@@ -42,14 +40,21 @@ namespace Web.Features.Api.Documents
             public CommandHandler(ApplicationDbContext db, IUserContext userContext,
                 IFileStorage fileStorage, IFileEncryptor fileEncryptor)
             {
-                _db = db;
-                _userContext = userContext;
-                _encryptor = fileEncryptor;
-                _fileStorage = fileStorage;
+                _db = db ?? throw new ArgumentNullException(nameof(db));
+                _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+                _encryptor = fileEncryptor ?? throw new ArgumentNullException(nameof(fileEncryptor));
+                _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
             public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
             {
+                // save the file
+
+                var fileInfo = await _fileStorage
+                    .Save(request.File.OpenReadStream())
+                    .ConfigureAwait(false);
+
+
                 // create and add the document
 
                 var document = new Document
@@ -57,11 +62,7 @@ namespace Web.Features.Api.Documents
                     CreatedBy = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now
                 };
-
-                var accessKey = _encryptor
-                        .Encrypt(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N")), null)
-                        .ToBase64String();
-
+               
                 var revision = new PublishedRevision
                 {
                     CreatedBy = _userContext.UserId,
@@ -69,8 +70,11 @@ namespace Web.Features.Api.Documents
                     Extension = Path
                         .GetExtension(request.File.FileName ?? "")
                         .ToLowerInvariant(),
-                    AccessKey = accessKey,
+                    AccessKey = fileInfo.Key,
+                    IV = fileInfo.IV,
+                    Path = fileInfo.Path,
                     Size = request.File.Length,
+                    Title = request.File.FileName,
                     VersionNum = 0
                 };
 
@@ -89,28 +93,25 @@ namespace Web.Features.Api.Documents
                     .FirstAsync()
                     .ConfigureAwait(false));
 
-                var file = new FileMeta(
-                    request.File.OpenReadStream().ToByteArray(),
-                    request.File.FileName);
+                //var file = new FileMeta(
+                //    request.File.OpenReadStream().ToByteArray(),
+                //    request.File.FileName);
+
+                var decoder = _fileStorage.Open(revision.Path, revision.AccessKey, revision.IV);
 
                 // metadata
 
-                revision.Abstract = file.Abstract;
-                revision.Title = request.File.FileName;
+                revision.Abstract = decoder.Content(); //todo: decoder should maintain state so we don't have to pass in document buffer?
 
                 try
                 {
-                    var thumbnail = file.CreateThumbnail(new Size(600, 600), 1);
+                    var thumbnail = decoder.CreateThumbnail(new Size(600, 600), 1);
 
                     revision.ThumbnailPath = await _fileStorage
-                        .Save(thumbnail, accessKey)
+                        .Save(thumbnail, fileInfo.Key, fileInfo.IV)
                         .ConfigureAwait(false);
 
-                    revision.PageCount = file.PageCount;
-
-                    revision.Path = await _fileStorage
-                        .Save(file.Buffer, accessKey)
-                        .ConfigureAwait(false);
+                    revision.PageCount = decoder.PageCount();
 
                     // save and commit
 
@@ -121,13 +122,8 @@ namespace Web.Features.Api.Documents
                 {
                     // some clean ups
 
-                    await _fileStorage
-                        .TryDelete(revision.ThumbnailPath)
-                        .ConfigureAwait(false);
-
-                    await _fileStorage
-                        .TryDelete(revision.Path)
-                        .ConfigureAwait(false);
+                    _fileStorage
+                        .TryDelete(revision.ThumbnailPath, revision.Path);
 
                     throw;
                 }
