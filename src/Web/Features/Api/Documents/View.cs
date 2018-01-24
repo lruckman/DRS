@@ -2,6 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,13 +44,14 @@ namespace Web.Features.Api.Documents
             public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var revision = await _db.Revisions
+                    .Include(r => r.DataFile)
                     .Where(r => r.DocumentId == request.Id.Value)
                     .Where(r => r.EndDate == null)
                     .SingleAsync()
                     .ConfigureAwait(false);
 
                 var file = _fileStorage
-                    .Open(revision.Path, revision.AccessKey);
+                    .Open(revision.DataFile.Path, revision.DataFile.Key, revision.DataFile.IV);
 
                 if (revision == null)
                 {
@@ -58,7 +60,7 @@ namespace Web.Features.Api.Documents
 
                 return new Result
                 {
-                    FileContents = file.Buffer,
+                    FileContents = file.FileStream,
                     ContentType = file.ContentType
                 };
             }
@@ -66,7 +68,7 @@ namespace Web.Features.Api.Documents
 
         public class Result
         {
-            public byte[] FileContents { get; set; }
+            public Stream FileContents { get; set; }
             public string ContentType { get; set; }
         }
     }

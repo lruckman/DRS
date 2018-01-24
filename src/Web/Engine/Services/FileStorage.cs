@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Web.Models;
 using File = System.IO.File;
@@ -11,13 +10,12 @@ namespace Web.Engine.Services
 {
     public interface IFileStorage
     {
-        Task<(byte[] Key, byte[] IV, string Path)> Save(Stream stream);
-        Task<string> Save(Stream stream, byte[] key, byte[] iv);
+        Task<(string Key, string IV, string Path)> Save(Stream stream);
 
         Task Delete(string path);
         void TryDelete(params string[] paths);
-
-        FileMeta Open(int fileId);
+        
+        FileMeta Open(string path, string key, string iv);
     }
 
     public class FileStorage : IFileStorage
@@ -40,6 +38,12 @@ namespace Web.Engine.Services
             _storageRoot = config.Value.DocumentPath ?? throw new ArgumentNullException(nameof(config.Value.DocumentPath));
         }
 
+        private (string Key, string IV) EncryptAccessKeys(byte[] key, byte[] iv)
+            => (_encryptor.Encrypt(key), _encryptor.Encrypt(iv));
+
+        private (byte[] Key, byte[] IV) DecryptAccessKeys(string key, string iv)
+            => (_encryptor.DecryptBase64(key), _encryptor.DecryptBase64(iv));
+
         private async Task<int> GetNextDirectorySeed()
         {
             var max = await _db.Documents.MaxAsync(d => d.Id);
@@ -49,31 +53,30 @@ namespace Web.Engine.Services
 
         private FileMeta Open(string path, byte[] key, byte[] iv)
         {
-            var fileContents = DecryptFile(path, key, iv);
+            var fileContents = _encryptor.Decrypt(File.OpenRead(path), key, iv);
             var contentType = MimeTypes.MimeTypeMap.GetMimeType(Path.GetExtension(path));
 
             return new FileMeta(fileContents, contentType, _fileDecoder.Get(path));
         }
 
-        public FileMeta Open(int fileId) // todo: lets start accessing files by id so we don't need to pass around access infos
+        public FileMeta Open(string path, string key, string iv)
         {
-            var file = _db.PublishedRevisions
-                .AsNoTracking()
-                .First(r => r.DocumentId == fileId);
+            var (Key, IV) = DecryptAccessKeys(key, iv);
 
-            return Open(file.Path, file.AccessKey, file.IV);
+            return Open(path, Key, IV);
         }
 
-        public async Task<(byte[] Key, byte[] IV, string Path)> Save(Stream stream)
+        public async Task<(string Key, string IV, string Path)> Save(Stream stream)
         {
-            var (Key, IV) = _encryptor.GenerateKeyAndIv();
+            var accessKeys = _encryptor.GenerateKeyAndIv();
+            var path = await Save(stream, accessKeys.Key, accessKeys.IV);
 
-            var path = await Save(stream, Key, IV);
+            var (Key, IV) = EncryptAccessKeys(accessKeys.Key, accessKeys.IV);
 
             return (Key, IV, path);
         }
 
-        public async Task<string> Save(Stream stream, byte[] key, byte[] iv)
+        private async Task<string> Save(Stream stream, byte[] key, byte[] iv)
         {
             var path = await GetNewFileName();
 
@@ -91,26 +94,6 @@ namespace Web.Engine.Services
 
             return path;
         }
-
-        //public async Task<string> Save(byte[] buffer, string accessKey)
-        //{
-        //    var path = GetNewFileName(await GetNextDirectorySeed(), _storageRoot);
-
-        //    await CreateDirectoryIfNotFound(Path.GetDirectoryName(path))
-        //        .ConfigureAwait(false);
-
-        //    buffer = _encryptor
-        //        .Encrypt(buffer, DecryptKey(accessKey));
-
-        //    using (var fileStream = File.Create(path))
-        //    {
-        //        await fileStream
-        //            .WriteAsync(buffer, 0, buffer.Length)
-        //            .ConfigureAwait(false);
-        //    }
-
-        //    return path;
-        //}
 
         public void TryDelete(params string[] paths)
         {
@@ -162,11 +145,5 @@ namespace Web.Engine.Services
             return Task.Factory
                 .StartNew(() => Directory.CreateDirectory(dirPath));
         }
-
-        private byte[] DecryptKey(string accessKey) => _encryptor
-                    .DecryptBase64(accessKey);
-
-        private byte[] DecryptFile(string path, string accessKey) => _encryptor
-                .DecryptFile(path, DecryptKey(accessKey));
     }
 }

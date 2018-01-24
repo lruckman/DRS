@@ -38,16 +38,18 @@ namespace Web.Engine.Services.Lucene.Definitions
                         entity.DocumentId,
                         Field.Store.YES);
 
-            var file = _fileStorage
-                .Open(entity.Path, entity.AccessKey);
-
-            if (!string.IsNullOrWhiteSpace(file.Content))
+            using (var file = _fileStorage
+                .Open(entity.DataFile.Path, entity.DataFile.Key, entity.DataFile.IV))
             {
-                yield return
-                    new TextField(
-                        Fields.RevisionContentField,
-                        file.Content,
-                        Field.Store.NO);
+
+                if (!string.IsNullOrWhiteSpace(file.Content()))
+                {
+                    yield return
+                        new TextField(
+                            Fields.RevisionContentField,
+                            file.Content(),
+                            Field.Store.NO);
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(entity.Abstract))

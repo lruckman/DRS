@@ -2,22 +2,20 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Web.Engine.Extensions;
 
 namespace Web.Engine.Services
 {
     public interface IFileEncryptor
     {
         Stream Encrypt(Stream sourceStream, byte[] key, byte[] iv);
-        byte[] Encrypt(string valueToEncrypt);
+        string Encrypt(byte[] valueToEncrypt);
 
         (byte[] Key, byte[] IV) GenerateKeyAndIv();
-
-        byte[] Decrypt(Stream stream, byte[] key = null);
+        
         byte[] Decrypt(byte[] buffer, byte[] key = null);
-        byte[] Decrypt(string s, byte[] key = null);
+        Stream Decrypt(Stream sourceStream, byte[] key, byte[] iv);
+
         byte[] DecryptBase64(string s, byte[] key = null);
-        byte[] DecryptFile(string path, byte[] key = null);
     }
 
     public static class FileEncryptorExtensions
@@ -33,9 +31,6 @@ namespace Web.Engine.Services
     {
         private const DataProtectionScope DataProtectionScope =
             System.Security.Cryptography.DataProtectionScope.LocalMachine;
-        
-        public string GenerateKey()
-            => Encrypt(Guid.NewGuid().ToString("N")).ToBase64String();
 
         public (byte[] Key, byte[] IV) GenerateKeyAndIv()
         {
@@ -48,17 +43,8 @@ namespace Web.Engine.Services
             }
         }
 
-        public byte[] Encrypt(string valueToEncrypt)
-        {
-            if (string.IsNullOrWhiteSpace(valueToEncrypt))
-            {
-                throw new ArgumentNullException(nameof(valueToEncrypt));
-            }
-
-            var userData = valueToEncrypt.ToByteArray();
-
-            return ProtectedData.Protect(userData, null, DataProtectionScope);
-        }
+        public string Encrypt(byte[] valueToEncrypt)
+            => ProtectedData.Protect(valueToEncrypt, null, DataProtectionScope).ToBase64String();
 
         public Stream Encrypt(Stream sourceStream, byte[] key, byte[] iv)
         {
@@ -92,12 +78,7 @@ namespace Web.Engine.Services
 
             return new CryptoStream(sourceStream, encryptor, CryptoStreamMode.Read);
         }
-
-        public byte[] Decrypt(Stream stream, byte[] key = null)
-        {
-            return Decrypt(stream.ToByteArray(), key);
-        }
-
+       
         public byte[] Decrypt(byte[] buffer, byte[] key = null)
         {
             if (buffer == null)
@@ -106,16 +87,6 @@ namespace Web.Engine.Services
             }
 
             return ProtectedData.Unprotect(buffer, key, DataProtectionScope);
-        }
-
-        public byte[] Decrypt(string s, byte[] key = null)
-        {
-            if (s == null)
-            {
-                throw new ArgumentNullException(nameof(s));
-            }
-
-            return Decrypt(Encoding.UTF8.GetBytes(s), key);
         }
 
         public byte[] DecryptBase64(string s, byte[] key = null)
@@ -128,19 +99,37 @@ namespace Web.Engine.Services
             return Decrypt(Convert.FromBase64String(s), key);
         }
 
-        public byte[] DecryptFile(string path, byte[] key = null)
+        public Stream Decrypt(Stream sourceStream, byte[] key, byte[] iv)
         {
-            if (path == null)
+            if (sourceStream == null)
             {
-                throw new ArgumentNullException(nameof(path));
+                throw new ArgumentNullException(nameof(sourceStream));
             }
 
-            if (!File.Exists(path))
+            if (!sourceStream.CanRead)
             {
-                throw new ArgumentException("Path does not exist.", nameof(path));
+                throw new ArgumentException("Stream cannot be read.", nameof(sourceStream));
             }
 
-            return Decrypt(File.ReadAllBytes(path), key);
+            if (key == null || key.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (iv == null || iv.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(iv));
+            }
+
+            var rijAlg = new RijndaelManaged
+            {
+                Key = key,
+                IV = iv
+            };
+
+            var decryptor = rijAlg.CreateDecryptor();
+
+            return new CryptoStream(sourceStream, decryptor, CryptoStreamMode.Read);
         }
     }
 }

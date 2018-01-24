@@ -26,6 +26,7 @@ namespace Web.Engine.Services.Hangfire.Jobs
         private void IndexNewDocuments()
         {
             foreach (var revision in _db.Revisions
+                .Include(r => r.DataFile)
                 .Include(r => r.Document)
                 .Include(r => r.Document.Distributions)
                 .Where(r => r.EndDate == null)
@@ -55,18 +56,20 @@ namespace Web.Engine.Services.Hangfire.Jobs
 
         private void RemoveDeletedDocuments()
         {
-            foreach (var revision in _db.DeletedRevisions
-                .Include(dr => dr.Document)
-                .Include(dr => dr.Document.Distributions)
-                .Where(dr => dr.EndDate == null && dr.IndexedOn == null)
-                .ToArray())
-            {
-                _fileIndexer.Index(revision);
+            //foreach (var revision in _db.DeletedRevisions
+            //    .Include(dr => dr.Document)
+            //    .Include(dr => dr.Document.Distributions)
+            //    .Where(dr => dr.EndDate == null && dr.IndexedOn == null)
+            //    .ToArray())
+            //{
+            //    _fileIndexer.Index(revision);
 
-                revision.IndexedOn = DateTimeOffset.Now;
+            //    revision.IndexedOn = DateTimeOffset.Now;
 
-                _db.SaveChanges();
-            }
+            //    _db.SaveChanges();
+            //}
+
+            throw new NotImplementedException();
         }
     }
 }

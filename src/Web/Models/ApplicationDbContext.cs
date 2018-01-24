@@ -7,6 +7,8 @@ namespace Web.Models
     {
         public DbSet<Document> Documents { get; set; }
 
+        public DbSet<DataFile> DataFiles { get; set; }
+
         public DbSet<Revision> Revisions { get; set; }
         public DbSet<PendingRevision> PendingRevisions { get; set; }
         public DbSet<DeletedRevision> DeletedRevisions { get; set; }

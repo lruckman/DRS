@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -35,14 +34,12 @@ namespace Web.Features.Api.Documents
             private readonly ApplicationDbContext _db;
             private readonly IUserContext _userContext;
             private readonly IFileStorage _fileStorage;
-            private readonly IFileEncryptor _encryptor;
 
             public CommandHandler(ApplicationDbContext db, IUserContext userContext,
-                IFileStorage fileStorage, IFileEncryptor fileEncryptor)
+                IFileStorage fileStorage)
             {
                 _db = db ?? throw new ArgumentNullException(nameof(db));
                 _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
-                _encryptor = fileEncryptor ?? throw new ArgumentNullException(nameof(fileEncryptor));
                 _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
@@ -54,78 +51,81 @@ namespace Web.Features.Api.Documents
                     .Save(request.File.OpenReadStream())
                     .ConfigureAwait(false);
 
-
                 // create and add the document
 
+                var dataFile = new DataFile
+                {
+                    Extension = Path
+                        .GetExtension(request.File.FileName ?? "")
+                        .ToLowerInvariant(),
+                    Key = fileInfo.Key,
+                    IV = fileInfo.IV,
+                    Path = fileInfo.Path,
+                    Size = request.File.Length,
+                };
+
+                _db.DataFiles.Add(dataFile);
+                
                 var document = new Document
                 {
                     CreatedBy = _userContext.UserId,
                     CreatedOn = DateTimeOffset.Now
                 };
-               
-                var revision = new PublishedRevision
-                {
-                    CreatedBy = _userContext.UserId,
-                    CreatedOn = DateTimeOffset.Now,
-                    Extension = Path
-                        .GetExtension(request.File.FileName ?? "")
-                        .ToLowerInvariant(),
-                    AccessKey = fileInfo.Key,
-                    IV = fileInfo.IV,
-                    Path = fileInfo.Path,
-                    Size = request.File.Length,
-                    Title = request.File.FileName,
-                    VersionNum = 0
-                };
-
-                document.Revisions.Add(revision);
 
                 _db.Documents.Add(document);
 
-                //todo: add to indexers private library (hardcoded for now)
-                // add document to the default library
+                using (var decoder = _fileStorage
+                    .Open(dataFile.Path, dataFile.Key, dataFile.IV))
+                {
 
-                document.Distributions.Add(await _db.DistributionGroups
-                    .Select(d => new Distribution
+                    var revision = new PublishedRevision
                     {
-                        DistributionGroup = d
-                    })
-                    .FirstAsync()
-                    .ConfigureAwait(false));
+                        Abstract = decoder.Content(),
+                        CreatedBy = _userContext.UserId,
+                        CreatedOn = DateTimeOffset.Now,
+                        DataFile = dataFile,
+                        Title = request.File.FileName,
+                        VersionNum = 0
+                    };
 
-                //var file = new FileMeta(
-                //    request.File.OpenReadStream().ToByteArray(),
-                //    request.File.FileName);
+                    document.Revisions.Add(revision);
 
-                var decoder = _fileStorage.Open(revision.Path, revision.AccessKey, revision.IV);
+                    //todo: add to indexers private library (hardcoded for now)
+                    // add document to the default library
 
-                // metadata
+                    document.Distributions.Add(await _db.DistributionGroups
+                        .Select(d => new Distribution
+                        {
+                            DistributionGroup = d
+                        })
+                        .FirstAsync()
+                        .ConfigureAwait(false));
 
-                revision.Abstract = decoder.Content(); //todo: decoder should maintain state so we don't have to pass in document buffer?
+                    try
+                    {
+                        dataFile.PageCount = decoder.PageCount();
 
-                try
-                {
-                    var thumbnail = decoder.CreateThumbnail(new Size(600, 600), 1);
+                        //var thumbnail = decoder.CreateThumbnail(new Size(600, 600), 1);
+                        //await _fileStorage
+                        //    .Save(thumbnail, fileInfo.Key, fileInfo.IV)
+                        //                .ConfigureAwait(false);
 
-                    revision.ThumbnailPath = await _fileStorage
-                        .Save(thumbnail, fileInfo.Key, fileInfo.IV)
-                        .ConfigureAwait(false);
 
-                    revision.PageCount = decoder.PageCount();
 
-                    // save and commit
+                        // save and commit
 
-                    await _db.SaveChangesAsync()
-                        .ConfigureAwait(false);
-                }
-                catch
-                {
-                    // some clean ups
+                        await _db.SaveChangesAsync()
+                            .ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        // some clean ups
 
-                    _fileStorage
-                        .TryDelete(revision.ThumbnailPath, revision.Path);
+                        _fileStorage
+                            .TryDelete(dataFile.ThumbnailPath, dataFile.Path);
 
-                    throw;
+                        throw;
+                    }
                 }
 
                 // the document that was created

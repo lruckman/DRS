@@ -6,13 +6,14 @@ using Web.Engine.Extensions;
 
 namespace Web.Engine.Services
 {
-    public interface IFileMeta
+    public interface IFileMeta : IDisposable
     {
         int PageCount();
         string Abstract();
         string Content();
         long Length { get; }
         byte[] CreateThumbnail(Size dimensions, int? pageNumber);
+        Stream FileStream { get; }
     }
 
     public class FileMeta : IFileMeta
@@ -22,11 +23,10 @@ namespace Web.Engine.Services
         private int _pageCount;
         private string _content;
 
-        private Stream _fileStream;
+        private readonly Stream _fileStream;
 
-        private Stream FileStream
+        public Stream FileStream
         {
-            set { _fileStream = value;  }
             get
             {
                 _fileStream.Position = 0;
@@ -52,5 +52,28 @@ namespace Web.Engine.Services
         public byte[] CreateThumbnail(Size dimensions, int? pageNumber) => _decoder.CreateThumbnail(FileStream, dimensions, pageNumber ?? 1);
 
         public long Length => FileStream.Length;
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    FileStream.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }
