@@ -31,7 +31,7 @@ namespace Web.Engine.Services
         ///     Returns a file parser for the file type passed in.
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="ArgumentException">Throws if filename == null</exception>
+        /// <exception cref="ArgumentException">if filename == null</exception>
         public IDecoder Get(string filename)
         {
             var extension = Path.GetExtension(filename)?.ToLower();
