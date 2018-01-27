@@ -23,22 +23,30 @@ namespace Web.Engine.Services
         private int _pageCount;
         private string _content;
 
-        private readonly Stream _fileStream;
+        private readonly Func<Stream> _streamCreator;
+        private Stream _fileStream;
 
         public Stream FileStream
         {
             get
             {
+                if (_fileStream == null || !_fileStream.CanRead)
+                {
+                    _fileStream?.Dispose();
+                    return (_fileStream = _streamCreator());
+                }
+
                 _fileStream.Position = 0;
                 return _fileStream;
             }
         }
 
-        public FileMeta(Stream stream, string contentType, IDecoder decoder)
+        public FileMeta(Func<Stream> streamCreator, string contentType, IDecoder decoder)
         {
             ContentType = contentType ?? throw new ArgumentNullException(nameof(contentType));
             _decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
-            _fileStream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _streamCreator = streamCreator ?? throw new ArgumentNullException(nameof(streamCreator));
+            _fileStream = null;
         }
 
         public int PageCount() => _pageCount == 0 ? _pageCount = _decoder.PageCount(FileStream) : _pageCount;
@@ -62,7 +70,7 @@ namespace Web.Engine.Services
             {
                 if (disposing)
                 {
-                    FileStream.Dispose();
+                    _fileStream?.Dispose();
                 }
 
                 disposedValue = true;

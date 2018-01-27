@@ -53,10 +53,10 @@ namespace Web.Engine.Services
 
         private FileMeta Open(string path, byte[] key, byte[] iv)
         {
-            var fileContents = _encryptor.Decrypt(File.OpenRead(path), key, iv);
+            Stream streamCreeator() => _encryptor.Decrypt(File.OpenRead(path), key, iv);
             var contentType = MimeTypes.MimeTypeMap.GetMimeType(Path.GetExtension(path));
 
-            return new FileMeta(fileContents, contentType, _fileDecoder.Get(path));
+            return new FileMeta(streamCreeator, contentType, _fileDecoder.Get(path));
         }
 
         public FileMeta Open(string path, string key, string iv)
