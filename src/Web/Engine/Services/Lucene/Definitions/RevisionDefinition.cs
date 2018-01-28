@@ -39,7 +39,7 @@ namespace Web.Engine.Services.Lucene.Definitions
                         Field.Store.YES);
 
             using (var file = _fileStorage
-                .Open(entity.DataFile.Path, entity.DataFile.Key, entity.DataFile.IV))
+                .Open(entity.DataFile.Path, entity.DataFile.Extension, entity.DataFile.Key, entity.DataFile.IV))
             {
 
                 if (!string.IsNullOrWhiteSpace(file.Content()))

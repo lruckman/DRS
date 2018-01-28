@@ -30,14 +30,9 @@ namespace Web.Engine.Services
         {
             get
             {
-                if (_fileStream == null || !_fileStream.CanRead)
-                {
-                    _fileStream?.Dispose();
-                    return (_fileStream = _streamCreator());
-                }
+                _fileStream?.Dispose();
 
-                _fileStream.Position = 0;
-                return _fileStream;
+                return (_fileStream = _streamCreator());
             }
         }
 

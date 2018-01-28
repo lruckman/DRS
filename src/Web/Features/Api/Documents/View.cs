@@ -17,7 +17,7 @@ namespace Web.Features.Api.Documents
     {
         public class Query : IRequest<Result>
         {
-            public int? Id { get; set; }
+            public int Id { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -25,7 +25,7 @@ namespace Web.Features.Api.Documents
             public QueryValidator(IDocumentSecurity documentSecurity)
             {
                 RuleFor(m => m.Id)
-                    .NotNull()
+                    .NotEmpty()
                     .HasDocumentPermission(documentSecurity, PermissionTypes.Read);
             }
         }
@@ -43,20 +43,15 @@ namespace Web.Features.Api.Documents
 
             public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
-                var revision = await _db.Revisions
-                    .Include(r => r.DataFile)
-                    .Where(r => r.DocumentId == request.Id.Value)
+                var dataFileId = await _db.Revisions
+                    .Where(r => r.DocumentId == request.Id)
                     .Where(r => r.EndDate == null)
+                    .Select(r => r.DataFileId)
                     .SingleAsync()
                     .ConfigureAwait(false);
 
-                var file = _fileStorage
-                    .Open(revision.DataFile.Path, revision.DataFile.Key, revision.DataFile.IV);
-
-                if (revision == null)
-                {
-                    return null;
-                }
+                var file = await _fileStorage
+                    .Open(dataFileId);
 
                 return new Result
                 {

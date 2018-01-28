@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Web.Models;
 using File = System.IO.File;
@@ -14,8 +15,9 @@ namespace Web.Engine.Services
 
         Task Delete(string path);
         void TryDelete(params string[] paths);
-        
-        FileMeta Open(string path, string key, string iv);
+
+        FileMeta Open(string path, string extension, string key, string iv);
+        Task<FileMeta> Open(int id);
     }
 
     public class FileStorage : IFileStorage
@@ -46,24 +48,48 @@ namespace Web.Engine.Services
 
         private async Task<int> GetNextDirectorySeed()
         {
+            var any = await _db.Documents.AnyAsync();
+
+            if (!any)
+            {
+                return 1;
+            }
+
             var max = await _db.Documents.MaxAsync(d => d.Id);
 
             return ++max;
         }
 
-        private FileMeta Open(string path, byte[] key, byte[] iv)
+        private FileMeta Open(string path, string extension, byte[] key, byte[] iv)
         {
             Stream streamCreeator() => _encryptor.Decrypt(File.OpenRead(path), key, iv);
-            var contentType = MimeTypes.MimeTypeMap.GetMimeType(Path.GetExtension(path));
+            var contentType = MimeTypes.MimeTypeMap.GetMimeType(extension);
 
             return new FileMeta(streamCreeator, contentType, _fileDecoder.Get(path));
         }
 
-        public FileMeta Open(string path, string key, string iv)
+        public async Task<FileMeta> Open(int id)
+        {
+            var dataFile = await _db.DataFiles
+                .Where(df => df.Id == id)
+                .Select(df => new
+                {
+                    df.Path,
+                    df.Extension,
+                    df.Key,
+                    df.IV
+                })
+                .SingleAsync()
+                .ConfigureAwait(false);
+
+            return Open(dataFile.Path, dataFile.Extension, dataFile.Key, dataFile.IV);
+        }
+
+        public FileMeta Open(string path, string extension, string key, string iv)
         {
             var (Key, IV) = DecryptAccessKeys(key, iv);
 
-            return Open(path, Key, IV);
+            return Open(path, extension, Key, IV);
         }
 
         public async Task<(string Key, string IV, string Path)> Save(Stream stream)

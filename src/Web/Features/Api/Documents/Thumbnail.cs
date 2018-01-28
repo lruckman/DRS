@@ -43,20 +43,15 @@ namespace Web.Features.Api.Documents
 
             public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
-                var revision = await _db.Revisions
-                    .Include(r => r.DataFile)
+                var dataFileId = await _db.Revisions
                     .Where(r => r.DocumentId == request.Id.Value)
                     .Where(r => r.EndDate == null)
+                    .Select(r => r.DataFileId)
                     .SingleAsync()
                     .ConfigureAwait(false);
 
-                if (revision == null)
-                {
-                    return null;
-                }
-
-                var currentRevision = _fileStorage
-                    .Open(revision.DataFile.Path, revision.DataFile.Key, revision.DataFile.IV);
+                var currentRevision = await _fileStorage
+                    .Open(dataFileId);
 
                 if (currentRevision == null)
                 {

@@ -55,6 +55,8 @@ namespace Web.Features.Api.Documents
 
                 var dataFile = new DataFile
                 {
+                    CreatedBy = _userContext.UserId,
+                    CreatedOn = DateTimeOffset.Now,
                     Extension = Path
                         .GetExtension(request.File.FileName ?? "")
                         .ToLowerInvariant(),
@@ -75,7 +77,7 @@ namespace Web.Features.Api.Documents
                 _db.Documents.Add(document);
 
                 using (var decoder = _fileStorage
-                    .Open(dataFile.Path, dataFile.Key, dataFile.IV))
+                    .Open(dataFile.Path, dataFile.Extension, dataFile.Key, dataFile.IV))
                 {
 
                     var revision = new PublishedRevision
