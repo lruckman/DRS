@@ -65,7 +65,7 @@ namespace Web.Engine.Services
             Stream streamCreeator() => _encryptor.Decrypt(File.OpenRead(path), key, iv);
             var contentType = MimeTypes.MimeTypeMap.GetMimeType(extension);
 
-            return new FileMeta(streamCreeator, contentType, _fileDecoder.Get(path));
+            return new FileMeta(streamCreeator, contentType, _fileDecoder.Get(extension));
         }
 
         public async Task<FileMeta> Open(int id)
