@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
+using Web.Engine.Extensions;
 using Web.Engine.Services;
 using Web.Models;
 
@@ -65,9 +66,9 @@ namespace Web.Features.Api.Documents
                     Path = fileInfo.Path,
                     Size = request.File.Length,
                 };
-
-                _db.DataFiles.Add(dataFile);
                 
+                _db.DataFiles.Add(dataFile);
+
                 var document = new Document
                 {
                     CreatedBy = _userContext.UserId,
@@ -76,58 +77,56 @@ namespace Web.Features.Api.Documents
 
                 _db.Documents.Add(document);
 
-                using (var decoder = _fileStorage
-                    .Open(dataFile.Path, dataFile.Extension, dataFile.Key, dataFile.IV))
+                try
                 {
 
-                    var revision = new PublishedRevision
+                    using (var decoder = _fileStorage
+                        .Open(dataFile.Path, dataFile.Extension, dataFile.Key, dataFile.IV))
                     {
-                        Abstract = decoder.Content(),
-                        CreatedBy = _userContext.UserId,
-                        CreatedOn = DateTimeOffset.Now,
-                        DataFile = dataFile,
-                        Title = request.File.FileName,
-                        VersionNum = 0
-                    };
 
-                    document.Revisions.Add(revision);
+                        var summary = decoder.Content()
+                            .NormalizeLineEndings()
+                            .Truncate(512);
 
-                    //todo: add to indexers private library (hardcoded for now)
-                    // add document to the default library
-
-                    document.Distributions.Add(await _db.DistributionGroups
-                        .Select(d => new Distribution
+                        var revision = new PublishedRevision
                         {
-                            DistributionGroup = d
-                        })
-                        .FirstAsync()
-                        .ConfigureAwait(false));
+                            Abstract = summary,
+                            CreatedBy = _userContext.UserId,
+                            CreatedOn = DateTimeOffset.Now,
+                            DataFile = dataFile,
+                            Title = request.File.FileName,
+                            VersionNum = 0
+                        };
 
-                    try
-                    {
+                        document.Revisions.Add(revision);
+
+                        //todo: add to indexers private library (hardcoded for now)
+                        // add document to the default library
+
+                        document.Distributions.Add(await _db.DistributionGroups
+                            .Select(d => new Distribution
+                            {
+                                DistributionGroup = d
+                            })
+                            .FirstAsync()
+                            .ConfigureAwait(false));
+
                         dataFile.PageCount = decoder.PageCount();
-
-                        //var thumbnail = decoder.CreateThumbnail(new Size(600, 600), 1);
-                        //await _fileStorage
-                        //    .Save(thumbnail, fileInfo.Key, fileInfo.IV)
-                        //                .ConfigureAwait(false);
-
-
-
+                        
                         // save and commit
 
                         await _db.SaveChangesAsync()
                             .ConfigureAwait(false);
                     }
-                    catch
-                    {
-                        // some clean ups
+                }
+                catch
+                {
+                    // some clean ups
 
-                        _fileStorage
-                            .TryDelete(dataFile.ThumbnailPath, dataFile.Path);
+                    _fileStorage
+                        .TryDelete(dataFile.ThumbnailPath, dataFile.Path);
 
-                        throw;
-                    }
+                    throw;
                 }
 
                 // the document that was created
