@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Text;
 
 namespace Web.Engine.Codecs.Decoders
@@ -10,10 +11,17 @@ namespace Web.Engine.Codecs.Decoders
         {
         }
 
-        public override string TextContent(byte[] buffer, int? pageNumber) => Encoding.UTF8.GetString(buffer);
+        public override string TextContent(Stream stream, int? pageNumber)
+        {
+            using (var ms = new MemoryStream())
+            {
+                stream.CopyTo(ms);
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
+        }
 
-        public override int PageCount(byte[] buffer) => 1;
+        public override int PageCount(Stream stream) => 1;
 
-        public override byte[] CreateThumbnail(byte[] buffer, Size size, int pageNumber) => throw new NotImplementedException();
+        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber) => throw new NotImplementedException();
     }
 }

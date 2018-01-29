@@ -3,10 +3,8 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Web.Engine;
@@ -37,20 +35,39 @@ namespace Web.Features.Api.Documents
             private readonly ApplicationDbContext _db;
             private readonly IUserContext _userContext;
             private readonly IFileStorage _fileStorage;
-            private readonly IFileEncryptor _encryptor;
 
             public CommandHandler(ApplicationDbContext db, IUserContext userContext,
-                IFileStorage fileStorage, IFileEncryptor fileEncryptor)
+                IFileStorage fileStorage)
             {
-                _db = db;
-                _userContext = userContext;
-                _encryptor = fileEncryptor;
-                _fileStorage = fileStorage;
+                _db = db ?? throw new ArgumentNullException(nameof(db));
+                _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+                _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
             public async Task<Result> Handle(Command request, CancellationToken cancellationToken)
             {
+                // save the file
+
+                var fileInfo = await _fileStorage
+                    .Save(request.File.OpenReadStream())
+                    .ConfigureAwait(false);
+
                 // create and add the document
+
+                var dataFile = new DataFile
+                {
+                    CreatedBy = _userContext.UserId,
+                    CreatedOn = DateTimeOffset.Now,
+                    Extension = Path
+                        .GetExtension(request.File.FileName ?? "")
+                        .ToLowerInvariant(),
+                    Key = fileInfo.Key,
+                    IV = fileInfo.IV,
+                    Path = fileInfo.Path,
+                    Size = request.File.Length,
+                };
+                
+                _db.DataFiles.Add(dataFile);
 
                 var document = new Document
                 {
@@ -58,76 +75,56 @@ namespace Web.Features.Api.Documents
                     CreatedOn = DateTimeOffset.Now
                 };
 
-                var accessKey = _encryptor
-                        .Encrypt(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString("N")), null)
-                        .ToBase64String();
-
-                var revision = new PublishedRevision
-                {
-                    CreatedBy = _userContext.UserId,
-                    CreatedOn = DateTimeOffset.Now,
-                    Extension = Path
-                        .GetExtension(request.File.FileName ?? "")
-                        .ToLowerInvariant(),
-                    AccessKey = accessKey,
-                    Size = request.File.Length,
-                    VersionNum = 0
-                };
-
-                document.Revisions.Add(revision);
-
                 _db.Documents.Add(document);
-
-                //todo: add to indexers private library (hardcoded for now)
-                // add document to the default library
-
-                document.Distributions.Add(await _db.DistributionGroups
-                    .Select(d => new Distribution
-                    {
-                        DistributionGroup = d
-                    })
-                    .FirstAsync()
-                    .ConfigureAwait(false));
-
-                var file = new FileMeta(
-                    request.File.OpenReadStream().ToByteArray(),
-                    request.File.FileName);
-
-                // metadata
-
-                revision.Abstract = file.Abstract;
-                revision.Title = request.File.FileName;
 
                 try
                 {
-                    var thumbnail = file.CreateThumbnail(new Size(600, 600), 1);
 
-                    revision.ThumbnailPath = await _fileStorage
-                        .Save(thumbnail, accessKey)
-                        .ConfigureAwait(false);
+                    using (var decoder = _fileStorage
+                        .Open(dataFile.Path, dataFile.Extension, dataFile.Key, dataFile.IV))
+                    {
 
-                    revision.PageCount = file.PageCount;
+                        var summary = decoder.Content()
+                            .NormalizeLineEndings()
+                            .Truncate(512);
 
-                    revision.Path = await _fileStorage
-                        .Save(file.Buffer, accessKey)
-                        .ConfigureAwait(false);
+                        var revision = new PublishedRevision
+                        {
+                            Abstract = summary,
+                            CreatedBy = _userContext.UserId,
+                            CreatedOn = DateTimeOffset.Now,
+                            DataFile = dataFile,
+                            Title = request.File.FileName,
+                            VersionNum = 0
+                        };
 
-                    // save and commit
+                        document.Revisions.Add(revision);
 
-                    await _db.SaveChangesAsync()
-                        .ConfigureAwait(false);
+                        //todo: add to indexers private library (hardcoded for now)
+                        // add document to the default library
+
+                        document.Distributions.Add(await _db.DistributionGroups
+                            .Select(d => new Distribution
+                            {
+                                DistributionGroup = d
+                            })
+                            .FirstAsync()
+                            .ConfigureAwait(false));
+
+                        dataFile.PageCount = decoder.PageCount();
+                        
+                        // save and commit
+
+                        await _db.SaveChangesAsync()
+                            .ConfigureAwait(false);
+                    }
                 }
                 catch
                 {
                     // some clean ups
 
-                    await _fileStorage
-                        .TryDelete(revision.ThumbnailPath)
-                        .ConfigureAwait(false);
-
-                    await _fileStorage
-                        .TryDelete(revision.Path)
-                        .ConfigureAwait(false);
+                    _fileStorage
+                        .TryDelete(dataFile.ThumbnailPath, dataFile.Path);
 
                     throw;
                 }

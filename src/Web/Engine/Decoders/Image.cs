@@ -24,41 +24,35 @@ namespace Web.Engine.Codecs.Decoders
             _tesseractDataPath = tesseractDataPath;
         }
 
-        public override string TextContent(byte[] buffer, int? pageNumber)
+        public override string TextContent(Stream stream, int? pageNumber)
         {
-            using (var engine = new TesseractEngine(_tesseractDataPath, "eng", EngineMode.Default))
+            using (var engine = new TesseractEngine(_tesseractDataPath, "eng", EngineMode.Default)) // todo: make this injectable
             {
-                using (var memoryStream = new MemoryStream(buffer))
+                // have to load Pix via a bitmap since Pix doesn't support loading a stream.
+                using (var image = new Bitmap(stream))
                 {
-                    // have to load Pix via a bitmap since Pix doesn't support loading a stream.
-                    using (var image = new Bitmap(memoryStream))
+                    using (var pix = PixConverter.ToPix(image))
                     {
-                        using (var pix = PixConverter.ToPix(image))
+                        using (var page = engine.Process(pix))
                         {
-                            using (var page = engine.Process(pix))
-                            {
-                                return page.GetText();
-                            }
+                            return page.GetText();
                         }
                     }
                 }
             }
         }
 
-        public override int PageCount(byte[] buffer) => 1;
+        public override int PageCount(Stream stream) => 1;
 
-        public override byte[] CreateThumbnail(byte[] buffer, Size size, int pageNumber)
+        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber)
         {
-            using (var memoryStream = new MemoryStream(buffer))
+            using (var image = new Bitmap(stream).ToFixedSize(size.Width, size.Height))
             {
-                using (var image = new Bitmap(memoryStream).ToFixedSize(size.Width, size.Height))
+                using (var ms = new MemoryStream())
                 {
-                    using (var ms = new MemoryStream())
-                    {
-                        image.Save(ms, ImageFormat.Png);
+                    image.Save(ms, ImageFormat.Png);
 
-                        return ms.ToArray();
-                    }
+                    return ms.ToArray();
                 }
             }
         }

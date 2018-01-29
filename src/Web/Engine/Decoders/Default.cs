@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 
 namespace Web.Engine.Codecs.Decoders
 {
@@ -9,11 +10,11 @@ namespace Web.Engine.Codecs.Decoders
         {
         }
 
-        public override string TextContent(byte[] buffer, int? pageNumber) => null;
+        public override string TextContent(Stream stream, int? pageNumber) => null;
 
-        public override int PageCount(byte[] buffer) => 1;
+        public override int PageCount(Stream stream) => 1;
 
-        public override byte[] CreateThumbnail(byte[] buffer, Size size, int pageNumber) => throw new NotImplementedException();
+        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber) => throw new NotImplementedException();
 
         public override bool AppliesTo(string extension) => true;
     }

@@ -2,18 +2,29 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Web.Engine.Extensions;
 
 namespace Web.Engine.Services
 {
     public interface IFileEncryptor
     {
-        byte[] Encrypt(byte[] buffer, byte[] key);
-        byte[] Decrypt(Stream stream, byte[] key = null);
+        Stream Encrypt(Stream sourceStream, byte[] key, byte[] iv);
+        string Encrypt(byte[] valueToEncrypt);
+
+        (byte[] Key, byte[] IV) GenerateKeyAndIv();
+        
         byte[] Decrypt(byte[] buffer, byte[] key = null);
-        byte[] Decrypt(string s, byte[] key = null);
+        Stream Decrypt(Stream sourceStream, byte[] key, byte[] iv);
+
         byte[] DecryptBase64(string s, byte[] key = null);
-        byte[] DecryptFile(string path, byte[] key = null);
+    }
+
+    public static class FileEncryptorExtensions
+    {
+        public static string ToBase64String(this byte[] buffer)
+            => Convert.ToBase64String(buffer);
+
+        public static byte[] ToByteArray(this string input)
+            => Encoding.UTF8.GetBytes(input);
     }
 
     public class FileEncryptor : IFileEncryptor
@@ -21,26 +32,53 @@ namespace Web.Engine.Services
         private const DataProtectionScope DataProtectionScope =
             System.Security.Cryptography.DataProtectionScope.LocalMachine;
 
-        /// <summary>
-        ///     Encrypts the provided byte[]. The byte[] passed in will have its reference updated.
-        /// </summary>
-        /// <returns>Returns the encrypted byte[]</returns>
-        /// <exception cref="ArgumentNullException">Throws if buffer == null</exception>
-        public byte[] Encrypt(byte[] buffer, byte[] key)
+        public (byte[] Key, byte[] IV) GenerateKeyAndIv()
         {
-            if (buffer == null)
+            using (var rm = new RijndaelManaged())
             {
-                throw new ArgumentNullException(nameof(buffer));
+                rm.GenerateKey();
+                rm.GenerateIV();
+
+                return (rm.Key, rm.IV);
+            }
+        }
+
+        public string Encrypt(byte[] valueToEncrypt)
+            => ProtectedData.Protect(valueToEncrypt, null, DataProtectionScope).ToBase64String();
+
+        public Stream Encrypt(Stream sourceStream, byte[] key, byte[] iv)
+        {
+            if (sourceStream == null)
+            {
+                throw new ArgumentNullException(nameof(sourceStream));
             }
 
-            return buffer = ProtectedData.Protect(buffer, key, DataProtectionScope);
-        }
+            if (!sourceStream.CanRead)
+            {
+                throw new ArgumentException("Stream cannot be read.", nameof(sourceStream));
+            }
 
-        public byte[] Decrypt(Stream stream, byte[] key = null)
-        {
-            return Decrypt(stream.ToByteArray(), key);
-        }
+            if (key == null || key.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
+            if (iv == null || iv.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(iv));
+            }
+
+            var rijAlg = new RijndaelManaged
+            {
+                Key = key,
+                IV = iv
+            };
+
+            var encryptor = rijAlg.CreateEncryptor();
+
+            return new CryptoStream(sourceStream, encryptor, CryptoStreamMode.Read);
+        }
+       
         public byte[] Decrypt(byte[] buffer, byte[] key = null)
         {
             if (buffer == null)
@@ -49,16 +87,6 @@ namespace Web.Engine.Services
             }
 
             return ProtectedData.Unprotect(buffer, key, DataProtectionScope);
-        }
-
-        public byte[] Decrypt(string s, byte[] key = null)
-        {
-            if (s == null)
-            {
-                throw new ArgumentNullException(nameof(s));
-            }
-
-            return Decrypt(Encoding.UTF8.GetBytes(s), key);
         }
 
         public byte[] DecryptBase64(string s, byte[] key = null)
@@ -71,19 +99,37 @@ namespace Web.Engine.Services
             return Decrypt(Convert.FromBase64String(s), key);
         }
 
-        public byte[] DecryptFile(string path, byte[] key = null)
+        public Stream Decrypt(Stream sourceStream, byte[] key, byte[] iv)
         {
-            if (path == null)
+            if (sourceStream == null)
             {
-                throw new ArgumentNullException(nameof(path));
+                throw new ArgumentNullException(nameof(sourceStream));
             }
 
-            if (!File.Exists(path))
+            if (!sourceStream.CanRead)
             {
-                throw new ArgumentException("Path does not exist.", nameof(path));
+                throw new ArgumentException("Stream cannot be read.", nameof(sourceStream));
             }
 
-            return Decrypt(File.ReadAllBytes(path), key);
+            if (key == null || key.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (iv == null || iv.Length <= 0)
+            {
+                throw new ArgumentNullException(nameof(iv));
+            }
+
+            var rijAlg = new RijndaelManaged
+            {
+                Key = key,
+                IV = iv
+            };
+
+            var decryptor = rijAlg.CreateDecryptor();
+
+            return new CryptoStream(sourceStream, decryptor, CryptoStreamMode.Read);
         }
     }
 }

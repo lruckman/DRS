@@ -15,9 +15,9 @@ namespace Web.Engine.Codecs.Decoders
         {
         }
 
-        public override string TextContent(byte[] buffer, int? pageNumber)
+        public override string TextContent(Stream stream, int? pageNumber)
         {
-            using (var reader = new PdfReader(buffer))
+            using (var reader = new PdfReader(stream))
             {
                 if (pageNumber != null)
                 {
@@ -38,35 +38,32 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        public override int PageCount(byte[] buffer)
+        public override int PageCount(Stream stream)
         {
-            using (var reader = new PdfReader(buffer))
+            using (var reader = new PdfReader(stream))
             {
                 return reader.NumberOfPages;
             }
         }
 
-        public override byte[] CreateThumbnail(byte[] buffer, Size size, int pageNumber)
+        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber)
         {
             var ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll";// HostingEnvironment.MapPath("~/bin/gsdll64.dll");
             var version = new Ghostscript.NET.GhostscriptVersionInfo(new Version(0, 0, 0), ghostDllPath, string.Empty, Ghostscript.NET.GhostscriptLicense.GPL);
-            
+
             using (var rasterizer = new GhostscriptRasterizer())
             {
-                using (var stream = new MemoryStream(buffer))
+                rasterizer.Open(stream, version, false);
+
+                using (var thumbnail = rasterizer
+                    .GetPage(200, 200, pageNumber)
+                    .ToFixedSize(size.Width, size.Height))
                 {
-                    rasterizer.Open(stream, version, false);
-
-                    using (var thumbnail = rasterizer
-                        .GetPage(200, 200, pageNumber)
-                        .ToFixedSize(size.Width, size.Height))
+                    using (var ms = new MemoryStream())
                     {
-                        using (var ms = new MemoryStream())
-                        {
-                            thumbnail.Save(ms, ImageFormat.Png);
+                        thumbnail.Save(ms, ImageFormat.Png);
 
-                            return ms.ToArray();
-                        }
+                        return ms.ToArray();
                     }
                 }
             }

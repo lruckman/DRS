@@ -17,7 +17,7 @@ namespace Web.Engine
                 scanner.LookForRegistries();
                 scanner.AssemblyContainingType<WebRegistry>();
 
-                For<IFileStorage>().Use<EncryptedFileStorage>();
+                For<IFileStorage>().Use<FileStorage>();
                 For<IFileIndexer>().Use<IndexService>();
                 For<IIndexDefinition<Revision>>().Use<RevisionDefinition>();
                 For<IFileSearcher>().Use<SearchService>();

@@ -63,6 +63,8 @@ namespace Web.Features.Api.Documents
                         .ForMember(d => d.Id, o => o.MapFrom(s => s.DocumentId))
                         .ForMember(d => d.CreatedOn, o => o.MapFrom(s => s.Document.CreatedOn))
                         .ForMember(d => d.ModifiedOn, o => o.MapFrom(s => s.CreatedOn))
+                        .ForMember(d => d.PageCount, o => o.MapFrom(s => s.DataFile.PageCount))
+                        .ForMember(d => d.Size, o => o.MapFrom(s => s.DataFile.Size))
                         .ForMember(d => d.LibraryIds, o => o.MapFrom(s =>
                             s.Document.Distributions.Select(d => d.DistributionGroupId).ToArray()))
                         .ForMember(d => d.Version, o => o.MapFrom(s => s.VersionNum));
