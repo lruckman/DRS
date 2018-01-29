@@ -21,6 +21,7 @@ namespace Web.Engine
                 For<IFileIndexer>().Use<IndexService>();
                 For<IIndexDefinition<Revision>>().Use<RevisionDefinition>();
                 For<IFileSearcher>().Use<SearchService>();
+                For<IOcrEngine>().Use<OcrEngine>();
             });
         }
     }

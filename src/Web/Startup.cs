@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using StructureMap;
@@ -49,6 +48,7 @@ namespace Web
 
             services.Configure<DRSConfig>(Configuration.GetSection("DRS"));
             services.Configure<Engine.Services.Lucene.Config>(Configuration.GetSection("DRS"));
+            services.Configure<OcrEngine.Config>(Configuration.GetSection("DRS:Tess"));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -100,7 +100,7 @@ namespace Web
 
             container.Populate(services);
 
-            FileDecoder.RegisterFileDecoders(container.GetInstance<IOptions<DRSConfig>>());
+            FileDecoder.RegisterFileDecoders(container.GetInstance<IOcrEngine>());
 
             return container.GetInstance<IServiceProvider>();
         }

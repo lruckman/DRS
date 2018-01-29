@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.Drawing;
 using System.IO;
 using Tesseract;
@@ -12,22 +13,23 @@ namespace Web.Engine.Services
 
     public class OcrEngine : IOcrEngine
     {
-        private static string _engLanguage = "eng";
         private readonly TesseractEngine _engine;
 
-        public OcrEngine(string tesseractDataPath)
+        public OcrEngine(IOptions<Config> config)
         {
-            if (tesseractDataPath == null)
+            var args = config?.Value;
+
+            if (args == null)
             {
-                throw new ArgumentNullException(nameof(tesseractDataPath));
+                throw new ArgumentNullException(nameof(args));
+            }
+            
+            if (!Directory.Exists(args.DataPath))
+            {
+                throw new ArgumentException("Path does not exist or access is denied.", nameof(args.DataPath));
             }
 
-            if (!Directory.Exists(tesseractDataPath))
-            {
-                throw new ArgumentException("Path does not exist or access is denied.", nameof(tesseractDataPath));
-            }
-
-            _engine = new TesseractEngine(tesseractDataPath, _engLanguage, EngineMode.Default);
+            _engine = new TesseractEngine(args.DataPath, args.Lang, EngineMode.Default);
         }
 
         public string GetText(Bitmap bitmap)
@@ -62,5 +64,11 @@ namespace Web.Engine.Services
             Dispose(true);
         }
         #endregion
+
+        public class Config
+        {
+            public string DataPath { get; set; }
+            public string Lang { get; set; }
+        }
     }
 }
