@@ -13,7 +13,17 @@ namespace Web.Engine.Services
 
     public class OcrEngine : IOcrEngine
     {
-        private readonly TesseractEngine _engine;
+        private readonly string _dataPath;
+        private readonly string _lang;
+        private TesseractEngine _engine;
+
+        private TesseractEngine Engine
+        {
+            get
+            {
+                return _engine ?? (_engine = new TesseractEngine(_dataPath, _lang, EngineMode.Default));
+            }
+        }
 
         public OcrEngine(IOptions<Config> config)
         {
@@ -23,20 +33,24 @@ namespace Web.Engine.Services
             {
                 throw new ArgumentNullException(nameof(args));
             }
-            
+
             if (!Directory.Exists(args.DataPath))
             {
                 throw new ArgumentException("Path does not exist or access is denied.", nameof(args.DataPath));
             }
 
-            _engine = new TesseractEngine(args.DataPath, args.Lang, EngineMode.Default);
+            // we cannot initialize tesseract here because if we are doing it out of a normal 
+            // context it won't be able to resolve the dlls needed to load.
+
+            _dataPath = args.DataPath ?? throw new ArgumentNullException(nameof(args.DataPath));
+            _lang = args.Lang ?? throw new ArgumentNullException(nameof(args.Lang));
         }
 
         public string GetText(Bitmap bitmap)
         {
             using (var pix = PixConverter.ToPix(bitmap))
             {
-                using (var page = _engine.Process(pix))
+                using (var page = Engine.Process(pix))
                 {
                     return page.GetText();
                 }
