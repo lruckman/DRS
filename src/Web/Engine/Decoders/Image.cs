@@ -29,16 +29,15 @@ namespace Web.Engine.Codecs.Decoders
 
         public override int PageCount(Stream stream) => 1;
 
-        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber)
+        public override Stream CreateThumbnail(Stream stream, Size size, int pageNumber)
         {
             using (var image = new Bitmap(stream).ToFixedSize(size.Width, size.Height))
             {
-                using (var ms = new MemoryStream())
-                {
-                    image.Save(ms, ImageFormat.Png);
+                var ms = new MemoryStream();
 
-                    return ms.ToArray();
-                }
+                image.Save(ms, ImageFormat.Png);
+
+                return ms;
             }
         }
     }

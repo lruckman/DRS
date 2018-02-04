@@ -7,7 +7,7 @@ namespace Web.Engine.Codecs.Decoders
     {
         string TextContent(Stream stream, int? pageNumber = null);
         int PageCount(Stream stream);
-        byte[] CreateThumbnail(Stream stream, Size size, int pageNumber = 1);
+        Stream CreateThumbnail(Stream stream, Size size, int pageNumber = 1);
         bool AppliesTo(string extension);
     }
 }

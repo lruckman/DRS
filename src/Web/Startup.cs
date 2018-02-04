@@ -128,7 +128,12 @@ namespace Web
             });
 
             RecurringJob
-                .AddOrUpdate<IndexRevisionsJob>(nameof(IndexRevisionsJob)
+                .AddOrUpdate<IndexRevisions>(nameof(IndexRevisions)
+                , j => j.Run()
+                , "*/5 * * * *", TimeZoneInfo.Local);
+
+            RecurringJob
+                .AddOrUpdate<GenerateThumbnails>(nameof(GenerateThumbnails)
                 , j => j.Run()
                 , "*/5 * * * *", TimeZoneInfo.Local);
 

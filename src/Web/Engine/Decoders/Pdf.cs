@@ -46,9 +46,9 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber)
+        public override Stream CreateThumbnail(Stream stream, Size size, int pageNumber)
         {
-            var ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll";// HostingEnvironment.MapPath("~/bin/gsdll64.dll");
+            var ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll"; //todo: banish the hardcode
             var version = new Ghostscript.NET.GhostscriptVersionInfo(new Version(0, 0, 0), ghostDllPath, string.Empty, Ghostscript.NET.GhostscriptLicense.GPL);
 
             using (var rasterizer = new GhostscriptRasterizer())
@@ -59,12 +59,11 @@ namespace Web.Engine.Codecs.Decoders
                     .GetPage(200, 200, pageNumber)
                     .ToFixedSize(size.Width, size.Height))
                 {
-                    using (var ms = new MemoryStream())
-                    {
-                        thumbnail.Save(ms, ImageFormat.Png);
+                    var ms = new MemoryStream();
 
-                        return ms.ToArray();
-                    }
+                    thumbnail.Save(ms, ImageFormat.Png);
+
+                    return ms;
                 }
             }
         }

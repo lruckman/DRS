@@ -5,12 +5,12 @@ using Web.Models;
 
 namespace Web.Engine.Services.Hangfire.Jobs
 {
-    public class IndexRevisionsJob
+    public class IndexRevisions
     {
         private readonly IFileIndexer _fileIndexer;
         private readonly ApplicationDbContext _db;
 
-        public IndexRevisionsJob(ApplicationDbContext db, IFileIndexer fileIndexer)
+        public IndexRevisions(ApplicationDbContext db, IFileIndexer fileIndexer)
         {
             _db = db ?? throw new ArgumentNullException(nameof(db));
             _fileIndexer = fileIndexer ?? throw new ArgumentNullException(nameof(fileIndexer));
