@@ -124,7 +124,7 @@ namespace Web.Features.Api.Documents
                     // some clean ups
 
                     _fileStorage
-                        .TryDelete(dataFile.ThumbnailPath, dataFile.Path);
+                        .TryDelete(dataFile.Path);
 
                     throw;
                 }
