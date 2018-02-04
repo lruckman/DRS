@@ -1,44 +1,29 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using Tesseract;
 using Web.Engine.Extensions;
+using Web.Engine.Services;
 using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace Web.Engine.Codecs.Decoders
 {
     public class Image : DecoderBase
     {
-        private readonly string _tesseractDataPath;
+        private readonly IOcrEngine _ocr;
 
-        public Image(string tesseractDataPath)
+        public Image(IOcrEngine ocr)
             : base(new[] {
             ".gif", ".jpg", ".jpe", "jpeg", ".jif", ".jfif", ".jfi",
             ".png", ".bmp", ".tiff", ".tif" })
         {
-            if (!Directory.Exists(tesseractDataPath))
-            {
-                throw new ArgumentException("Path does not exist or access is denied.", nameof(tesseractDataPath));
-            }
-
-            _tesseractDataPath = tesseractDataPath;
+            _ocr = ocr ?? throw new ArgumentNullException(nameof(ocr));
         }
 
         public override string TextContent(Stream stream, int? pageNumber)
         {
-            using (var engine = new TesseractEngine(_tesseractDataPath, "eng", EngineMode.Default)) // todo: make this injectable
+            using (var image = new Bitmap(stream))
             {
-                // have to load Pix via a bitmap since Pix doesn't support loading a stream.
-                using (var image = new Bitmap(stream))
-                {
-                    using (var pix = PixConverter.ToPix(image))
-                    {
-                        using (var page = engine.Process(pix))
-                        {
-                            return page.GetText();
-                        }
-                    }
-                }
+                return _ocr.GetText(image);
             }
         }
 

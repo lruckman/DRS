@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using Web.Engine.Codecs.Decoders;
@@ -11,16 +10,16 @@ namespace Web.Engine.Services
     {
         private static IDecoder[] _decoders;
 
-        public static void RegisterFileDecoders(IOptions<DRSConfig> config)
+        public static void RegisterFileDecoders(IOcrEngine ocrEngine)
         {
-            if (config == null)
+            if (ocrEngine == null)
             {
-                throw new ArgumentNullException(nameof(config));
+                throw new ArgumentNullException(nameof(ocrEngine));
             }
 
             _decoders = new IDecoder[]
             {
-                new Image(config.Value.TessDataPath),
+                new Image(ocrEngine),
                 new Pdf(),
                 new Text(),
                 new Default()
