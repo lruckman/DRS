@@ -6,7 +6,7 @@ using Tesseract;
 
 namespace Web.Engine.Services
 {
-    public interface IOcrEngine : IDisposable
+    public interface IOcrEngine
     {
         string GetText(Bitmap bitmap);
     }
@@ -15,13 +15,12 @@ namespace Web.Engine.Services
     {
         private readonly string _dataPath;
         private readonly string _lang;
-        private TesseractEngine _engine;
 
         private TesseractEngine Engine
         {
             get
             {
-                return _engine ?? (_engine = new TesseractEngine(_dataPath, _lang, EngineMode.Default));
+                return new TesseractEngine(_dataPath, _lang, EngineMode.Default);
             }
         }
 
@@ -50,34 +49,15 @@ namespace Web.Engine.Services
         {
             using (var pix = PixConverter.ToPix(bitmap))
             {
-                using (var page = Engine.Process(pix))
+                using (Engine)
                 {
-                    return page.GetText();
+                    using (var page = Engine.Process(pix))
+                    {
+                        return page.GetText();
+                    }
                 }
             }
         }
-
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _engine?.Dispose();
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-        #endregion
 
         public class Config
         {
