@@ -42,6 +42,7 @@
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="4.0.0" />
     <PackageReference Include="MediaTypeMap" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <PackageReference Include="OdeToCode.AddFeatureFolders" Version="1.0.8" />
     <PackageReference Include="Serilog" Version="2.6.1-dev-00936" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.2" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.2.0-dev-00018" />
