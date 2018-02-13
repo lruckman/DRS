@@ -50,19 +50,19 @@ namespace Web.Features.Api.Documents
                     .SingleAsync()
                     .ConfigureAwait(false);
 
-                var currentRevision = await _fileStorage
-                    .Open(dataFileId)
+                var file = await _fileStorage
+                    .Open(dataFileId, true)
                     .ConfigureAwait(false);
 
-                if (currentRevision == null)
+                if (file == null)
                 {
                     return null;
                 }
 
                 return new Result
                 {
-                    FileContents = currentRevision.FileStream,
-                    ContentType = currentRevision.ContentType
+                    FileContents = file.FileStream,
+                    ContentType = file.ContentType
                 };
             }
         }
