@@ -18,7 +18,7 @@ namespace Web.Engine.Services
         void TryDelete(params string[] paths);
 
         FileMeta Open(string path, string extension, string key, string iv);
-        Task<FileMeta> Open(int id);
+        Task<FileMeta> Open(int id, bool thumbnail = false);
     }
 
     public class FileStorage : IFileStorage
@@ -73,14 +73,14 @@ namespace Web.Engine.Services
             return new FileMeta(streamCreator, contentType, _fileDecoder.Get(extension));
         }
 
-        public async Task<FileMeta> Open(int id)
+        public async Task<FileMeta> Open(int id, bool thumbnail = false)
         {
             var dataFile = await _db.DataFiles
                 .Where(df => df.Id == id)
                 .Select(df => new
                 {
-                    df.Path,
-                    df.Extension,
+                    Path = thumbnail ?  df.ThumbnailPath :  df.Path,
+                    Extension = thumbnail ?  ".png" :  df.Extension,
                     df.Key,
                     df.IV
                 })

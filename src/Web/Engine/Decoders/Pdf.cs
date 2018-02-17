@@ -5,7 +5,6 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using Web.Engine.Extensions;
 
 namespace Web.Engine.Codecs.Decoders
 {
@@ -48,22 +47,39 @@ namespace Web.Engine.Codecs.Decoders
 
         public override Stream CreateThumbnail(Stream stream, Size size, int pageNumber)
         {
-            var ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll"; //todo: banish the hardcode
+            const string ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll"; //todo: banish the hardcode
             var version = new Ghostscript.NET.GhostscriptVersionInfo(new Version(0, 0, 0), ghostDllPath, string.Empty, Ghostscript.NET.GhostscriptLicense.GPL);
 
             using (var rasterizer = new GhostscriptRasterizer())
             {
-                rasterizer.Open(stream, version, false);
+                var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid() + ".pdf");
 
-                using (var thumbnail = rasterizer
-                    .GetPage(200, 200, pageNumber)
-                    .ToFixedSize(size.Width, size.Height))
+                try
                 {
-                    var ms = new MemoryStream();
+                    using (var fs = File.Create(path))
+                    {
+                        //todo: why is ghostscript requiring i save the pdf to file first??
+                        stream.CopyTo(fs);
+                        stream.Dispose();
+                    }
 
-                    thumbnail.Save(ms, ImageFormat.Png);
+                    rasterizer.Open(path, version, true);
 
-                    return ms;
+                    using (var thumbnail = rasterizer.GetPage(200, 200, pageNumber))
+                    {
+                        using (var thumbnailStream = new MemoryStream())
+                        {
+                            thumbnail.Save(thumbnailStream, ImageFormat.Png);
+                            thumbnail.Dispose();
+                            thumbnailStream.Position = 0;
+
+                            return ResizeAndCrop(thumbnailStream, size.Width, size.Height);
+                        }
+                    }
+                }
+                finally
+                {
+                    File.Delete(path);
                 }
             }
         }
