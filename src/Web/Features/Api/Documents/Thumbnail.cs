@@ -51,7 +51,7 @@ namespace Web.Features.Api.Documents
                     .ConfigureAwait(false);
 
                 var file = await _fileStorage
-                    .Open(dataFileId, true)
+                    .OpenThumbnail(dataFileId)
                     .ConfigureAwait(false);
 
                 if (file == null)

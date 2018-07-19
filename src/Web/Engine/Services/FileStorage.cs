@@ -18,7 +18,8 @@ namespace Web.Engine.Services
         void TryDelete(params string[] paths);
 
         FileMeta Open(string path, string extension, string key, string iv);
-        Task<FileMeta> Open(int id, bool thumbnail = false);
+        Task<FileMeta> Open(int id);
+        Task<FileMeta> OpenThumbnail(int id);
     }
 
     public class FileStorage : IFileStorage
@@ -73,14 +74,16 @@ namespace Web.Engine.Services
             return new FileMeta(streamCreator, contentType, _fileDecoder.Get(extension));
         }
 
-        public async Task<FileMeta> Open(int id, bool thumbnail = false)
+        private IQueryable<DataFile> GetDataFile(int id)
+            => _db.DataFiles.Where(df => df.Id == id);
+
+        public async Task<FileMeta> Open(int id)
         {
-            var dataFile = await _db.DataFiles
-                .Where(df => df.Id == id)
+            var dataFile = await GetDataFile(id)
                 .Select(df => new
                 {
-                    Path = thumbnail ?  df.ThumbnailPath :  df.Path,
-                    Extension = thumbnail ?  ".png" :  df.Extension,
+                    df.Path,
+                    df.Extension,
                     df.Key,
                     df.IV
                 })
@@ -88,6 +91,21 @@ namespace Web.Engine.Services
                 .ConfigureAwait(false);
 
             return Open(dataFile.Path, dataFile.Extension, dataFile.Key, dataFile.IV);
+        }
+
+        public async Task<FileMeta> OpenThumbnail(int id)
+        {
+            var dataFile = await GetDataFile(id)
+                .Select(df => new
+                {
+                    Path = df.ThumbnailPath,
+                    df.Key,
+                    df.IV
+                })
+                .SingleAsync()
+                .ConfigureAwait(false);
+
+            return Open(dataFile.Path, ".png", dataFile.Key, dataFile.IV);
         }
 
         public FileMeta Open(string path, string extension, string key, string iv)
