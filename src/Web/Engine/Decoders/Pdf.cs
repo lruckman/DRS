@@ -71,6 +71,7 @@ namespace Web.Engine.Codecs.Decoders
                         {
                             thumbnail.Save(thumbnailStream, ImageFormat.Png);
                             thumbnail.Dispose();
+
                             thumbnailStream.Position = 0;
 
                             return ResizeAndCrop(thumbnailStream, size.Width, size.Height);

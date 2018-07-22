@@ -37,6 +37,8 @@ namespace Web.Engine.Codecs.Decoders
 
                 image.SaveAsPng(outStream);
 
+                outStream.Position = 0;
+
                 return outStream;
             }
         }
