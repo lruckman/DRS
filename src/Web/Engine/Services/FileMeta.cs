@@ -44,15 +44,19 @@ namespace Web.Engine.Services
             _fileStream = null;
         }
 
-        public int PageCount() => _pageCount == 0 ? _pageCount = _decoder.PageCount(FileStream) : _pageCount;
+        public int PageCount() 
+            => _pageCount == 0 ? _pageCount = _decoder.PageCount(FileStream) : _pageCount;
 
-        public string Abstract() => Content()?.NormalizeLineEndings()?.Truncate(512);
+        public string Abstract() 
+            => Content()?.NormalizeLineEndings()?.Truncate(512);
 
-        public string Content() => string.IsNullOrWhiteSpace(_content) ? _content = _decoder.TextContent(FileStream) : _content;
+        public string Content() 
+            => string.IsNullOrWhiteSpace(_content) ? _content = _decoder.TextContent(FileStream) : _content;
 
         public string ContentType { get; }
 
-        public Stream CreateThumbnail(Size dimensions, int? pageNumber) => _decoder.CreateThumbnail(FileStream, dimensions, pageNumber ?? 1);
+        public Stream CreateThumbnail(Size dimensions, int? pageNumber)
+            => _decoder.CreateThumbnail(FileStream, dimensions, pageNumber ?? 1);
 
         public long Length => FileStream.Length;
 
