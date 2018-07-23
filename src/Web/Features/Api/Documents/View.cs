@@ -37,7 +37,7 @@ namespace Web.Features.Api.Documents
 
             public QueryHandler(ApplicationDbContext db, IFileStorage fileStorage)
             {
-                _db = db;
+                _db = db ?? throw new ArgumentNullException(nameof(db));
                 _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
@@ -51,7 +51,13 @@ namespace Web.Features.Api.Documents
                     .ConfigureAwait(false);
 
                 var file = await _fileStorage
-                    .Open(dataFileId);
+                    .Open(dataFileId)
+                    .ConfigureAwait(false);
+
+                if (file == null)
+                {
+                    return null;
+                }
 
                 return new Result
                 {

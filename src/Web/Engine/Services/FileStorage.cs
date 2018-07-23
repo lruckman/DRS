@@ -12,12 +12,14 @@ namespace Web.Engine.Services
     public interface IFileStorage
     {
         Task<(string Key, string IV, string Path)> Save(Stream stream);
+        Task<string> Save(Stream stream, string key, string iv);
 
         Task Delete(string path);
         void TryDelete(params string[] paths);
 
         FileMeta Open(string path, string extension, string key, string iv);
         Task<FileMeta> Open(int id);
+        Task<FileMeta> OpenThumbnail(int id);
     }
 
     public class FileStorage : IFileStorage
@@ -48,30 +50,36 @@ namespace Web.Engine.Services
 
         private async Task<int> GetNextDirectorySeed()
         {
-            var any = await _db.Documents.AnyAsync();
+            var any = await _db.Documents
+                .AnyAsync()
+                .ConfigureAwait(false);
 
             if (!any)
             {
                 return 1;
             }
 
-            var max = await _db.Documents.MaxAsync(d => d.Id);
+            var max = await _db.Documents
+                .MaxAsync(d => d.Id)
+                .ConfigureAwait(false);
 
             return ++max;
         }
 
         private FileMeta Open(string path, string extension, byte[] key, byte[] iv)
         {
-            Stream streamCreeator() => _encryptor.Decrypt(File.OpenRead(path), key, iv);
+            Stream streamCreator() => _encryptor.Decrypt(File.OpenRead(path), key, iv);
             var contentType = MimeTypes.MimeTypeMap.GetMimeType(extension);
 
-            return new FileMeta(streamCreeator, contentType, _fileDecoder.Get(extension));
+            return new FileMeta(streamCreator, contentType, _fileDecoder.Get(extension));
         }
+
+        private IQueryable<DataFile> GetDataFile(int id)
+            => _db.DataFiles.Where(df => df.Id == id);
 
         public async Task<FileMeta> Open(int id)
         {
-            var dataFile = await _db.DataFiles
-                .Where(df => df.Id == id)
+            var dataFile = await GetDataFile(id)
                 .Select(df => new
                 {
                     df.Path,
@@ -85,6 +93,21 @@ namespace Web.Engine.Services
             return Open(dataFile.Path, dataFile.Extension, dataFile.Key, dataFile.IV);
         }
 
+        public async Task<FileMeta> OpenThumbnail(int id)
+        {
+            var dataFile = await GetDataFile(id)
+                .Select(df => new
+                {
+                    Path = df.ThumbnailPath,
+                    df.Key,
+                    df.IV
+                })
+                .SingleAsync()
+                .ConfigureAwait(false);
+
+            return Open(dataFile.Path, ".png", dataFile.Key, dataFile.IV);
+        }
+
         public FileMeta Open(string path, string extension, string key, string iv)
         {
             var (Key, IV) = DecryptAccessKeys(key, iv);
@@ -95,16 +118,26 @@ namespace Web.Engine.Services
         public async Task<(string Key, string IV, string Path)> Save(Stream stream)
         {
             var accessKeys = _encryptor.GenerateKeyAndIv();
-            var path = await Save(stream, accessKeys.Key, accessKeys.IV);
+
+            var path = await Save(stream, accessKeys.Key, accessKeys.IV)
+                .ConfigureAwait(false);
 
             var (Key, IV) = EncryptAccessKeys(accessKeys.Key, accessKeys.IV);
 
             return (Key, IV, path);
         }
 
+        public Task<string> Save(Stream stream, string key, string iv)
+        {
+            var (Key, IV) = DecryptAccessKeys(key, iv);
+
+            return Save(stream, Key, IV);
+        }
+
         private async Task<string> Save(Stream stream, byte[] key, byte[] iv)
         {
-            var path = await GetNewFileName();
+            var path = await GetNewFileName()
+                .ConfigureAwait(false);
 
             await CreateDirectoryIfNotFound(Path.GetDirectoryName(path))
                 .ConfigureAwait(false);
@@ -149,7 +182,7 @@ namespace Web.Engine.Services
         }
 
         private async Task<string> GetNewFileName()
-            => GetNewFileName(await GetNextDirectorySeed(), _storageRoot);
+            => GetNewFileName(await GetNextDirectorySeed().ConfigureAwait(false), _storageRoot);
 
         private static string GetNewFileName(int directorySeed, string rootPath)
         {
