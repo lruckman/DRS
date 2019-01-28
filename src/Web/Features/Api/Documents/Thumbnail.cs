@@ -17,7 +17,7 @@ namespace Web.Features.Api.Documents
     {
         public class Query : IRequest<Result>
         {
-            public int? Id { get; set; }
+            public int Id { get; set; }
         }
 
         public class QueryValidator : AbstractValidator<Query>
@@ -25,7 +25,7 @@ namespace Web.Features.Api.Documents
             public QueryValidator(IDocumentSecurity documentSecurity)
             {
                 RuleFor(m => m.Id)
-                    .NotNull()
+                    .NotEmpty()
                     .HasDocumentPermission(documentSecurity, PermissionTypes.Read);
             }
         }
@@ -37,31 +37,32 @@ namespace Web.Features.Api.Documents
 
             public QueryHandler(ApplicationDbContext db, IFileStorage fileStorage)
             {
-                _db = db;
+                _db = db ?? throw new ArgumentNullException(nameof(db));
                 _fileStorage = fileStorage ?? throw new ArgumentNullException(nameof(fileStorage));
             }
 
             public async Task<Result> Handle(Query request, CancellationToken cancellationToken)
             {
                 var dataFileId = await _db.Revisions
-                    .Where(r => r.DocumentId == request.Id.Value)
+                    .Where(r => r.DocumentId == request.Id)
                     .Where(r => r.EndDate == null)
                     .Select(r => r.DataFileId)
                     .SingleAsync()
                     .ConfigureAwait(false);
 
-                var currentRevision = await _fileStorage
-                    .Open(dataFileId);
+                var file = await _fileStorage
+                    .OpenThumbnail(dataFileId)
+                    .ConfigureAwait(false);
 
-                if (currentRevision == null)
+                if (file == null)
                 {
                     return null;
                 }
 
                 return new Result
                 {
-                    FileContents = currentRevision.FileStream,
-                    ContentType = currentRevision.ContentType
+                    FileContents = file.FileStream,
+                    ContentType = file.ContentType
                 };
             }
         }

@@ -22,6 +22,6 @@ namespace Web.Engine.Codecs.Decoders
 
         public override int PageCount(Stream stream) => 1;
 
-        public override Bitmap CreateThumbnail(Stream stream, Size size, int pageNumber) => throw new NotImplementedException();
+        public override Stream CreateThumbnail(Stream stream, Size size, int pageNumber) => throw new NotImplementedException();
     }
 }

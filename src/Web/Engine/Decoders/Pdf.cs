@@ -1,18 +1,18 @@
-﻿using iTextSharp.text.pdf;
+﻿using Ghostscript.NET.Rasterizer;
+using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
-using Web.Engine.Services;
 
 namespace Web.Engine.Codecs.Decoders
 {
     public class Pdf : DecoderBase
     {
-        private readonly IPdfRasterizer _pdfRasterizer;
-
-        public Pdf(IPdfRasterizer pdfRasterizer) : base(new[] { ".pdf" })
-            => _pdfRasterizer = pdfRasterizer ?? throw new ArgumentNullException(nameof(pdfRasterizer));
+        public Pdf() : base(new[] { ".pdf" })
+        {
+        }
 
         public override string TextContent(Stream stream, int? pageNumber)
         {
@@ -45,7 +45,44 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        public override Bitmap CreateThumbnail(Stream stream, Size size, int pageNumber)
-            => _pdfRasterizer.GetThumbnail(stream, pageNumber);
+        public override Stream CreateThumbnail(Stream stream, Size size, int pageNumber)
+        {
+            const string ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll"; //todo: banish the hardcode
+            var version = new Ghostscript.NET.GhostscriptVersionInfo(new Version(0, 0, 0), ghostDllPath, string.Empty, Ghostscript.NET.GhostscriptLicense.GPL);
+
+            using (var rasterizer = new GhostscriptRasterizer())
+            {
+                var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid() + ".pdf");
+
+                try
+                {
+                    using (var fs = File.Create(path))
+                    {
+                        //todo: why is ghostscript requiring i save the pdf to file first??
+                        stream.CopyTo(fs);
+                        stream.Dispose();
+                    }
+
+                    rasterizer.Open(path, version, true);
+
+                    using (var thumbnail = rasterizer.GetPage(200, 200, pageNumber))
+                    {
+                        using (var thumbnailStream = new MemoryStream())
+                        {
+                            thumbnail.Save(thumbnailStream, ImageFormat.Png);
+                            thumbnail.Dispose();
+
+                            thumbnailStream.Position = 0;
+
+                            return ResizeAndCrop(thumbnailStream, size.Width, size.Height);
+                        }
+                    }
+                }
+                finally
+                {
+                    File.Delete(path);
+                }
+            }
+        }
     }
 }

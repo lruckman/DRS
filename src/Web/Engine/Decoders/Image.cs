@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using Web.Engine.Extensions;
 using Web.Engine.Services;
 
 namespace Web.Engine.Codecs.Decoders
@@ -28,12 +27,7 @@ namespace Web.Engine.Codecs.Decoders
 
         public override int PageCount(Stream stream) => 1;
 
-        public override Bitmap CreateThumbnail(Stream stream, Size size, int pageNumber)
-        {
-            using (var image = new Bitmap(stream).ToFixedSize(size.Width, size.Height))
-            {
-                return new Bitmap(image);
-            }
-        }
+        public override Stream CreateThumbnail(Stream stream, Size size, int pageNumber)
+            => ResizeAndCrop(stream, size.Width, size.Height);
     }
 }
