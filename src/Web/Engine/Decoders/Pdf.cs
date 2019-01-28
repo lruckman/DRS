@@ -1,19 +1,18 @@
-﻿using Ghostscript.NET.Rasterizer;
-using iTextSharp.text.pdf;
+﻿using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using Web.Engine.Extensions;
+using Web.Engine.Services;
 
 namespace Web.Engine.Codecs.Decoders
 {
     public class Pdf : DecoderBase
     {
-        public Pdf() : base(new[] { ".pdf" })
-        {
-        }
+        private readonly IPdfRasterizer _pdfRasterizer;
+
+        public Pdf(IPdfRasterizer pdfRasterizer) : base(new[] { ".pdf" })
+            => _pdfRasterizer = pdfRasterizer ?? throw new ArgumentNullException(nameof(pdfRasterizer));
 
         public override string TextContent(Stream stream, int? pageNumber)
         {
@@ -46,27 +45,7 @@ namespace Web.Engine.Codecs.Decoders
             }
         }
 
-        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber)
-        {
-            var ghostDllPath = @"C:\Development\DRS\src\Web\bin\gsdll64.dll";// HostingEnvironment.MapPath("~/bin/gsdll64.dll");
-            var version = new Ghostscript.NET.GhostscriptVersionInfo(new Version(0, 0, 0), ghostDllPath, string.Empty, Ghostscript.NET.GhostscriptLicense.GPL);
-
-            using (var rasterizer = new GhostscriptRasterizer())
-            {
-                rasterizer.Open(stream, version, false);
-
-                using (var thumbnail = rasterizer
-                    .GetPage(200, 200, pageNumber)
-                    .ToFixedSize(size.Width, size.Height))
-                {
-                    using (var ms = new MemoryStream())
-                    {
-                        thumbnail.Save(ms, ImageFormat.Png);
-
-                        return ms.ToArray();
-                    }
-                }
-            }
-        }
+        public override Bitmap CreateThumbnail(Stream stream, Size size, int pageNumber)
+            => _pdfRasterizer.GetThumbnail(stream, pageNumber);
     }
 }

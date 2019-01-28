@@ -3,7 +3,6 @@ using System.Drawing;
 using System.IO;
 using Web.Engine.Extensions;
 using Web.Engine.Services;
-using ImageFormat = System.Drawing.Imaging.ImageFormat;
 
 namespace Web.Engine.Codecs.Decoders
 {
@@ -29,16 +28,11 @@ namespace Web.Engine.Codecs.Decoders
 
         public override int PageCount(Stream stream) => 1;
 
-        public override byte[] CreateThumbnail(Stream stream, Size size, int pageNumber)
+        public override Bitmap CreateThumbnail(Stream stream, Size size, int pageNumber)
         {
             using (var image = new Bitmap(stream).ToFixedSize(size.Width, size.Height))
             {
-                using (var ms = new MemoryStream())
-                {
-                    image.Save(ms, ImageFormat.Png);
-
-                    return ms.ToArray();
-                }
+                return new Bitmap(image);
             }
         }
     }

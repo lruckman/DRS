@@ -80,7 +80,7 @@ namespace Web
 
             container.Populate(services);
 
-            FileDecoder.RegisterFileDecoders(container.GetInstance<IOcrEngine>());
+            FileDecoder.RegisterFileDecoders(container.GetInstance<IOcrEngine>(), container.GetInstance<IPdfRasterizer>());
 
             return container.GetInstance<IServiceProvider>();
         }

@@ -12,7 +12,7 @@ namespace Web.Engine.Services
         string Abstract();
         string Content();
         long Length { get; }
-        byte[] CreateThumbnail(Size dimensions, int? pageNumber);
+        Bitmap CreateThumbnail(Size dimensions, int? pageNumber);
         Stream FileStream { get; }
     }
 
@@ -52,7 +52,7 @@ namespace Web.Engine.Services
 
         public string ContentType { get; }
 
-        public byte[] CreateThumbnail(Size dimensions, int? pageNumber) => _decoder.CreateThumbnail(FileStream, dimensions, pageNumber ?? 1);
+        public Bitmap CreateThumbnail(Size dimensions, int? pageNumber) => _decoder.CreateThumbnail(FileStream, dimensions, pageNumber ?? 1);
 
         public long Length => FileStream.Length;
 

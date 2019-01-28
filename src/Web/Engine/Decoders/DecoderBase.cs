@@ -16,7 +16,7 @@ namespace Web.Engine.Codecs.Decoders
 
         public abstract string TextContent(Stream stream, int? pageNumber);
         public abstract int PageCount(Stream stream);
-        public abstract byte[] CreateThumbnail(Stream stream, Size size, int pageNumber = 1);
+        public abstract Bitmap CreateThumbnail(Stream stream, Size size, int pageNumber = 1);
 
         public virtual bool AppliesTo(string extension) => _supportedFileTypes.Contains(extension, StringComparer.InvariantCultureIgnoreCase);
     }

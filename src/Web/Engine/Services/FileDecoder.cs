@@ -10,17 +10,22 @@ namespace Web.Engine.Services
     {
         private static IDecoder[] _decoders;
 
-        public static void RegisterFileDecoders(IOcrEngine ocrEngine)
+        public static void RegisterFileDecoders(IOcrEngine ocrEngine, IPdfRasterizer pdfRasterizer)
         {
             if (ocrEngine == null)
             {
                 throw new ArgumentNullException(nameof(ocrEngine));
             }
 
+            if (pdfRasterizer == null)
+            {
+                throw new ArgumentNullException(nameof(pdfRasterizer));
+            }
+
             _decoders = new IDecoder[]
             {
                 new Image(ocrEngine),
-                new Pdf(),
+                new Pdf(pdfRasterizer),
                 new Text(),
                 new Default()
             };
