@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 
@@ -17,6 +18,6 @@ namespace Web.Engine.Codecs.Decoders
         public abstract int PageCount(Stream stream);
         public abstract byte[] CreateThumbnail(Stream stream, Size size, int pageNumber = 1);
 
-        public virtual bool AppliesTo(string extension) => _supportedFileTypes.Contains(extension);
+        public virtual bool AppliesTo(string extension) => _supportedFileTypes.Contains(extension, StringComparer.InvariantCultureIgnoreCase);
     }
 }
